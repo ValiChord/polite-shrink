@@ -1,0 +1,77 @@
+
+=== V1 damped ===
+  warmup 1s; equilibrium coverage min=6 mean=8.8
+  gen  0  best loss=  5744 exposure= 53650 floor=0
+  gen  1  best loss=  5744 exposure= 53650 floor=0
+  gen  2  best loss=  5744 exposure= 53650 floor=0
+  gen  3  best loss=  5744 exposure= 53650 floor=0
+  gen  4  best loss=  5744 exposure= 53650 floor=0
+  gen  5  best loss=  5744 exposure= 53650 floor=0
+  gen  6  best loss=  5744 exposure= 53650 floor=0
+  gen  7  best loss=  5744 exposure= 53650 floor=0
+  gen  8  best loss=  5744 exposure= 53650 floor=0
+  gen  9  best loss=  5744 exposure= 53650 floor=0
+  gen 10  best loss=  5744 exposure= 53650 floor=0
+  gen 11  best loss=  5744 exposure= 53650 floor=0
+  gen 12  best loss=  5744 exposure= 53650 floor=0
+  gen 13  best loss=  5994 exposure= 55897 floor=0
+  gen 14  best loss=  5994 exposure= 55897 floor=0
+  gen 15  best loss=  5994 exposure= 55897 floor=0
+  gen 16  best loss=  5994 exposure= 55897 floor=0
+  gen 17  best loss=  5994 exposure= 55897 floor=0
+  gen 18  best loss=  5994 exposure= 55897 floor=0
+  gen 19  best loss=  5994 exposure= 55897 floor=0
+  BEST: loss=5994 exposure=55897 sectors_lost=134 shape={'tick_min': 1500, 'tick_max': 1539, 'tick_std': 11.157097890281923, 'frac_first_50_ticks': 1.0, 'victim_home_spread_sectors': 287, 'victim_home_densest_quarter': 0.75}
+
+=== V2 damped+jitter ===
+  warmup 1s; equilibrium coverage min=6 mean=12.1
+  gen  0  best loss=     0 exposure= 44364 floor=2
+  gen  1  best loss=   660 exposure= 21797 floor=0
+  gen  2  best loss=   660 exposure= 22249 floor=0
+  gen  3  best loss=   660 exposure= 22249 floor=0
+  gen  4  best loss=   660 exposure= 22249 floor=0
+  gen  5  best loss=   660 exposure= 22345 floor=0
+  gen  6  best loss=   860 exposure= 25262 floor=0
+  gen  7  best loss=  1570 exposure= 22758 floor=0
+  gen  8  best loss=  1570 exposure= 22758 floor=0
+  gen  9  best loss=  1570 exposure= 22758 floor=0
+  gen 10  best loss=  1570 exposure= 22758 floor=0
+  gen 11  best loss=  1706 exposure= 29354 floor=0
+  gen 12  best loss=  2938 exposure= 29393 floor=0
+  gen 13  best loss=  2938 exposure= 29393 floor=0
+  gen 14  best loss=  2938 exposure= 29393 floor=0
+  gen 15  best loss=  2938 exposure= 29393 floor=0
+  gen 16  best loss=  2938 exposure= 29393 floor=0
+  gen 17  best loss=  2938 exposure= 29393 floor=0
+  gen 18  best loss=  2938 exposure= 29393 floor=0
+  gen 19  best loss=  2938 exposure= 29393 floor=0
+  BEST: loss=2938 exposure=29393 sectors_lost=23 shape={'tick_min': 1500, 'tick_max': 1899, 'tick_std': 129.72464320843423, 'frac_first_50_ticks': 0.13333333333333333, 'victim_home_spread_sectors': 478, 'victim_home_densest_quarter': 0.35}
+
+=== V3 full (polite shrink) ===
+  warmup 1s; equilibrium coverage min=6 mean=10.0
+  gen  0  best loss=     0 exposure= 16897 floor=3
+  gen  1  best loss=     0 exposure= 16897 floor=3
+  gen  2  best loss=     0 exposure= 18698 floor=3
+  gen  3  best loss=     0 exposure= 20445 floor=4
+  gen  4  best loss=     0 exposure= 20445 floor=4
+  gen  5  best loss=     0 exposure= 21386 floor=2
+  gen  6  best loss=     0 exposure= 21386 floor=2
+  gen  7  best loss=     0 exposure= 22147 floor=3
+  gen  8  best loss=     0 exposure= 22147 floor=3
+  gen  9  best loss=     0 exposure= 22147 floor=3
+  gen 10  best loss=     0 exposure= 23522 floor=2
+  gen 11  best loss=     0 exposure= 23522 floor=2
+  gen 12  best loss=     0 exposure= 23522 floor=2
+  gen 13  best loss=     0 exposure= 25983 floor=3
+  gen 14  best loss=     0 exposure= 27723 floor=2
+  gen 15  best loss=     0 exposure= 27872 floor=1
+  gen 16  best loss=     0 exposure= 27872 floor=1
+  gen 17  best loss=     0 exposure= 27872 floor=1
+  gen 18  best loss=     0 exposure= 27872 floor=1
+  gen 19  best loss=     0 exposure= 27872 floor=1
+  BEST: loss=0 exposure=27872 sectors_lost=0 shape={'tick_min': 1500, 'tick_max': 1899, 'tick_std': 120.4002168694983, 'frac_first_50_ticks': 0.11666666666666667, 'victim_home_spread_sectors': 493, 'victim_home_densest_quarter': 0.3333333333333333}
+
+wrote results/adversary.json
+V1 damped                  storm loss=   391  rand loss=     0  evolved loss=  5994 (sectors lost: 134) exposure 54007->55897
+V2 damped+jitter           storm loss=     0  rand loss=   128  evolved loss=  2938 (sectors lost: 23) exposure 15271->29393
+V3 full (polite shrink)    storm loss=     0  rand loss=     0  evolved loss=     0 (sectors lost: 0) exposure 7559->27872
