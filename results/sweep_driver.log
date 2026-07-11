@@ -1,2 +1,32 @@
 === attempt 1: 1240 cells remaining, launching sweep ===
 target 1248 cells; 8 already done; 1240 to run on 2 procs (4960 sims)
+  50/1240 cells    352s  (~8736s total)  checkpoint=50
+  100/1240 cells    644s  (~7983s total)  checkpoint=100
+  150/1240 cells    960s  (~7933s total)  checkpoint=150
+  200/1240 cells   1263s  (~7830s total)  checkpoint=200
+  250/1240 cells   1573s  (~7801s total)  checkpoint=250
+  300/1240 cells   1862s  (~7695s total)  checkpoint=300
+  350/1240 cells   2216s  (~7852s total)  checkpoint=350
+  400/1240 cells   2561s  (~7940s total)  checkpoint=400
+  450/1240 cells   2921s  (~8049s total)  checkpoint=450
+  500/1240 cells   3267s  (~8102s total)  checkpoint=500
+  550/1240 cells   3626s  (~8176s total)  checkpoint=550
+  600/1240 cells   3973s  (~8210s total)  checkpoint=600
+  650/1240 cells   4442s  (~8475s total)  checkpoint=650
+  700/1240 cells   4953s  (~8775s total)  checkpoint=700
+  750/1240 cells   5493s  (~9082s total)  checkpoint=750
+=== attempt 1: 460 cells remaining, launching sweep ===
+target 1248 cells; 788 already done; 460 to run on 2 procs (1840 sims)
+  50/460 cells    567s  (~5218s total)  checkpoint=50
+  100/460 cells   1081s  (~4972s total)  checkpoint=100
+  150/460 cells   1628s  (~4992s total)  checkpoint=150
+  200/460 cells   2051s  (~4718s total)  checkpoint=200
+  250/460 cells   2484s  (~4570s total)  checkpoint=250
+  300/460 cells   2914s  (~4469s total)  checkpoint=300
+  350/460 cells   3355s  (~4409s total)  checkpoint=350
+  400/460 cells   3798s  (~4368s total)  checkpoint=400
+  450/460 cells   4238s  (~4332s total)  checkpoint=450
+  460/460 cells   4318s  (~4318s total)  checkpoint=460
+done. 4318s. aggregated 1248 cells -> results/sweep.json
+COMPLETE after 1 relaunch(es): all cells done
+=== driver finished ===

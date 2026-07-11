@@ -1,19 +1,19 @@
-# Robustness sweep — 8 (scenario,seed) cells, 32 simulations
+# Robustness sweep — 1248 (scenario,seed) cells, 4992 simulations
 
 ## Pooled across all four scenarios
 
 | variant | runs | runs with data loss | loss rate | 95% upper bound | worst floor | mean exposure |
 |---|---|---|---|---|---|---|
-| V0 naive | 8 | 8 | 100.00% | < 100.00% | 0 | 261791 |
-| V1 damped | 8 | 3 | 37.50% | < 71.05% | 0 | 21786 |
-| V2 damped+jitter | 8 | 1 | 12.50% | < 35.42% | 0 | 22671 |
-| V3 full (polite shrink) | 8 | 0 | 0.00% | < 37.50% | 3 | 3851 |
+| V0 naive | 1248 | 1197 | 95.91% | < 97.01% | 0 | 250879 |
+| V1 damped | 1248 | 300 | 24.04% | < 26.41% | 0 | 25302 |
+| V2 damped+jitter | 1248 | 303 | 24.28% | < 26.66% | 0 | 25032 |
+| V3 full (polite shrink) | 1248 | 0 | 0.00% | < 0.24% | 1 | 4666 |
 
 ## Per scenario (runs with data loss / runs)
 
 | scenario | V0 naive | V1 damped | V2 damped+jitter | V3 full (polite shrink) |
 |---|---|---|---|---|
-| activation | 2/2 | 1/2 | 0/2 | 0/2 |
-| storm | 2/2 | 0/2 | 0/2 | 0/2 |
-| flashcrowd | 2/2 | 1/2 | 0/2 | 0/2 |
-| churn | 2/2 | 1/2 | 1/2 | 0/2 |
+| activation | 312/312 | 96/312 | 112/312 | 0/312 |
+| storm | 297/312 | 74/312 | 55/312 | 0/312 |
+| flashcrowd | 281/312 | 29/312 | 33/312 | 0/312 |
+| churn | 307/312 | 101/312 | 103/312 | 0/312 |
