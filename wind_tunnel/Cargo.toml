@@ -19,6 +19,7 @@ resolver = "3"
 members = [
   "bindings/kitsune_client",
   "scenarios/kitsune_arc_sharding",
+  "tools/bootstrap_relay",
 ]
 
 [workspace.package]

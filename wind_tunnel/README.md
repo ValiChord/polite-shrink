@@ -53,25 +53,35 @@ cd research/arc_sim/wind_tunnel
 cargo check --workspace
 ```
 
-## Run (once the scenario is real — work items 4–5)
-
-One local binary provides bootstrap **and** iroh relay — the fork's
-`bootstrap_srv` embeds the relay (protocol V2):
+## Run
 
 ```bash
-cargo run --manifest-path /workspaces/kitsune2/Cargo.toml -p kitsune2_bootstrap_srv
+./run_experiment.sh settle    # main cohort only
+./run_experiment.sh storm     # + churn cohort joining late and dying abruptly
 ```
 
-Then, sized per the plan (R = 5, ~12 in-process agents — Wind Tunnel kitsune
-agents are tokio tasks, not conductors):
+The script builds the workspace, starts `bootstrap_relay` (one binary =
+bootstrap **and** embedded iroh relay, built here so the whole experiment is
+one `cargo build --workspace`), runs the main cohort with
+`--reporter influx-file`, optionally runs the churn cohort (same `--run-id`,
+which is the space id — same id = same DHT; its process exit is abrupt, so
+survivors must detect the loss, brake, regrow, and hand off), then analyses.
+Artifacts land in `runs/$RUN_ID/` (gitignored — curated results for the
+writeup go to a `results/` dir like the sim's).
 
-```bash
-cargo run -p kitsune_arc_sharding -- --agents 12 --duration 300
-```
+Everything is env-tunable: `AGENTS`, `DURATION`, `CHURN_AGENTS`,
+`CHURN_DELAY`, `CHURN_DURATION`, `PROFILE` (`release`/`debug`), `RUN_ID`,
+`PORT`, plus all `K2_SHARDING_*` knobs. The script refuses to run with
+`K2_SHARDING_CLAMP_MIN_PEERS >= AGENTS`.
 
-Churn cohort: a second, short `--duration` invocation against the same
-bootstrap server; its exit forces unresponsive-marking, regrow, handoff, and
-the storm brake on the survivors.
+Analysis (`analysis/analyze_run.py`, stdlib-only; matplotlib optional for the
+plot) applies the sim's ground-truth checks to the real network's declared
+arcs on the real DHT sector grid (`SECTOR_SIZE` 2^23 → 512 sectors, the same
+ring size the sim used): per-sector coverage over time using the storm test's
+whole-sector containment rule, `floor(t)`, `zero_sectors(t)`, `frac_under R`,
+plus the controller event timeline. Verdicts: continuous coverage (no sector
+ever orphaned post-warmup) and final redundancy (floor ≥ R). Outputs
+`summary.json`, `analysis.txt`, `floor.png`.
 
 ## Work items (from the 2026-07-12 plan)
 
@@ -97,6 +107,10 @@ the storm brake on the survivors.
      degrade visibly instead of dropping data.
    - Set `K2_LOG` (EnvFilter syntax, e.g. `kitsune2_gossip=debug`) to also
      print tracing output; `RUST_LOG` only reaches `log`-crate records.
-4. Real `kitsune_arc_sharding` scenario + churn cohort + post-run coverage/floor
-   analysis (the sim's floor check applied to real metrics).
+4. ✅ Real scenario + churn orchestration + analysis (see **Run** above).
+   Smoke-verified end to end (6 agents, 120 s settle, R=2, clamp 4, debug
+   build): 53 controller events captured, 9 executed polite shrinks, mean arc
+   span 1.000 → 0.500 → 0.833, coverage floor never below 2, zero orphaned
+   sectors — both verdicts PASS. A smoke run is **not** a scientific result;
+   item 5 does the real settle/storm runs at the plan's sizing.
 5. Runs mirroring the sim's settle/storm settings, writeup, update kitsune2#160.

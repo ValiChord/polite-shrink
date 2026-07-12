@@ -1,14 +1,24 @@
-//! Arc-sharding scenario — SKELETON (work item 1: proves the dependency graph
-//! builds against the sharding fork; the real scenario is work item 4).
+//! Arc-sharding scenario: measure the V3 polite-shrink controller under
+//! Wind Tunnel on real iroh transport.
 //!
-//! Planned shape: N agents join at FULL arc, publish chatter ops, then the
-//! sharding controller shrinks toward target_redundancy R. A churn cohort is a
-//! second short `--duration` invocation whose exit forces unresponsive-marking,
-//! regrow, handoff, and the storm brake. Coverage/floor analysis runs post-hoc
-//! on the recorded metrics.
+//! One invocation = one cohort of in-process agents:
 //!
-//! Behaviour below is publish-chatter only, borrowed from upstream
-//! kitsune_continuous_flow while the skeleton stands in for the real scenario.
+//! - **Main cohort**: long `--duration`. Agents join at FULL arc, publish
+//!   chatter ops on a steady cadence, and the sharding controller shrinks
+//!   their arcs toward target redundancy R (set
+//!   `K2_SHARDING_CLAMP_MIN_PEERS` below the total agent count or the
+//!   controller never engages).
+//! - **Churn cohort** (storm runs): a second invocation with the **same
+//!   `--run-id`** (the run id is the space id — same id = same DHT) and a
+//!   short `--duration`. Its process exit is abrupt from the network's
+//!   point of view: survivors must notice the losses, cancel suspect
+//!   intents (storm brake), regrow, and hand off.
+//!
+//! All controller observability comes from the instrumented client's
+//! `arc_state` + `sharding_event` metrics; run with
+//! `--reporter influx-file` (+ `WT_METRICS_DIR`) so
+//! `analysis/analyze_run.py` can reconstruct coverage. Orchestrated end to
+//! end by `run_experiment.sh`.
 
 use kitsune_wind_tunnel_runner::prelude::*;
 use rand::Rng;
@@ -22,11 +32,16 @@ fn agent_setup(ctx: &mut AgentContext<KitsuneRunnerContext, KitsuneAgentContext>
 fn behaviour(
     ctx: &mut AgentContext<KitsuneRunnerContext, KitsuneAgentContext>,
 ) -> anyhow::Result<()> {
-    // Number of chatter ops published per interval; env-tunable.
+    // Ops published per interval and mean interval between publishes.
     let number_of_messages: u8 = std::env::var("NUM_MESSAGES")
         .unwrap_or("3".to_string())
         .parse()
         .expect("NUM_MESSAGES must be a number < 256");
+    let publish_interval_ms: u64 = std::env::var("PUBLISH_INTERVAL_MS")
+        .unwrap_or("1000".to_string())
+        .parse()
+        .expect("PUBLISH_INTERVAL_MS must be a number of milliseconds");
+
     let timestamp = std::time::UNIX_EPOCH
         .elapsed()
         .expect("time went backwards")
@@ -36,7 +51,9 @@ fn behaviour(
         .collect();
     say(ctx, messages)?;
 
-    let interval = rand::rng().random_range(10..1000);
+    // Uniform jitter of 0.5x–1.5x around the configured interval so agents
+    // don't publish in lockstep.
+    let interval = rand::rng().random_range(publish_interval_ms / 2..=publish_interval_ms * 3 / 2);
     ctx.runner_context().executor().execute_in_place(async {
         tokio::time::sleep(Duration::from_millis(interval)).await;
         Ok(())
@@ -50,6 +67,7 @@ fn main() -> WindTunnelResult<()> {
     >::new_with_init("kitsune_arc_sharding")?
     .into_std()
     .add_capture_env("NUM_MESSAGES")
+    .add_capture_env("PUBLISH_INTERVAL_MS")
     // Sharding knobs read by kitsune_client_instrumented; captured so every
     // run records the controller settings it ran with.
     .add_capture_env("K2_INITIAL_ARC")
@@ -65,7 +83,7 @@ fn main() -> WindTunnelResult<()> {
     .add_capture_env("K2_ARC_SAMPLE_INTERVAL_MS")
     .use_agent_setup(agent_setup)
     .use_agent_behaviour(behaviour)
-    .with_default_duration_s(30);
+    .with_default_duration_s(300);
     run(builder)?;
     Ok(())
 }

@@ -127,6 +127,10 @@ fn sharding_event_kind(message: &str) -> Option<&'static str> {
         m if m.contains("shrink intent cancelled at re-check") => "intent_cancelled",
         m if m.contains("peer loss detected") => "peer_loss_cancel",
         m if m.contains("growing target arc") => "grow",
+        // Undelivered intent announcements mean peers decide without seeing
+        // them — coordination degrades to the timing-based safety margin, so
+        // runs must be able to count these.
+        m if m.contains("intent send failed") => "intent_send_failed",
         m if m.starts_with("sharding:") => "other",
         _ => return None,
     })
@@ -202,6 +206,10 @@ mod tests {
         assert_eq!(
             sharding_event_kind("sharding: growing target arc"),
             Some("grow")
+        );
+        assert_eq!(
+            sharding_event_kind("sharding: intent send failed"),
+            Some("intent_send_failed")
         );
         // Unrecognised sharding messages must degrade visibly, not vanish.
         assert_eq!(

@@ -435,6 +435,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "bootstrap_relay"
+version = "0.1.0"
+dependencies = [
+ "kitsune2_bootstrap_srv",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
