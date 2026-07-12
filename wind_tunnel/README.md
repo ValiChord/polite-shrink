@@ -13,11 +13,12 @@ the sharding module lives at and the layer the kitsune team owns.
 
 - This is **not** a full Holochain-conductor run. Holochain pins kitsune2 0.4.x;
   rebuilding it against the fork is out of scope.
-- Until the runs in this workspace complete, **V3 has not passed Wind Tunnel**
-  and must not be described as having done so. What it has passed as of
-  2026-07-12: the standalone simulation (0 loss in 1248 sweep runs + adversary)
-  and the kitsune2 mem-transport storm test (4/4). Those are different claims —
-  keep the distinction in every writeup.
+- As of 2026-07-12 the settle and storm runs in `results/` are complete: V3
+  **has now been measured under Wind Tunnel at this layer** (both verdicts
+  PASS — see `results/REPORT.md` for exactly what that does and does not
+  claim). Distinct, earlier claims: the standalone simulation (0 loss in 1248
+  sweep runs + adversary) and the kitsune2 mem-transport storm test (4/4).
+  Keep the three claims separate in every writeup.
 
 ## Layout and dependency shape
 
@@ -113,4 +114,9 @@ ever orphaned post-warmup) and final redundancy (floor ≥ R). Outputs
    span 1.000 → 0.500 → 0.833, coverage floor never below 2, zero orphaned
    sectors — both verdicts PASS. A smoke run is **not** a scientific result;
    item 5 does the real settle/storm runs at the plan's sizing.
-5. Runs mirroring the sim's settle/storm settings, writeup, update kitsune2#160.
+5. ✅ Release runs at plan sizing (R=5, 12 agents, clamp 8; storm adds a
+   6-agent churn cohort — 33% of the 18-agent peak — dying simultaneously).
+   **Both runs: coverage floor never below 6 ≥ R, zero orphaned sectors,
+   both verdicts PASS.** Full writeup with claim boundary and caveats (storm
+   brake not exercised; `intent_send_failed` = benign self-connect artifact):
+   `results/REPORT.md`.

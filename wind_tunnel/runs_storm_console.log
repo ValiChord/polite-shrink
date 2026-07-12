@@ -1,0 +1,33 @@
+== building (release) ==
+    Finished `release` profile [optimized] target(s) in 0.41s
+warning: the following packages contain code that will be rejected by a future version of Rust: ts_influxdb v0.7.3-beta.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+== starting bootstrap + iroh relay on 127.0.0.1:30744 ==
+== main cohort: 12 agents, 600s (run id storm-r5-a12-c6-1) ==
+== storm: churn cohort of 6 joins at t+240s, dies at t+360s ==
+== churn cohort gone; main cohort continues ==
+== analysing ==
+files: 2   agents seen: 18   events: 56   duration: 599s
+sector grid: 512 sectors (SECTOR_SIZE 2^23), R = 5, warmup excluded: 30s
+
+controller events:
+  grow               2
+  shrink_intent      18
+  shrink_executed    12
+  intent_cancelled   6
+  intent_send_failed 18
+
+mean arc span (post-warmup): start 0.917 -> min 0.444 -> final 0.583 (1.000 = FULL)
+
+coverage floor (post-warmup): min 6   orphaned sectors: max 0
+final 60s: floor 6 vs R=5
+
+VERDICT continuous coverage (no sector ever orphaned): PASS
+VERDICT final redundancy (floor >= R):                 PASS
+
+ops: said 23745, heard 227656 (context only — op-level loss is not measured here)
+
+wrote runs/storm-r5-a12-c6-1/summary.json
+wrote runs/storm-r5-a12-c6-1/floor.png
+
+run artifacts: runs/storm-r5-a12-c6-1/

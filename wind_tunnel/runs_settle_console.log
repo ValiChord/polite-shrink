@@ -1,0 +1,31 @@
+== building (release) ==
+    Finished `release` profile [optimized] target(s) in 0.39s
+warning: the following packages contain code that will be rejected by a future version of Rust: ts_influxdb v0.7.3-beta.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+== starting bootstrap + iroh relay on 127.0.0.1:30744 ==
+== main cohort: 12 agents, 600s (run id settle-r5-a12-1) ==
+== analysing ==
+files: 1   agents seen: 12   events: 55   duration: 599s
+sector grid: 512 sectors (SECTOR_SIZE 2^23), R = 5, warmup excluded: 30s
+
+controller events:
+  grow               1
+  shrink_intent      18
+  shrink_executed    10
+  intent_cancelled   8
+  intent_send_failed 18
+
+mean arc span (post-warmup): start 1.000 -> min 0.625 -> final 0.625 (1.000 = FULL)
+
+coverage floor (post-warmup): min 6   orphaned sectors: max 0
+final 60s: floor 6 vs R=5
+
+VERDICT continuous coverage (no sector ever orphaned): PASS
+VERDICT final redundancy (floor >= R):                 PASS
+
+ops: said 21546, heard 145159 (context only — op-level loss is not measured here)
+
+wrote runs/settle-r5-a12-1/summary.json
+wrote runs/settle-r5-a12-1/floor.png
+
+run artifacts: runs/settle-r5-a12-1/
