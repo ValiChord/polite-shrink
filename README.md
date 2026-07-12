@@ -1,5 +1,10 @@
 # arc_sim — DHT storage-arc controller simulation
 
+> **Full scientific write-up: [`REPORT.md`](REPORT.md)** — methodology, results
+> (4,992-sim sweep + adversarial search), the kitsune2 reference
+> implementation, findings, and limitations, with a complete artifact
+> inventory for reproduction.
+
 **What this is:** a Stage-1 simulation study of the *dynamic sharding* problem
 Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):
 how should each node in a DHT decide how much of the keyspace to store (its
