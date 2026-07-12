@@ -7,6 +7,7 @@ publish = false
 [dependencies]
 anyhow = { workspace = true }
 rand = { workspace = true }
+serde_json = { workspace = true }
 tokio = { workspace = true }
 
 kitsune_wind_tunnel_runner = { workspace = true }

@@ -154,6 +154,13 @@ impl WtChatter {
         &self.id
     }
 
+    /// Every op id currently held in this agent's store (gossiped in as well
+    /// as self-published), for post-run reachability analysis.
+    pub async fn held_op_ids(&self) -> Vec<OpId> {
+        let state = self.state.lock().await;
+        state.op_store.held_op_ids().await
+    }
+
     /// Join the WindTunnel space.
     #[wind_tunnel_instrument]
     pub async fn join_space(&self) -> anyhow::Result<()> {

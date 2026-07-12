@@ -2585,6 +2585,7 @@ dependencies = [
  "anyhow",
  "kitsune_wind_tunnel_runner",
  "rand 0.9.5",
+ "serde_json",
  "tokio",
 ]
 

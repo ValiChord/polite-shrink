@@ -22,11 +22,78 @@
 
 use kitsune_wind_tunnel_runner::prelude::*;
 use rand::Rng;
+use std::io::Write;
 use std::time::Duration;
 
 fn agent_setup(ctx: &mut AgentContext<KitsuneRunnerContext, KitsuneAgentContext>) -> HookResult {
     create_chatter(ctx)?;
     join_chatter_network(ctx)
+}
+
+/// Op-log support for the post-run reachability check: when K2_OP_LOG_DIR is
+/// set, every publish appends the op ids to published_<agent>.jsonl and the
+/// teardown dumps the agent's full held-op inventory to held_<agent>.json.
+/// Filenames use the chatter id (not the agent index, which collides across
+/// the main and churn cohort processes).
+mod op_log {
+    use super::*;
+
+    pub fn dir() -> Option<std::path::PathBuf> {
+        std::env::var("K2_OP_LOG_DIR").ok().map(Into::into)
+    }
+
+    fn now_ms() -> u128 {
+        std::time::UNIX_EPOCH
+            .elapsed()
+            .expect("time went backwards")
+            .as_millis()
+    }
+
+    pub fn append_published(agent: &str, op_ids: &[String]) -> anyhow::Result<()> {
+        let Some(dir) = dir() else { return Ok(()) };
+        std::fs::create_dir_all(&dir)?;
+        let line = serde_json::json!({"t_ms": now_ms() as u64, "agent": agent, "op_ids": op_ids});
+        let mut file = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(dir.join(format!("published_{agent}.jsonl")))?;
+        writeln!(file, "{line}")?;
+        Ok(())
+    }
+
+    pub fn write_held(agent: &str, op_ids: &[String]) -> anyhow::Result<()> {
+        let Some(dir) = dir() else { return Ok(()) };
+        std::fs::create_dir_all(&dir)?;
+        let doc = serde_json::json!({"t_ms": now_ms() as u64, "agent": agent, "op_ids": op_ids});
+        std::fs::write(
+            dir.join(format!("held_{agent}.json")),
+            serde_json::to_vec(&doc)?,
+        )?;
+        Ok(())
+    }
+}
+
+fn agent_teardown(
+    ctx: &mut AgentContext<KitsuneRunnerContext, KitsuneAgentContext>,
+) -> HookResult {
+    if op_log::dir().is_none() {
+        return Ok(());
+    }
+    let agent = ctx.get().chatter_id();
+    let chatter = ctx.get().chatter();
+    let held: Vec<String> = ctx
+        .runner_context()
+        .executor()
+        .execute_in_place(async move {
+            Ok(chatter
+                .held_op_ids()
+                .await
+                .iter()
+                .map(|id| id.to_string())
+                .collect())
+        })?;
+    op_log::write_held(&agent, &held)?;
+    Ok(())
 }
 
 fn behaviour(
@@ -46,10 +113,24 @@ fn behaviour(
         .elapsed()
         .expect("time went backwards")
         .as_millis();
-    let messages = (0..number_of_messages)
+    let messages: Vec<String> = (0..number_of_messages)
         .map(|i| format!("op_{}_{}_{}", ctx.agent_index(), timestamp, i))
         .collect();
-    say(ctx, messages)?;
+    // Publish via the chatter directly (the runner's `say` helper discards
+    // the op ids, which the reachability check needs).
+    let chatter = ctx.get().chatter();
+    let op_ids: Vec<String> = ctx
+        .runner_context()
+        .executor()
+        .execute_in_place(async move {
+            Ok(chatter
+                .say(messages)
+                .await?
+                .iter()
+                .map(|id| id.to_string())
+                .collect())
+        })?;
+    op_log::append_published(&ctx.get().chatter_id(), &op_ids)?;
 
     // Uniform jitter of 0.5x–1.5x around the configured interval so agents
     // don't publish in lockstep.
@@ -81,8 +162,10 @@ fn main() -> WindTunnelResult<()> {
     .add_capture_env("K2_SHARDING_LAG_FLOOR_MS")
     .add_capture_env("K2_SHARDING_LAG_CEILING_MS")
     .add_capture_env("K2_ARC_SAMPLE_INTERVAL_MS")
+    .add_capture_env("K2_OP_LOG_DIR")
     .use_agent_setup(agent_setup)
     .use_agent_behaviour(behaviour)
+    .use_agent_teardown(agent_teardown)
     .with_default_duration_s(300);
     run(builder)?;
     Ok(())

@@ -162,6 +162,12 @@ impl WtOpStore {
         }
     }
 
+    /// Every op id currently held in this store, for post-run reachability
+    /// analysis (which published ops does each survivor hold?).
+    pub async fn held_op_ids(&self) -> Vec<OpId> {
+        self.inner.read().await.op_list.keys().cloned().collect()
+    }
+
     pub async fn store_ops(&self, ops: Vec<WtOp>) -> anyhow::Result<Vec<OpId>> {
         let mut inner_lock = self.inner.write().await;
         let mut inserted_op_ids = Vec::new();

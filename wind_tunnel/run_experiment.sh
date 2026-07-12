@@ -43,6 +43,7 @@ fi
 RUN_DIR="runs/$RUN_ID"
 mkdir -p "$RUN_DIR"
 export WT_METRICS_DIR="$PWD/$RUN_DIR/metrics"
+export K2_OP_LOG_DIR="$PWD/$RUN_DIR/oplog"
 
 FLAGS=()
 [ "$PROFILE" = release ] && FLAGS+=(--release)
@@ -109,6 +110,11 @@ echo "== analysing =="
 python3 analysis/analyze_run.py "$WT_METRICS_DIR" \
   --redundancy "$K2_SHARDING_TARGET_REDUNDANCY" \
   --out "$RUN_DIR" | tee "$RUN_DIR/analysis.txt"
+if ls "$K2_OP_LOG_DIR"/held_*.json >/dev/null 2>&1; then
+  echo
+  python3 analysis/op_reachability.py "$K2_OP_LOG_DIR" \
+    --out "$RUN_DIR" | tee -a "$RUN_DIR/analysis.txt"
+fi
 
 echo
 echo "run artifacts: $RUN_DIR/"
