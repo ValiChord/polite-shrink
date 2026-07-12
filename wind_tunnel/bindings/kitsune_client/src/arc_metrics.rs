@@ -131,6 +131,12 @@ fn sharding_event_kind(message: &str) -> Option<&'static str> {
         // them — coordination degrades to the timing-based safety margin, so
         // runs must be able to count these.
         m if m.contains("intent send failed") => "intent_send_failed",
+        // Lifecycle/error messages that don't follow the "sharding:" prefix
+        // convention — invisible until the storm-timed run taught us that
+        // check()-level failures are exactly the events we can't afford to
+        // miss.
+        m if m.contains("Sharding check failed") => "check_failed",
+        m if m.contains("stopping check task") => "task_stopped",
         m if m.starts_with("sharding:") => "other",
         _ => return None,
     })
@@ -210,6 +216,14 @@ mod tests {
         assert_eq!(
             sharding_event_kind("sharding: intent send failed"),
             Some("intent_send_failed")
+        );
+        assert_eq!(
+            sharding_event_kind("Sharding check failed"),
+            Some("check_failed")
+        );
+        assert_eq!(
+            sharding_event_kind("Sharding instance dropped, stopping check task"),
+            Some("task_stopped")
         );
         // Unrecognised sharding messages must degrade visibly, not vanish.
         assert_eq!(

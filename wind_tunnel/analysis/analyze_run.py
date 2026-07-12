@@ -160,7 +160,9 @@ def load_metrics(metrics_dir):
                 )
     for samples in arc_samples.values():
         samples.sort()
-    events.sort()
+    # Key on (t, kind, agent) only — the fields dict is unorderable, and
+    # same-nanosecond events (e.g. several send failures) do occur.
+    events.sort(key=lambda e: e[:3])
     return dict(arc_samples), events, dict(op_counts), [str(f) for f in files]
 
 
