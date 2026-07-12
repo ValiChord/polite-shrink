@@ -1,0 +1,35 @@
+# Vendored from holochain/wind-tunnel @ 1cf7ebf04902dd3603c45fc3c72f21d105b73463
+# (bindings/kitsune_client). Vendored rather than git-depped because the sharding
+# experiment modifies it: K2ShardingModConfig wiring, conditional FULL-arc hint,
+# arc-width/shrink-intent metrics. Framework deps stay on the same upstream rev.
+[package]
+name = "kitsune_client_instrumented"
+version.workspace = true
+description = "Instrumented Kitsune2 client, vendored for the arc-sharding Wind Tunnel experiment"
+license.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+bytes = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha3 = { workspace = true }
+tokio = { workspace = true }
+
+kitsune2 = { workspace = true }
+kitsune2_api = { workspace = true }
+kitsune2_core = { workspace = true }
+kitsune2_gossip = { workspace = true }
+kitsune2_transport_iroh = { workspace = true }
+
+wind_tunnel_core = { workspace = true }
+wind_tunnel_instruments = { workspace = true }
+wind_tunnel_instruments_derive = { workspace = true }
+
+[dev-dependencies]
+env_logger = { workspace = true }
+kitsune2_bootstrap_srv = { workspace = true }
+rustls = { workspace = true }

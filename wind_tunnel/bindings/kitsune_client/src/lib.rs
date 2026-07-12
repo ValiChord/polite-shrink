@@ -1,0 +1,404 @@
+use anyhow::Context;
+use bytes::Bytes;
+use kitsune2::default_builder;
+use kitsune2_api::{
+    AgentId, BoxFut, Builder, Config, DhtArc, DynKitsune, DynLocalAgent, DynSpace, DynSpaceHandler,
+    K2Result, KitsuneHandler, LocalAgent, OpId, SpaceHandler, SpaceId, StoredOp, Timestamp,
+};
+use kitsune2_core::{
+    Ed25519LocalAgent,
+    factories::config::{CoreBootstrapConfig, CoreBootstrapModConfig},
+};
+use kitsune2_gossip::{K2GossipConfig, K2GossipModConfig, K2ShardingConfig, K2ShardingModConfig};
+use kitsune2_transport_iroh::config::{IrohTransportConfig, IrohTransportModConfig};
+use op_store::{DynWtOpStore, WtOp, WtOpStore, WtOpStoreFactory};
+use std::{sync::Arc, time::Duration};
+use tokio::sync::Mutex;
+use wind_tunnel_instruments::prelude::{ReportMetric, Reporter};
+use wind_tunnel_instruments_derive::wind_tunnel_instrument;
+
+mod op_store;
+
+#[derive(Debug)]
+struct WtSpaceHandler;
+impl SpaceHandler for WtSpaceHandler {}
+
+#[derive(Debug)]
+struct WtKitsuneHandler;
+impl KitsuneHandler for WtKitsuneHandler {
+    fn create_space(
+        &self,
+        _space: SpaceId,
+        _config: Option<&Config>,
+    ) -> BoxFut<'_, K2Result<DynSpaceHandler>> {
+        let space_handler: DynSpaceHandler = Arc::new(WtSpaceHandler);
+        Box::pin(async move { Ok(space_handler) })
+    }
+}
+
+#[derive(Debug)]
+struct State {
+    agent: DynLocalAgent,
+    op_store: DynWtOpStore,
+    space: DynSpace,
+    _kitsune: DynKitsune,
+}
+
+/// A Kitsune2 app for running performance tests in WindTunnel.
+#[derive(Debug)]
+pub struct WtChatter {
+    state: Arc<Mutex<State>>,
+    reporter: Arc<Reporter>,
+    id: AgentId,
+}
+
+impl WtChatter {
+    /// Construct an instance.
+    pub async fn create(
+        bootstrap_server_url: &str,
+        relay_url: &str,
+        space_id: &str,
+        reporter: Arc<Reporter>,
+    ) -> anyhow::Result<Self> {
+        let agent = Arc::new(Ed25519LocalAgent::default());
+        // The sharding controller owns the target arc after join; this hint is
+        // only the starting state. FULL matches the experiment's start state
+        // (and the fork's storm test); `empty` is for late-joining churn
+        // cohorts that must grow into coverage.
+        let initial_arc = match std::env::var("K2_INITIAL_ARC") {
+            Err(_) => DhtArc::FULL,
+            Ok(raw) if raw == "full" => DhtArc::FULL,
+            Ok(raw) if raw == "empty" => DhtArc::Empty,
+            Ok(raw) => anyhow::bail!("invalid K2_INITIAL_ARC={raw}: expected full|empty"),
+        };
+        agent.set_tgt_storage_arc_hint(initial_arc);
+        let id = agent.agent().clone();
+        // Counter to common practice, an op store has to be created first and passed
+        // to the factory constructor, to keep a handle to the typed WtOpStore in the chatter
+        // instance. This store instance is also used to instantiate the dummy factory, which
+        // will simply return the same store at the time of calling it during space creation.
+        let op_store = Arc::new(WtOpStore::new(agent.agent().clone(), reporter.clone()));
+        let kitsune_builder = Builder {
+            op_store: Arc::new(WtOpStoreFactory::new(op_store.clone())),
+            ..default_builder()
+        }
+        .with_default_config()?;
+        kitsune_builder
+            .config
+            .set_module_config(&CoreBootstrapModConfig {
+                core_bootstrap: CoreBootstrapConfig {
+                    server_url: Some(bootstrap_server_url.to_string()),
+                    ..Default::default()
+                },
+            })?;
+        kitsune_builder
+            .config
+            .set_module_config(&IrohTransportModConfig {
+                iroh_transport: IrohTransportConfig {
+                    relay_url: Some(relay_url.to_string()),
+                    relay_allow_plain_text: true,
+                    ..Default::default()
+                },
+            })?;
+        kitsune_builder
+            .config
+            .set_module_config(&K2GossipModConfig {
+                k2_gossip: K2GossipConfig {
+                    initiate_interval_ms: 1000,
+                    min_initiate_interval_ms: 900,
+                    ..Default::default()
+                },
+            })?;
+        let sharding_config = sharding_config_from_env()?;
+        log::info!("sharding config: {sharding_config:?}, initial arc: {initial_arc:?}");
+        kitsune_builder
+            .config
+            .set_module_config(&K2ShardingModConfig {
+                k2_sharding: sharding_config,
+            })?;
+        let kitsune = kitsune_builder.build().await?;
+        kitsune.register_handler(Arc::new(WtKitsuneHandler)).await?;
+        // This will call the op store factory's `create` method.
+        let space = kitsune
+            .space(
+                SpaceId::from(Bytes::copy_from_slice(space_id.as_bytes())),
+                None,
+            )
+            .await?;
+
+        log::info!("created chatter with id {}", agent.agent());
+
+        let state = Arc::new(Mutex::new(State {
+            agent,
+            op_store,
+            space,
+            _kitsune: kitsune,
+        }));
+
+        Ok(Self {
+            state,
+            reporter,
+            id,
+        })
+    }
+
+    /// Get chatter id.
+    pub fn id(&self) -> &AgentId {
+        &self.id
+    }
+
+    /// Join the WindTunnel space.
+    #[wind_tunnel_instrument]
+    pub async fn join_space(&self) -> anyhow::Result<()> {
+        let state_lock = self.state.lock().await;
+        state_lock
+            .space
+            .local_agent_join(state_lock.agent.clone())
+            .await?;
+
+        // Wait for agent to publish their info to the bootstrap & peer store.
+        tokio::time::timeout(Duration::from_secs(20), async {
+            loop {
+                tokio::time::sleep(Duration::from_millis(1000)).await;
+                let maybe_agent = match state_lock
+                    .space
+                    .peer_store()
+                    .get(state_lock.agent.agent().clone())
+                    .await
+                {
+                    Ok(maybe_agent) => maybe_agent,
+                    Err(err) => {
+                        log::error!("failure to query peer store: {err}");
+                        continue;
+                    }
+                };
+                if maybe_agent.is_some() {
+                    break;
+                }
+            }
+        })
+        .await
+        .context("failure to join space")
+    }
+
+    /// Say messages, so that they will be gossiped to all peers.
+    #[wind_tunnel_instrument]
+    pub async fn say(&self, messages: Vec<String>) -> anyhow::Result<Vec<OpId>> {
+        let state = self.state.lock().await;
+        let timestamp = Timestamp::now();
+        let message_ops = messages
+            .clone()
+            .into_iter()
+            .map(|message| WtOp::new(timestamp, message.into()))
+            .collect();
+        let message_ids = state
+            .op_store
+            .store_ops(message_ops)
+            .await
+            .context("failure to write ops to the store")?;
+        state
+            .space
+            .inform_ops_stored(
+                message_ids
+                    .clone()
+                    .into_iter()
+                    .map(|message_id| StoredOp {
+                        created_at: Timestamp::now(),
+                        op_id: message_id,
+                    })
+                    .collect(),
+            )
+            .await?;
+        for message in messages {
+            log::info!("agent {} said {}", state.agent.agent(), message);
+        }
+
+        self.reporter.add_custom(
+            ReportMetric::new("said_messages")
+                .with_tag("agent_id", state.agent.agent().to_string())
+                .with_field("num_messages", message_ids.len() as u32),
+        );
+
+        Ok(message_ids)
+    }
+}
+
+/// Sharding knobs, overridable per run via environment variables — the runner's
+/// CLI and `WtChatter::create` signature are fixed upstream (git dep), so the
+/// environment is the only per-run channel into the client. Unset variables
+/// keep the module defaults; malformed values fail the run rather than being
+/// silently ignored.
+fn sharding_config_from_env() -> anyhow::Result<K2ShardingConfig> {
+    let mut config = K2ShardingConfig::default();
+    env_knob("K2_SHARDING_TARGET_REDUNDANCY", &mut config.target_redundancy)?;
+    env_knob("K2_SHARDING_CLAMP_MIN_PEERS", &mut config.clamp_min_peers)?;
+    env_knob("K2_SHARDING_CHECK_INTERVAL_MS", &mut config.check_interval_ms)?;
+    env_knob("K2_SHARDING_GROW_PERSISTENCE", &mut config.grow_persistence)?;
+    env_knob(
+        "K2_SHARDING_SHRINK_PERSISTENCE",
+        &mut config.shrink_persistence,
+    )?;
+    env_knob("K2_SHARDING_INTENT_WAIT", &mut config.intent_wait)?;
+    env_knob(
+        "K2_SHARDING_INTENT_MIN_WAIT_MS",
+        &mut config.intent_min_wait_ms,
+    )?;
+    env_knob("K2_SHARDING_LAG_FLOOR_MS", &mut config.lag_floor_ms)?;
+    env_knob("K2_SHARDING_LAG_CEILING_MS", &mut config.lag_ceiling_ms)?;
+    Ok(config)
+}
+
+fn env_knob<T: std::str::FromStr>(name: &str, target: &mut T) -> anyhow::Result<()>
+where
+    T::Err: std::fmt::Display,
+{
+    if let Ok(raw) = std::env::var(name) {
+        *target = raw
+            .parse()
+            .map_err(|err| anyhow::anyhow!("invalid {name}={raw}: {err}"))?;
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use kitsune2_bootstrap_srv::{BootstrapSrv, Config};
+    use rustls::crypto::{self, CryptoProvider};
+    use std::time::{Duration, Instant};
+    use wind_tunnel_core::prelude::ShutdownHandle;
+    use wind_tunnel_instruments::{ReportConfig, Reporter};
+
+    pub(crate) fn test_reporter() -> Arc<Reporter> {
+        let runtime = tokio::runtime::Handle::current();
+        let shutdown_listener = ShutdownHandle::new().new_listener();
+        Arc::new(
+            ReportConfig::new("".to_string(), "".to_string())
+                .enable_in_memory()
+                .init_reporter(&runtime, shutdown_listener)
+                .unwrap(),
+        )
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn say_something_to_other_chatter() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        if CryptoProvider::get_default().is_none() {
+            crypto::aws_lc_rs::default_provider()
+                .install_default()
+                .unwrap();
+        }
+        let bootstrap_server =
+            tokio::task::spawn_blocking(|| BootstrapSrv::new(Config::testing()).unwrap())
+                .await
+                .unwrap();
+        let bootstrap_server_url = format!("http://{}", bootstrap_server.listen_addrs()[0]);
+        let relay_url = format!("http://{}", bootstrap_server.listen_addrs()[0]);
+
+        let reporter = test_reporter();
+        let space_id = Timestamp::now().as_micros().to_string();
+        let chatter_1 = WtChatter::create(
+            &bootstrap_server_url,
+            &relay_url,
+            &space_id,
+            reporter.clone(),
+        )
+        .await
+        .unwrap();
+        let chatter_2 = WtChatter::create(&bootstrap_server_url, &relay_url, &space_id, reporter)
+            .await
+            .unwrap();
+        let agent_1 = chatter_1.state.lock().await.agent.agent().clone();
+        let agent_2 = chatter_2.state.lock().await.agent.agent().clone();
+        chatter_1.join_space().await.unwrap();
+        chatter_2.join_space().await.unwrap();
+
+        // Bootstrapping takes about 10 seconds.
+        let now = Instant::now();
+        tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                tokio::time::sleep(Duration::from_millis(100)).await;
+                if chatter_1
+                    .state
+                    .lock()
+                    .await
+                    .space
+                    .peer_store()
+                    .get_all()
+                    .await
+                    .unwrap()
+                    .len()
+                    == 2
+                    && chatter_2
+                        .state
+                        .lock()
+                        .await
+                        .space
+                        .peer_store()
+                        .get_all()
+                        .await
+                        .unwrap()
+                        .len()
+                        == 2
+                {
+                    break;
+                }
+            }
+        })
+        .await
+        .unwrap();
+        log::info!("Bootstrapping took {:?}", now.elapsed());
+
+        // Each chatter says 3 messages.
+        let mut all_message_ids_1 = vec![];
+        let mut all_message_ids_2 = vec![];
+        for i in 0..3 {
+            let message_1 = format!("hello there {agent_1} {i}");
+            let message_2 = format!("hello there {agent_2} {i}");
+            let mut message_ids_1 = chatter_1.say(vec![message_1]).await.unwrap();
+            let mut message_ids_2 = chatter_2.say(vec![message_2]).await.unwrap();
+            all_message_ids_1.append(&mut message_ids_1);
+            all_message_ids_2.append(&mut message_ids_2);
+            tokio::time::sleep(Duration::from_secs(1)).await;
+        }
+
+        // Wait for both chatters to have received all messages.
+        let now = Instant::now();
+        tokio::time::timeout(Duration::from_secs(5), async {
+            loop {
+                tokio::time::sleep(Duration::from_millis(100)).await;
+                let ops_1 = chatter_2
+                    .state
+                    .lock()
+                    .await
+                    .space
+                    .op_store()
+                    .retrieve_ops(all_message_ids_1.clone())
+                    .await
+                    .unwrap();
+                let ops_2 = chatter_1
+                    .state
+                    .lock()
+                    .await
+                    .space
+                    .op_store()
+                    .retrieve_ops(all_message_ids_2.clone())
+                    .await
+                    .unwrap();
+                if ops_1.len() == all_message_ids_1.len() && ops_2.len() == all_message_ids_2.len()
+                {
+                    break;
+                } else {
+                    println!("ops 1 len {}/{}", ops_1.len(), all_message_ids_1.len());
+                    println!("ops 2 len {}/{}", ops_2.len(), all_message_ids_2.len());
+                }
+            }
+        })
+        .await
+        .unwrap();
+        log::info!(
+            "All messages received by all peers after {:?}",
+            now.elapsed()
+        );
+    }
+}

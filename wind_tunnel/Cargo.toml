@@ -1,0 +1,75 @@
+# Standalone Wind Tunnel workspace for the V3 polite-shrink sharding experiment.
+#
+# Deliberately separate from valichord/wind-tunnel/ (crates.io runner 0.7 against
+# kitsune2 0.4.x — incompatible with the sharding fork). Do not merge the two.
+#
+# Dependency shape:
+#   - framework + kitsune runner: git deps on holochain/wind-tunnel, pinned rev
+#   - kitsune_client_instrumented: vendored locally (we modify it for sharding
+#     config, conditional arc hint, and arc metrics) and patched into the git graph
+#   - all kitsune2_* crates: patched to the local sharding fork
+#     (/workspaces/kitsune2, branch feat/sharding-module-v3)
+#
+# The `sharding` feature on kitsune2_gossip is also the patch canary: crates.io
+# kitsune2_gossip has no such feature, so this workspace only builds if the
+# [patch.crates-io] redirection to the fork is actually in effect.
+
+[workspace]
+resolver = "3"
+members = [
+  "bindings/kitsune_client",
+  "scenarios/kitsune_arc_sharding",
+]
+
+[workspace.package]
+version = "0.7.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+anyhow = "1.0.80"
+bytes = "1.10"
+env_logger = "0.11.2"
+log = "0.4.20"
+rand = "0.9"
+rustls = "0.23.36"
+serde = "1"
+serde_json = "1"
+sha3 = "0.10"
+tokio = { version = "1.36.0", features = ["full"] }
+
+# Resolved against the fork via [patch.crates-io] below.
+kitsune2 = { version = "0.5.0-dev.4", default-features = false, features = [
+  "transport-iroh",
+] }
+kitsune2_api = "0.5.0-dev.4"
+kitsune2_core = "0.5.0-dev.4"
+kitsune2_gossip = { version = "0.5.0-dev.4", features = ["sharding"] }
+kitsune2_transport_iroh = { version = "0.5.0-dev.4", default-features = false }
+kitsune2_bootstrap_srv = { version = "0.5.0-dev.4", default-features = false, features = [
+  "iroh-relay",
+] }
+
+# holochain/wind-tunnel main @ 2026-07: first rev whose workspace binds
+# kitsune2 0.5.0-dev.4 (crates.io kitsune_wind_tunnel_runner 0.7.0 binds 0.4.1).
+wind_tunnel_core = { git = "https://github.com/holochain/wind-tunnel.git", rev = "1cf7ebf04902dd3603c45fc3c72f21d105b73463" }
+wind_tunnel_instruments = { git = "https://github.com/holochain/wind-tunnel.git", rev = "1cf7ebf04902dd3603c45fc3c72f21d105b73463" }
+wind_tunnel_instruments_derive = { git = "https://github.com/holochain/wind-tunnel.git", rev = "1cf7ebf04902dd3603c45fc3c72f21d105b73463" }
+kitsune_wind_tunnel_runner = { git = "https://github.com/holochain/wind-tunnel.git", rev = "1cf7ebf04902dd3603c45fc3c72f21d105b73463" }
+
+kitsune_client_instrumented = { path = "bindings/kitsune_client", version = "0.7.0" }
+
+# Make the git-sourced kitsune_wind_tunnel_runner use our vendored client instead
+# of the copy inside its own repo, so there is exactly one client type in the graph.
+[patch."https://github.com/holochain/wind-tunnel.git"]
+kitsune_client_instrumented = { path = "bindings/kitsune_client" }
+
+# Sharding fork: topeuph-ai/kitsune2, branch feat/sharding-module-v3 (0.5.0-dev.6,
+# satisfies ^0.5.0-dev.4). Requires the fork checked out at /workspaces/kitsune2.
+[patch.crates-io]
+kitsune2 = { path = "../../../../kitsune2/crates/kitsune2" }
+kitsune2_api = { path = "../../../../kitsune2/crates/api" }
+kitsune2_core = { path = "../../../../kitsune2/crates/core" }
+kitsune2_gossip = { path = "../../../../kitsune2/crates/gossip" }
+kitsune2_transport_iroh = { path = "../../../../kitsune2/crates/transport_iroh" }
+kitsune2_bootstrap_srv = { path = "../../../../kitsune2/crates/bootstrap_srv" }
