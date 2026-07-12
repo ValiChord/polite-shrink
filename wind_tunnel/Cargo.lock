@@ -2600,6 +2600,8 @@ dependencies = [
  "serde_json",
  "sha3",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "wind_tunnel_core",
  "wind_tunnel_instruments",
  "wind_tunnel_instruments_derive",

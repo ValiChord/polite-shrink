@@ -62,6 +62,7 @@ fn main() -> WindTunnelResult<()> {
     .add_capture_env("K2_SHARDING_INTENT_MIN_WAIT_MS")
     .add_capture_env("K2_SHARDING_LAG_FLOOR_MS")
     .add_capture_env("K2_SHARDING_LAG_CEILING_MS")
+    .add_capture_env("K2_ARC_SAMPLE_INTERVAL_MS")
     .use_agent_setup(agent_setup)
     .use_agent_behaviour(behaviour)
     .with_default_duration_s(30);

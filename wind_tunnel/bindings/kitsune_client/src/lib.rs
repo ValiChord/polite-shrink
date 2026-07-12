@@ -17,6 +17,7 @@ use tokio::sync::Mutex;
 use wind_tunnel_instruments::prelude::{ReportMetric, Reporter};
 use wind_tunnel_instruments_derive::wind_tunnel_instrument;
 
+mod arc_metrics;
 mod op_store;
 
 #[derive(Debug)]
@@ -50,6 +51,7 @@ pub struct WtChatter {
     state: Arc<Mutex<State>>,
     reporter: Arc<Reporter>,
     id: AgentId,
+    _arc_sampler: arc_metrics::AbortGuard,
 }
 
 impl WtChatter {
@@ -60,6 +62,8 @@ impl WtChatter {
         space_id: &str,
         reporter: Arc<Reporter>,
     ) -> anyhow::Result<Self> {
+        // Install before the space exists so no controller event is missed.
+        arc_metrics::install_sharding_event_bridge(reporter.clone());
         let agent = Arc::new(Ed25519LocalAgent::default());
         // The sharding controller owns the target arc after join; this hint is
         // only the starting state. FULL matches the experiment's start state
@@ -128,6 +132,8 @@ impl WtChatter {
 
         log::info!("created chatter with id {}", agent.agent());
 
+        let arc_sampler = arc_metrics::spawn_arc_sampler(agent.clone(), reporter.clone())?;
+
         let state = Arc::new(Mutex::new(State {
             agent,
             op_store,
@@ -139,6 +145,7 @@ impl WtChatter {
             state,
             reporter,
             id,
+            _arc_sampler: arc_sampler,
         })
     }
 

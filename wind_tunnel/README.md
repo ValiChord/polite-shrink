@@ -82,7 +82,21 @@ the storm brake on the survivors.
    `empty` — the controller owns the arc after join. **Every real run must set
    `K2_SHARDING_CLAMP_MIN_PEERS` below the agent count** (default 25 > planned
    12 agents, i.e. the controller would otherwise never engage).
-3. Instrumented metrics: arc-width sampling per tick + shrink-intent events.
+3. ✅ Instrumented metrics (`bindings/kitsune_client/src/arc_metrics.rs`):
+   - `arc_state` — every `K2_ARC_SAMPLE_INTERVAL_MS` (default 1000) each agent
+     reports its declared arc (`get_cur_storage_arc`, the same surface the
+     fork's storm test treats as authoritative): `arc_start`, `arc_end`,
+     `arc_span`, `is_empty`, tagged `agent_id`.
+   - `sharding_event` — a tracing layer (Wind Tunnel itself never installs a
+     tracing subscriber, so the client owns the global default) converts the
+     controller's structured events into metrics tagged
+     `event` = `grow` | `shrink_intent` | `shrink_executed` |
+     `intent_cancelled` | `peer_loss_cancel` | `other` and `agent_id`, with
+     `level` and remaining event fields preserved. Unrecognised `sharding:`
+     messages land in `other` with the message intact, so fork wording changes
+     degrade visibly instead of dropping data.
+   - Set `K2_LOG` (EnvFilter syntax, e.g. `kitsune2_gossip=debug`) to also
+     print tracing output; `RUST_LOG` only reaches `log`-crate records.
 4. Real `kitsune_arc_sharding` scenario + churn cohort + post-run coverage/floor
    analysis (the sim's floor check applied to real metrics).
 5. Runs mirroring the sim's settle/storm settings, writeup, update kitsune2#160.
