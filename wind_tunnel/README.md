@@ -118,5 +118,7 @@ ever orphaned post-warmup) and final redundancy (floor ≥ R). Outputs
    6-agent churn cohort — 33% of the 18-agent peak — dying simultaneously).
    **Both runs: coverage floor never below 6 ≥ R, zero orphaned sectors,
    both verdicts PASS.** Full writeup with claim boundary and caveats (storm
-   brake not exercised; `intent_send_failed` = benign self-connect artifact):
-   `results/REPORT.md`.
+   brake not exercised; `intent_send_failed` = benign self-connect artifact,
+   fixed on the fork as `190e204`): `results/REPORT.md`. Reported upstream:
+   [kitsune2#160 comment](https://github.com/holochain/kitsune2/issues/160#issuecomment-4951958041)
+   (2026-07-12).
