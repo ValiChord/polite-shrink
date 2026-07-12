@@ -101,6 +101,10 @@ MAIN_PID=""
 kill "$SRV_PID" 2>/dev/null || true
 trap - EXIT
 
+# The runner appends one line per invocation (both cohorts) to CWD; it holds
+# the captured env knobs — keep it with the run.
+[ -f run_summary.jsonl ] && mv run_summary.jsonl "$RUN_DIR/"
+
 echo "== analysing =="
 python3 analysis/analyze_run.py "$WT_METRICS_DIR" \
   --redundancy "$K2_SHARDING_TARGET_REDUNDANCY" \
