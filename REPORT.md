@@ -59,7 +59,7 @@ Variant-specific rules:
 - **V3 (+two-phase shrink):**
   1. When the shrink condition matures, the agent *announces* an intent to vacate (visible to all agents after their lag) and freezes its own decisions.
   2. After `intent_delay` = 50 ticks (> 2 × max lag), it *re-checks* on its then-current stale view: effective coverage of the vacate half = declared coverage − own declaration − the vacated ranges of **announced intenders with lower agent id**. If min ≥ R it shrinks; otherwise it cancels and resets its dwell counter.
-  3. Tie-break asymmetry: lower-id intenders are counted as gone; higher-id intenders are ignored (they will count *us* and defer). The lowest conflicting id therefore proceeds; symmetric deference was tried first and livelocks the network (no agent can ever shrink).
+  3. Tie-break asymmetry: lower-id intenders are counted as gone; higher-id intenders are ignored (they will count *us* and defer). The lowest conflicting id therefore proceeds; symmetric deference was tried first and livelocks the network (no agent can ever shrink). The scheme is modelled on TCAS, aviation's collision-avoidance system (C. John's insight): conflicting parties announce, then resolve *asymmetrically* by a deterministic rank both sides compute independently — complementary resolution advisories, never mirrored ones. This ingredient, not damping or jitter, is what separates the zero-loss variant from the rest (§3, §4).
   4. Growers subtract announced vacates from coverage (move before the hole opens); starting a grow cancels any pending intent (safety first).
   5. Small-network clamp: below 25 visible peers, hold/grow to full arc, never shrink.
 
