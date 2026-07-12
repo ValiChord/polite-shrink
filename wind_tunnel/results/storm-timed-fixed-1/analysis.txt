@@ -1,0 +1,29 @@
+files: 2   agents seen: 18   events: 62   duration: 600s
+sector grid: 512 sectors (SECTOR_SIZE 2^23), R = 5, warmup excluded: 30s
+
+controller events:
+  grow               7
+  shrink_intent      32
+  shrink_executed    10
+  intent_cancelled   4
+  peer_loss_cancel   9
+
+mean arc span (post-warmup): start 1.000 -> min 0.667 -> final 0.875 (1.000 = FULL)
+
+coverage floor (post-warmup): min 8   orphaned sectors: max 0
+final 60s: floor 9 vs R=5
+
+VERDICT continuous coverage (no sector ever orphaned): PASS
+VERDICT final redundancy (floor >= R):                 PASS
+
+ops: said 23673, heard 289155 (context only — op-level loss is not measured here)
+
+wrote runs/storm-timed-fixed-1/summary.json
+wrote runs/storm-timed-fixed-1/floor.png
+ops published: 23673 by 18 agents (12 survivors, 6 dead at run end)
+reachable from survivors: 23625   replication per op: min 1, median 12
+grey (dead publisher, published within 30s of its last publish — propagation latency, not arc safety): 48
+lost (published, propagated window elapsed, held by no survivor): 0
+
+VERDICT op reachability (zero non-grey ops lost):       PASS
+wrote runs/storm-timed-fixed-1/op_summary.json

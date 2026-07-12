@@ -115,6 +115,72 @@ timeline, `floor.png`, the runner's `run_summary.jsonl` (captured env), and
 the gzipped raw influx metrics. Timing-dependent numbers (event counts, exact
 spans) will vary between runs; the verdicts are the reproducible claim.
 
+## Follow-up: the storm brake exercised, a liveness bug found and fixed
+
+Same day, second measurement campaign: a storm variant with deaths timed
+into pending-intent windows (`K2_SHARDING_INTENT_MIN_WAIT_MS=60000` widens
+every window to ≥60 s; churn cohort joins t+60, dies t+180), plus the
+op-level reachability check (`analysis/op_reachability.py`) on every run.
+
+### The brake works — and it caught the §6.1 race in the wild
+
+In `storm-timed-fixed-1` (fork @ `ff9c1f2`): six agents die at t=182; at
+t=240–245 detection lands and the brake cancels **nine** pending intents —
+nine survivors had announced into the die-off on views that still counted
+the dead. None executed. That is the intent-death race occurring naturally
+on real transport and being closed by the brake.
+
+### The liveness bug (found in `storm-timed-r5-a12-c6-1`, fork @ `190e204`)
+
+In the first timed run the network never shrank again after the storm: 12
+re-announced intents, zero executions, arcs frozen at FULL for the last
+four minutes. Diagnosis (raw controller logs, `storm-diag-1/controller_log.gz`):
+`broadcast()` awaited each `send_module` sequentially *inside the check
+task*, and a send to a dead peer blocks for the transport's connect
+timeout (default 60 s). First send failure at exactly announce+60.00 s,
+second at exactly +120.00 s, zero controller activity between — an
+announce into a 6-peer die-off froze the announcer's controller for up to
+6 minutes, so pending intents' execute times were never evaluated. Safety
+was unaffected (a frozen controller does nothing, the safe direction);
+shrink liveness stalled. Invisible to the simulation (no transport) and to
+the mem-transport test (fails instantly); only real transport surfaces it.
+
+**Fix** (fork `ff9c1f2`): sends run in parallel in a detached task, and
+peers already marked unresponsive are skipped. Rerunning the identical
+scenario:
+
+| | stalled (`190e204`) | fixed (`ff9c1f2`) |
+|---|---|---|
+| shrink intents / executed | 15 / **0** | 32 / **10** |
+| brake cancellations | 3 | 9 |
+| `intent_send_failed` | 57 (all 60 s dead-peer probes) | **0** |
+| final mean span | 1.000 (frozen) | 0.875 (live) |
+| coverage floor / orphans | ≥10 / 0 | ≥8 / 0 |
+| op reachability | 23,472 published, 0 lost | 23,673 published, 0 lost |
+
+Post-fix the controller resumed shrinking at t=395 and hovered near the
+N=12/R=5 boundary (10 shrinks, 7 grows over ~200 s, floor ≥8 throughout) —
+bounded hunting at the density edge, not the runaway 2021 oscillation.
+
+### Op-level reachability (new since the first campaign)
+
+All three timed/diagnostic runs also pass the data-level check: every op
+published by any agent — including the dead cohort, minus a 30 s pre-death
+grey window reported separately — was held by at least one survivor at run
+end (median replication 12). This upgrades the claim from declared
+coverage to actual data reachability.
+
+### Storm-test flake accounting (correcting a record)
+
+The fork commit `ff9c1f2`'s message claims "4/4 consecutive passes"; the
+batch it summarised was actually 3/4 — a command-chaining mistake let the
+commit go out before the results were read. Corrected tally, same day:
+with the fix 14 passes / 1 failure (the failure at 132 s on a quiet
+machine); baseline `190e204` 10/10 passes with runtimes swinging 14–83 s.
+One failure in fifteen against a baseline whose passing tail reaches 83 s
+is consistent with the test's own timeout tail and does not implicate the
+fix; we note it rather than hide it.
+
 ## Provenance
 
 Part of the arc-sizing study conducted 2026-07-11/12 within the ValiChord

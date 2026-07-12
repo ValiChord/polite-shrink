@@ -1,0 +1,257 @@
+{
+  "ops_published": 23673,
+  "publishers": 18,
+  "survivors": 12,
+  "dead": 6,
+  "reachable": 23625,
+  "replication_min": 1,
+  "replication_median": 12,
+  "grey": 48,
+  "grey_ops": [
+    {
+      "t_ms": 1783887709326,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "aA9sJfAZlTsgs9x-B7JhBObAIjdw5ubLicPJZft1bsU"
+    },
+    {
+      "t_ms": 1783887709326,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "z3VZVNnij8OAUiea70PG2wWHKAHbbq9VdB-jjeXSFgc"
+    },
+    {
+      "t_ms": 1783887709326,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "15IOIl5Wm0d64zquRUK-xyEVJ9s5SyhGBNDe9yFLUMk"
+    },
+    {
+      "t_ms": 1783887709834,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "JhEzpBDpww9BRFSz0u8feAbwtoCCNNNmw2gwj0qo1gI"
+    },
+    {
+      "t_ms": 1783887709834,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "n5Txx2EKHVtMDsLV2uxqxtzqx6VmBPaDScS1Gpv18ac"
+    },
+    {
+      "t_ms": 1783887709834,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "EIZ7a8GMGEovnrWPLGqK9MR3oxTLpw3r1H6TaYXeAHw"
+    },
+    {
+      "t_ms": 1783887710345,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "iOQWrNnczJOzCmQBKcqoiMQxhNovY_u1l-ZSzqPqeIQ"
+    },
+    {
+      "t_ms": 1783887710345,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "oR83oJ92UIAJN72Gd_40Ewq51ar_26h92ZfzgowAwVE"
+    },
+    {
+      "t_ms": 1783887710345,
+      "agent": "Ev-FvJzQ_u-zts0Qcy923WHdnAGj6HoaEBJaXL_LTnA",
+      "op_id": "qgOoBMF9sZomwhzJlDVMyn0fcTEEzh_xO3zl_X3KMlY"
+    },
+    {
+      "t_ms": 1783887704079,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "xz5ZRsV7LjyYViECKe7UaQ6pabX55pbf99z_Am_w_jM"
+    },
+    {
+      "t_ms": 1783887704079,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "QIt0iJjMw4ekVYJTOXSBMSVobZICJpjzx70egFz5c8I"
+    },
+    {
+      "t_ms": 1783887704079,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "zzWlcJ4aT4BlaYCb3Rw3RvKnfSn67DeAW0Z5XT48UW8"
+    },
+    {
+      "t_ms": 1783887705040,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "0VlgBl2oU317i3Cr_ZolxtBJ6ZMY3EMIQy1-ECP--z0"
+    },
+    {
+      "t_ms": 1783887705040,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "1Iy16xgmYdiZjU7XGH3hv5OqFoFnbG4jcd1RBhEWxYM"
+    },
+    {
+      "t_ms": 1783887705040,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "ZNW0-8z7HQmeDC9IbBdzaCqvGzDShy1vB3Jv0cTFw3I"
+    },
+    {
+      "t_ms": 1783887705657,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "MgkcueP3GG551s185laxzr0V6inX1GyNZTFfOkDYD98"
+    },
+    {
+      "t_ms": 1783887705657,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "SWM6bQOF9ZDiBnS04pAHg6dEn2dz6LEI6Otlsqzn_GU"
+    },
+    {
+      "t_ms": 1783887705657,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "UGMmsc4gIVsIo7YF5yhjimdQrFfivB_6ogLjmmgkBPI"
+    },
+    {
+      "t_ms": 1783887706919,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "UA9S8eNVoWAmuRITc0838w0rFtDN0YijqDwClXU2ToE"
+    },
+    {
+      "t_ms": 1783887706919,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "p-MrlF36m2wLGWgV7cbqyyrrAdB7XMXxTNc6tBfwYCs"
+    },
+    {
+      "t_ms": 1783887706919,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "cCViXAe8-A7vkUAZW540tLvxYpM57a6nM-gOqOIG0eE"
+    },
+    {
+      "t_ms": 1783887707792,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "nSpYt81MBvwiCN8unmQuOL1N2jKrD49Nhp3S7-6P--M"
+    },
+    {
+      "t_ms": 1783887707792,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "qaur5-Z3mJdvi8PMqwOMZxeZSJdu_YYzBFUh-i20NF4"
+    },
+    {
+      "t_ms": 1783887707792,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "ScvV_3L0XRrHsu5uo3QXxZm0NJXSW5aeRbjvJqzW_Eg"
+    },
+    {
+      "t_ms": 1783887708711,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "rrCfw5W2ob86CQGKItDvlgyyonBpj4rA6XpOw4ZSQ88"
+    },
+    {
+      "t_ms": 1783887708711,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "QRxszDBSPqqaMMmV-PXJqZjKa7KUrTM3v55L8zoIjUg"
+    },
+    {
+      "t_ms": 1783887708711,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "oDrki_J8jlNzUiCoJOrTu2FxmKpckrB7YFVL8NI0Elw"
+    },
+    {
+      "t_ms": 1783887709241,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "tkTs9L4GU4h5MpZJ9os-Wuo8q0obipSp5jKXSc3SqLo"
+    },
+    {
+      "t_ms": 1783887709241,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "-QdBKlGzfLGfBovX0IoRq1N_yr_v9sPG92vJrzVRA_4"
+    },
+    {
+      "t_ms": 1783887709241,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "dXVKtiWOKCmSIMihMyz8c47awkm62HSJIxke3v2L7ok"
+    },
+    {
+      "t_ms": 1783887709809,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "fHlgLSF_LZDrt3-okraDFcl139JEOzfR4ogf0fEvKjY"
+    },
+    {
+      "t_ms": 1783887709809,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "prBkh706DThg4ztIbeoV4IAOyfUa-mC_KHiu7CmoqMw"
+    },
+    {
+      "t_ms": 1783887709809,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "ERlHvuu3eKNfBRA9sjoVr4V6EmERpHwdo24USxQ5c8s"
+    },
+    {
+      "t_ms": 1783887710577,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "w-Qq0SfEnkFSFXgIu4cMKNGqNW9jobkLM4ocPYgTmeA"
+    },
+    {
+      "t_ms": 1783887710577,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "bMsRYTdgJ-sX4-ybF5uYMqVm7E3U3WYP0fxFOfLqH-s"
+    },
+    {
+      "t_ms": 1783887710577,
+      "agent": "Jqf_BN7P2Z4w16TX_qBJwDq_OR5BAwF9W1Q9kRmSGM4",
+      "op_id": "J_7GVlanaNyMLvgtOoVu1Tm_Ep7hgu_V-ue9lbtNnBY"
+    },
+    {
+      "t_ms": 1783887710647,
+      "agent": "WzJ7ZU72ez9mtwT9nvIjcvo6fEpHgczecAfh81s9zT0",
+      "op_id": "CBfUgPPXmtkX21B13YePGLnAH5SYNIyRS1lcpr1op-o"
+    },
+    {
+      "t_ms": 1783887710647,
+      "agent": "WzJ7ZU72ez9mtwT9nvIjcvo6fEpHgczecAfh81s9zT0",
+      "op_id": "O69qz_guMV5j--mjW2APmvBX_sflGhUJ4k6EKUSPl7c"
+    },
+    {
+      "t_ms": 1783887710647,
+      "agent": "WzJ7ZU72ez9mtwT9nvIjcvo6fEpHgczecAfh81s9zT0",
+      "op_id": "0n9ZDgsaX9Swzo-rpwP-FRJa0UEFx5Cg5Q0eOZR-IPo"
+    },
+    {
+      "t_ms": 1783887709209,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "eSfLfyfs92enIxW-IHt7S6CKjJ1byDrN3bKjGadcnbE"
+    },
+    {
+      "t_ms": 1783887709209,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "VlDl0ey2iheuJBMtVdAIwYxfi-ewAYjC62a6iFYumt0"
+    },
+    {
+      "t_ms": 1783887709209,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "CqYSa3x5arptxGtiePfSLBsScPkuSL_SsLWetp0eqV0"
+    },
+    {
+      "t_ms": 1783887710309,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "WnoZyhogCG0rc7UJAZchXrs7pdd7_iZ3O7RTTAu3ib8"
+    },
+    {
+      "t_ms": 1783887710309,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "_unliZleV0QtK74CJml_j5dbhMIwxwvIaA9jZX9sqDY"
+    },
+    {
+      "t_ms": 1783887710309,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "mNDyyAxSxd3tCpccRKB3F-3wRDs_P050PwE3XB_yypE"
+    },
+    {
+      "t_ms": 1783887711066,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "yeD7drGlZb0hBRqW7-AmPphlbLvRsiKaHzNWIkbFbGg"
+    },
+    {
+      "t_ms": 1783887711066,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "RNgmFRIWTjSUVdO3gzQDSoVgDPVU5ZdAN7j-dqZ7J5o"
+    },
+    {
+      "t_ms": 1783887711066,
+      "agent": "pRXmVYsE2ryWeQec0gneBBeA-6BWNgvcRCZZOA0PoiA",
+      "op_id": "r9GUa2Cv2c_sQhvxMb4bmuA5z0nYfairyuC7kmUl1xI"
+    }
+  ],
+  "lost": 0,
+  "lost_ops": [],
+  "survivor_window_s": 60.0,
+  "grace_s": 30.0,
+  "verdict_op_reachability": true
+}
