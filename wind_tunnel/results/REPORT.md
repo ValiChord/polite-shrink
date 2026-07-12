@@ -1,5 +1,6 @@
 # V3 polite shrink under Wind Tunnel — kitsune2 substrate layer, real iroh transport
 
+**Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic) — see Provenance below
 **Date:** 2026-07-12
 **Code:** ValiChord repo `research/dht-arc-sharding-sim` @ `9fa05a3` (this workspace);
 kitsune2 fork `topeuph-ai/kitsune2` `feat/sharding-module-v3` @ `82a5896`;
@@ -113,3 +114,16 @@ subdirectory holds the run's `analysis.txt`, full per-second `summary.json`
 timeline, `floor.png`, the runner's `run_summary.jsonl` (captured env), and
 the gzipped raw influx metrics. Timing-dependent numbers (event counts, exact
 spans) will vary between runs; the verdicts are the reproducible claim.
+
+## Provenance
+
+Part of the arc-sizing study conducted 2026-07-11/12 within the ValiChord
+project (main report: [`../../REPORT.md`](../../REPORT.md), §9). Research
+programme conceived and directed by Ceri John (topeuph-ai); the two-phase
+polite shrink's conflict-resolution scheme was motivated by TCAS's
+coordinated complementary resolution advisories, suggested by C. John.
+Design elaboration, implementation, and analysis executed with AI assistance
+(Claude, Anthropic); all results human-reviewed. Published openly — no
+exclusivity claimed; this note and the repository's public commit history
+(pushed 2026-07-12) exist to date and attribute the work. Citation record:
+[`../../CITATION.cff`](../../CITATION.cff).

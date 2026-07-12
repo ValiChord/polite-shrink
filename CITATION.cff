@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: >-
+  If you use or build on this work — in particular the two-phase "polite
+  shrink" storage-arc controller — please cite it as below. Published openly;
+  no exclusivity is claimed. This record exists to date and attribute the
+  ideas.
+type: software
+title: >-
+  Dynamic DHT Storage-Arc Sizing: Controller Design, Robustness Evidence, and
+  a Reference Implementation for Kitsune2 (two-phase "polite shrink")
+authors:
+  - family-names: John
+    given-names: Ceri
+    alias: topeuph-ai
+date-released: "2026-07-12"
+repository-code: "https://github.com/ValiChord/ValiChord"
+url: "https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim"
+abstract: >-
+  A dynamic storage-arc controller for kitsune2 (Holochain's DHT layer),
+  addressing the control-loop oscillation that led to arcs being fixed at
+  FULL in 2021 (kitsune2 issue #160). Core mechanism: a two-phase "polite
+  shrink" — announce an intent to vacate, wait a multiple of measured gossip
+  staleness, re-check counting lower-agent-id intenders as already gone, with
+  deterministic asymmetric conflict resolution motivated by TCAS coordinated
+  complementary resolution advisories (suggested by C. John). Evidence:
+  4,992 paired simulations (0 sector losses in 1,248 runs for the winning
+  variant), an evolutionary adversarial search, a kitsune2 reference
+  implementation with an 8-node storm test, and Wind Tunnel measurements
+  over real iroh transport surviving a 33% simultaneous node loss with no
+  sector ever orphaned. Research programme conceived and directed by Ceri
+  John; design elaboration, implementation, and analysis executed with AI
+  assistance (Claude, Anthropic); all results human-reviewed.
+keywords:
+  - distributed-hash-table
+  - dht-sharding
+  - storage-arcs
+  - holochain
+  - kitsune2
+  - control-loop
+  - polite-shrink
+references:
+  - type: report
+    title: "Main study report"
+    url: "https://github.com/ValiChord/ValiChord/blob/research/dht-arc-sharding-sim/research/arc_sim/REPORT.md"
+  - type: software
+    title: "Reference implementation (kitsune2 fork, feat/sharding-module-v3)"
+    url: "https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3"
+  - type: generic
+    title: "Design note and Wind Tunnel results on holochain/kitsune2#160"
+    url: "https://github.com/holochain/kitsune2/issues/160#issuecomment-4949241059"

@@ -1,5 +1,6 @@
 # Dynamic DHT Storage-Arc Sizing: Controller Design, Robustness Evidence, and a Reference Implementation for Kitsune2
 
+**Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic) — roles in §9 Provenance; citation record in [`CITATION.cff`](CITATION.cff)
 **Study period:** 2026-07-11 → 2026-07-12
 **Status:** complete (Stages 1, 1c, 2); design note published on [holochain/kitsune2#160](https://github.com/holochain/kitsune2/issues/160#issuecomment-4949241059)
 **Reference implementation:** [`topeuph-ai/kitsune2`, branch `feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3)
