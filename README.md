@@ -42,6 +42,27 @@ one-command reproducible; see [Run it](#run-it) and `REPRODUCE.md`.
   scale, the §6.1 race quantified, and the §6.2 repair rule simulated
   before implementation.
 
+## Where is the code?
+
+Two places, by design:
+
+- **The rule, as proven** (Python, this repo): the entire polite-shrink
+  mechanism is ~30 lines — [`arc_sim.py`](arc_sim.py), `_decide` (phase 1:
+  announce the vacate intent instead of dropping) and `_execute_intent`
+  (phase 2: after the wait, re-check the vacated half counting every
+  lower-priority intender as already gone; proceed only if still ≥ R).
+  The V4 expanding-ring repair extension is [`repair_sim.py`](repair_sim.py).
+  Everything else here is the machinery for attacking those lines.
+- **The rule, as deployable** (Rust, kitsune2 fork):
+  [`crates/gossip/src/sharding/`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3/crates/gossip/src/sharding)
+  on branch `feat/sharding-module-v3` — ~1,200 lines behind kitsune2's
+  existing `sharding` feature flag, with `ShrinkIntent` as a wire message
+  on the `k2sharding` module channel, plus the storm brake and small-network
+  clamp. It lives on the fork because it is a module *inside* kitsune2's
+  crate structure, offered upstream via
+  [#160](https://github.com/holochain/kitsune2/issues/160); the
+  `wind_tunnel/` harness here measures it over real transport.
+
 **The problem in one question:** how should each node in a DHT decide how
 much of the keyspace to store (its "storage arc"), using only stale gossip
 information, without a coordinator, while never letting any data drop below
