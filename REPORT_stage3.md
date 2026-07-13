@@ -213,6 +213,64 @@ copy), with durations tracked to recovery.
   vanishingly rare relative to the ordinary churn floor that R must be
   provisioned for anyway.
 
+## 6. Addendum (same day): the five follow-ups, dispositioned
+
+Stage 3's findings implied five actions. Each was either done or
+deliberately declined, with evidence:
+
+**1. Ring granularity must scale with N — documented recommendation.**
+Already evidenced by §3's constant-density series (post-storm floor 4–5
+where the fixed ring gives 1). No further work: this is a kitsune2
+protocol-parameter decision (`SECTOR_SIZE`), not a controller change.
+Interim rule: provision R against agents-per-sector, not as an absolute.
+
+**2. Intent range-validation — simulated AND implemented.**
+Simulation (`defense_sim.py`): capping forged intents to what validation
+admits reduces the attack from 2.3× sync (77.2k vs 32.9k clean) to **~4%
+(34.3k)**; arcs settle at level 1.01 vs the attack's 2.34 (clean 0.85);
+resize count returns to baseline (3,623 vs 3,619). Implementation (fork
+commit `5224d37`): a structural check at receive (no vacate span can
+exceed half the ring) plus consumption-time containment against the
+announcer's declared arc on the same peer snapshot the tick's coverage
+uses; local agents bypass. Free bonus: stale intents from
+already-executed shrinks are dropped instead of double-counted. 84
+gossip tests + the storm test + clippy clean.
+
+**3. Serve-audit against liars — simulated; the dynamics work.**
+The most conservative variant (each agent samples 2 declared peers per
+decision epoch; one failed serve → *per-observer* exclusion, no verdict
+gossip, no reputation machinery) fully rescues the K=2R liar collapse:
+from ~350 permanently zero-true-copy sectors to a completely re-covered
+ring, true floor back to R, in all 3 seeds, ~270–330 ticks after audits
+start (`results/defense_summary.md`). Detection time scales as
+N·threshold/rate; recovery begins *before* full detection because
+partial exclusion already re-triggers growth. Implementation in kitsune2
+is future work (it belongs in gossip's sync layer, not the controller);
+until then R − K remains the honest safety margin.
+
+**4. The §6.1 race — deliberately left alone.**
+§5 measured the shrink-race at 0.002% of holes at R=5 under absurd
+hazard, zero at short lags, all holes transient. The storm brake is
+sufficient; further mechanism there would add complexity against the
+wrong risk. The dominant hole source is plain churn = an R-provisioning
+question. Decision recorded here so it isn't re-litigated.
+
+**5. Rotating the tie-break — tested, premise refuted, not adopted.**
+We hypothesised the lowest-id-proceeds rule caused the skewed
+equilibrium arc distribution. Measured (`fairness_sim.py`): the skew is
+real and extreme — the top decile of agents holds ~91% of stored
+sectors — but it is **not id-correlated** (corr(aid, level) ≈ +0.08),
+and rotating the priority per epoch (V3F) does not flatten it (93% at
+either period). Probes show only weak links to home density (−0.10) and
+gossip lag (−0.06): the skew is hysteresis-freeze path dependence.
+Rotation is *safe* (zero losses in all 288 sweep runs, including a
+period chosen so every intent straddles an epoch boundary), so it
+remains available if a real fairness mechanism ever needs it — but it
+buys nothing today, and the big arcs it would erode are the same
+emergent insurance that gave §4's sparse-recovery cascade global reach.
+Real storage fairness would need load-aware growth targets: future
+work, with that tension named.
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
@@ -240,6 +298,9 @@ results say where to look next, not that the search is over.
 | Byzantine study | `byzantine_sim.py` → `results/byz_{forge,liar}.png`, `byz_summary.md`, `byzantine.json` |
 | scale study | `scale_sim.py` → `results/scale.png`, `scale_summary.md`, `scale.json` |
 | §6.2 repair-rule study | `repair_sim.py` → `results/repair_deadlock.png`, `repair_summary.md`, `repair.json` (staged: `--study deadlock`, `--study rest`, `--study finish`) |
+| Byzantine-defense study | `defense_sim.py` → `results/defense.png`, `defense_summary.md`, `defense.json` |
+| tie-break fairness study | `fairness_sim.py` → `results/fairness.png`, `fairness_summary.md`, `fairness.json` |
+| intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | shared style/helpers | `ext_common.py` |
 | one-command runner | `./run_stage3.sh` (≈ 25 min on 8 cores; log → `results/stage3_run.log`) |
