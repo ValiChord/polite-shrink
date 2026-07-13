@@ -48,6 +48,15 @@ oscillation ("the hallway dance") that led Holochain to disable sharding.
 | **V1 damped** | act only after the condition persists ≥ K × *own measured lag* (grow 1×, shrink 4× — "grow eager, shrink slow") | control theory: react slower than your information is stale |
 | **V2 +jitter** | desynchronised decision epochs | TCP-RED: break lockstep reactions |
 | **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-priority intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
+| **V4 polite+repair** *(Stage 3)* | + expanding-ring repair: a hole in the level+g ancestor block motivates growth after `grow_need + (g−1)·2·lag` persistence — ring-near agents move first, distant timers reset when the hole closes | expanding-ring search (ad-hoc routing) |
+
+V0–V3 are the Stage-1 ablation (results below). **V4 is the Stage-3 addition**
+(`repair_sim.py`, REPORT_stage3.md §4): it fixes the sparse-network recovery
+deadlock the clamp otherwise papers over (V3 without the clamp: stuck 5/90
+port-scale seeds; V4: 120/120 recovered, no herding, zero loss across the
+regression battery). Trade-off to know: V4 tracks the target more tightly
+(~R+1 vs V3's accidental ~2R over-provisioning), so provision R explicitly
+for the storm margin you want — V4 at R+1 dominated V3 at R in our runs.
 
 ## Scenarios
 
