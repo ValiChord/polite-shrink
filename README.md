@@ -25,12 +25,13 @@ we could think of. It hasn't lost a sector yet:
 
 **What we don't claim:** these are simulation + kitsune2-substrate
 measurements on one machine — not a Holochain-conductor deployment, not WAN.
-The false-coverage (liar) attack defeats *any* declaration-trusting
-controller past K = R liars — that needs sensor integrity, not control law;
-the serve-audit defense is simulated (it fully rescues a K=2R collapse —
-[REPORT_stage3.md §6](REPORT_stage3.md)) but not yet implemented in
-kitsune2, so R − K remains the deployed margin. Every number above is
-one-command reproducible; see [Run it](#run-it) and `REPRODUCE.md`.
+On liars (false coverage declarations): both the attack *and* its defense
+are measured — past K = R phantom declarations any declaration-trusting
+controller loses data, and the serve-audit fully rescues even a K = 2R
+collapse ([REPORT_stage3.md §6](REPORT_stage3.md)) — but the audit exists
+only in simulation so far, so a *deployed* network's honest margin today
+is still R − K. Every number above is one-command reproducible; see
+[Run it](#run-it) and `REPRODUCE.md`.
 
 ## The write-ups
 
