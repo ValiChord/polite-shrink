@@ -1,7 +1,7 @@
 """
 Stage-3b: Byzantine agents against the arc controllers.
 
-REPORT.md §7 flags Byzantine behaviour (lying declarations, forged
+REPORT_stage1.md §7 flags Byzantine behaviour (lying declarations, forged
 intents) as unmodelled. This study adds the two attack channels the
 protocol actually exposes, and measures what each can and cannot do.
 

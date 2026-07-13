@@ -184,7 +184,7 @@ fix; we note it rather than hide it.
 ## Provenance
 
 Part of the arc-sizing study conducted 2026-07-11/12 within the ValiChord
-project (main report: [`../../REPORT.md`](../../REPORT.md), §9). Research
+project (main report: [`../../REPORT_stage1.md`](../../REPORT_stage1.md), §9). Research
 programme conceived and directed by Ceri John (topeuph-ai); the two-phase
 polite shrink's conflict-resolution scheme was motivated by TCAS's
 coordinated complementary resolution advisories, suggested by C. John.

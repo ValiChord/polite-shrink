@@ -1,7 +1,7 @@
 """
 Stage-3d: quantifying the §6.1 residual race.
 
-REPORT.md §6.1: deaths younger than the detection latency at the moment
+REPORT_stage1.md §6.1: deaths younger than the detection latency at the moment
 a shrink executes are locally undecidable — a declared-coverage hole can
 open. The storm brake bounds the window; nothing closes it. §7 leaves
 "how often, under realistic parameters?" open. The 0/1,248 sweep result

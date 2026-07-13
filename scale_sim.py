@@ -1,7 +1,7 @@
 """
 Stage-3c: does the controller behaviour survive scale?
 
-Stage-1's claims are all at N = 200 (REPORT.md §7 scopes them so).
+Stage-1's claims are all at N = 200 (REPORT_stage1.md §7 scopes them so).
 Holochain networks could be thousands of nodes; cascade dynamics,
 settle times, and per-agent costs might all degrade with N. This study
 runs V1 and V3 through activation and storm at N up to 5000, in two

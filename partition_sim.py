@@ -1,7 +1,7 @@
 """
 Stage-3a: network partitions / netsplits against the arc controllers.
 
-The Stage-1 model assumes full peer visibility; REPORT.md §7 flags
+The Stage-1 model assumes full peer visibility; REPORT_stage1.md §7 flags
 partitions as untested. This study adds them with the same stale-view
 machinery: from the moment of a split, each side's *snapshots* contain
 only its own members, so the other side fades out of every agent's lagged

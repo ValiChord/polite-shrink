@@ -1,6 +1,6 @@
 """
 Stage-3e: the §6.2 global under-coverage repair rule, simulated before
-implementation — exactly as REPORT.md §6.2 requires.
+implementation — exactly as REPORT_stage1.md §6.2 requires.
 
 The problem. Quantised growth is sibling-half-local: an agent can only
 double its aligned block, so growth cannot be *steered* toward a distant

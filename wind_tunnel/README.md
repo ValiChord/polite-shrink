@@ -15,7 +15,7 @@ the sharding module lives at and the layer the kitsune team owns.
   rebuilding it against the fork is out of scope.
 - As of 2026-07-12 the settle and storm runs in `results/` are complete: V3
   **has now been measured under Wind Tunnel at this layer** (both verdicts
-  PASS — see `results/REPORT.md` for exactly what that does and does not
+  PASS — see `results/REPORT_stage2_wind_tunnel.md` for exactly what that does and does not
   claim). Distinct, earlier claims: the standalone simulation (0 loss in 1248
   sweep runs + adversary) and the kitsune2 mem-transport storm test (4/4).
   Keep the three claims separate in every writeup.
@@ -119,6 +119,6 @@ ever orphaned post-warmup) and final redundancy (floor ≥ R). Outputs
    **Both runs: coverage floor never below 6 ≥ R, zero orphaned sectors,
    both verdicts PASS.** Full writeup with claim boundary and caveats (storm
    brake not exercised; `intent_send_failed` = benign self-connect artifact,
-   fixed on the fork as `190e204`): `results/REPORT.md`. Reported upstream:
+   fixed on the fork as `190e204`): `results/REPORT_stage2_wind_tunnel.md`. Reported upstream:
    [kitsune2#160 comment](https://github.com/holochain/kitsune2/issues/160#issuecomment-4951958041)
    (2026-07-12).

@@ -16,10 +16,10 @@ we could think of. It hasn't lost a sector yet:
 
 | Evidence class | Result |
 |---|---|
-| **1,248-run robustness sweep** (312 seeds × 4 scenarios, paired against 3 weaker controllers) | **0 sectors lost** (95% UB < 0.24%); weakest controller lost data in 95.9% of runs ([REPORT.md](REPORT.md)) |
+| **1,248-run robustness sweep** (312 seeds × 4 scenarios, paired against 3 weaker controllers) | **0 sectors lost** (95% UB < 0.24%); weakest controller lost data in 95.9% of runs ([REPORT_stage1.md](REPORT_stage1.md)) |
 | **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; **could not make polite shrink lose a single sector** |
 | **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
-| **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT.md](wind_tunnel/results/REPORT.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
+| **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); both Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract (fixed, [PR #572](https://github.com/holochain/kitsune2/pull/572)); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
@@ -34,10 +34,10 @@ one-command reproducible; see [Run it](#run-it) and `REPRODUCE.md`.
 
 ## The write-ups
 
-- **[REPORT.md](REPORT.md)** — the main study: methodology, the 4,992-sim
+- **[REPORT_stage1.md](REPORT_stage1.md)** — the main study: methodology, the 4,992-sim
   sweep, adversarial search, the reference implementation and its findings
   (§6 is the "what simulation hid" section), limitations.
-- **[wind_tunnel/results/REPORT.md](wind_tunnel/results/REPORT.md)** — real
+- **[wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)** — real
   iroh transport under Wind Tunnel: settle, storm, timed-storm; op-level
   reachability verdicts; flake accounting.
 - **[REPORT_stage3.md](REPORT_stage3.md)** — partitions, Byzantine agents,
@@ -166,8 +166,8 @@ directory — see `wind_tunnel/README.md`.
   result in particular may be specific to the exact shrink rule used here.
 
 Where the programme stands: the Stage-2 port to a kitsune2 fork is done
-(`REPORT.md`), measured under Wind Tunnel on real iroh transport with live
-churn (`wind_tunnel/results/REPORT.md`), and the open risks from REPORT.md §7
+(`REPORT_stage1.md`), measured under Wind Tunnel on real iroh transport with live
+churn (`wind_tunnel/results/REPORT_stage2_wind_tunnel.md`), and the open risks from REPORT_stage1.md §7
 are tested in Stage 3 (`REPORT_stage3.md`).
 
 ---

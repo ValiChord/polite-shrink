@@ -2,7 +2,7 @@
 
 **Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic)
 **Date:** 2026-07-13
-**Extends:** `REPORT.md` (Stage 1 simulation + Stage 2 kitsune2 port). Its §7
+**Extends:** `REPORT_stage1.md` (Stage 1 simulation + Stage 2 kitsune2 port). Its §7
 lists four threats to validity this stage was built to test: network
 partitions, Byzantine behaviour, parameter-regime transfer (scale), and the
 §6.1 residual race left unquantified — plus the §6.2 global repair rule,
@@ -126,7 +126,7 @@ fixed 512-sector ring (density grows 25×) and constant-density (ring up to
 
 ## 4. The §6.2 global repair rule, simulated before implementation (`repair_sim.py`)
 
-REPORT.md §6.2 proposed a global under-coverage repair rule to remove the
+REPORT_stage1.md §6.2 proposed a global under-coverage repair rule to remove the
 clamp dependency in sparse networks, and required simulation before
 implementation because it "introduces dynamics the sweep never validated."
 
