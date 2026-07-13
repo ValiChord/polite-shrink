@@ -4,6 +4,14 @@
 > (4,992-sim sweep + adversarial search), the kitsune2 reference
 > implementation, findings, and limitations, with a complete artifact
 > inventory for reproduction.
+>
+> **Stage 3: [`REPORT_stage3.md`](REPORT_stage3.md)** — the four risks
+> REPORT.md §7 left open, tested: netsplits + heal (zero durability loss),
+> forged intents (fail-safe; a cost attack), false-coverage liars (sharp
+> threshold at K = R — the real Byzantine gap), scale to N=5000 (V1 loses
+> data during activation at N ≥ 2000; V3 doesn't), and the §6.1 race
+> measured and extrapolated (churn-dominated; §6.1 proper ≈ 0.002% of
+> holes at R=5). One command: `./run_stage3.sh`.
 
 **What this is:** a Stage-1 simulation study of the *dynamic sharding* problem
 Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):
