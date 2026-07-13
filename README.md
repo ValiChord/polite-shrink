@@ -76,10 +76,15 @@ python3 run_experiments.py          # ~45 s, writes results/*.png + summary.md
 python3 check_seeds.py              # seed-robustness check
 ```
 
-## Honest limitations (Stage-1 by design)
+## Honest limitations of the Stage-1 model (and what later stages closed)
 
-- Full peer visibility (no partial peer discovery); one lag per viewer, not per pair.
-- Honest, non-adversarial agents; no Byzantine behaviour.
+- Full peer visibility (no partial peer discovery); one lag per viewer, not
+  per pair. *Partitions/netsplits are now tested in Stage 3
+  (`partition_sim.py`); per-pair asymmetric reachability remains unmodelled.*
+- The Stage-1 simulator itself assumes honest agents. *Byzantine behaviour —
+  forged intents and false coverage declarations — is now tested in Stage 3
+  (`byzantine_sim.py`); see REPORT_stage3.md §2 for what each attack can and
+  cannot do.*
 - Sync time linear in sectors; no bandwidth contention; deaths are instant
   (no graceful leave).
 - Instantaneous storm kill means *some* post-storm floor dip is unavoidable —
@@ -89,6 +94,7 @@ python3 check_seeds.py              # seed-robustness check
 - Findings are simulation evidence about this rule-set, not proofs; the V2
   result in particular may be specific to the exact shrink rule used here.
 
-Next step if pursued: port the V3 controller sketch to a kitsune2 fork behind
-a feature flag, using its in-memory test transport (Stage 2), and offer the
-measurement scenarios upstream.
+Where the programme stands: the Stage-2 port to a kitsune2 fork is done
+(`REPORT.md`), measured under Wind Tunnel on real iroh transport with live
+churn (`wind_tunnel/results/REPORT.md`), and the open risks from REPORT.md §7
+are tested in Stage 3 (`REPORT_stage3.md`).
