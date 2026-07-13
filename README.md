@@ -1,38 +1,53 @@
-# polite-shrink — dynamic DHT storage-arc controller research
+# polite-shrink — dynamic DHT storage-arc sizing that survives churn
 
-> **Full scientific write-up: [`REPORT.md`](REPORT.md)** — methodology, results
-> (4,992-sim sweep + adversarial search), the kitsune2 reference
-> implementation, findings, and limitations, with a complete artifact
-> inventory for reproduction.
->
-> **Stage 3: [`REPORT_stage3.md`](REPORT_stage3.md)** — the risks
-> REPORT.md §7 left open, tested: netsplits + heal (zero durability loss),
-> forged intents (fail-safe; a cost attack), false-coverage liars (sharp
-> threshold at K = R — the real Byzantine gap), scale to N=5000 (V1 loses
-> data during activation at N ≥ 2000; V3 doesn't), the §6.1 race
-> measured and extrapolated (churn-dominated; §6.1 proper ≈ 0.002% of
-> holes at R=5), and §6.2's global repair rule simulated as required
-> before implementation (deadlock real: V3 stuck 5/90 port-scale seeds
-> without the clamp; V4 expanding-ring repair recovers 100% with no
-> herding). One command: `./run_stage3.sh`.
+**The problem:** Holochain's DHT disabled dynamic sharding in 2021 after
+arc-resizing oscillation ("the hallway dance") caused data loss — every node
+has stored the full DHT since ([kitsune2 issue
+#160](https://github.com/holochain/kitsune2/issues/160)). Full arcs cap how
+large a network can grow.
 
-> **Provenance:** this research began as `research/arc_sim/` on the [ValiChord repo's research branch](https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim) (full commit history preserved here). Links already published to that location remain valid; this repository is the canonical home from 2026-07-13 on.
+**The contribution:** a two-phase **"polite shrink"** controller — announce an
+intent to vacate, wait out gossip staleness, re-check with a deterministic
+TCAS-style tie-break, and only then drop — plus an expanding-ring repair rule
+for sparse networks. Designed by ablation, then attacked from every direction
+we could think of. It hasn't lost a sector yet:
 
+## Evidence at a glance
 
-**What this is:** a research programme on the *dynamic sharding* problem
-Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):
-how should each node in a DHT decide how much of the keyspace to store (its
-"storage arc"), using only stale gossip information, without a coordinator,
-while never letting any data drop below a redundancy target R?
+| Evidence class | Result |
+|---|---|
+| **1,248-run robustness sweep** (312 seeds × 4 scenarios, paired against 3 weaker controllers) | **0 sectors lost** (95% UB < 0.24%); weakest controller lost data in 95.9% of runs ([REPORT.md](REPORT.md)) |
+| **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; **could not make polite shrink lose a single sector** |
+| **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
+| **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT.md](wind_tunnel/results/REPORT.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
+| **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery) |
+| **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract (fixed, [PR #572](https://github.com/holochain/kitsune2/pull/572)); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
-Three stages so far: a **simulation study** of the control-loop dynamics
-(this directory's `*.py` — no kitsune2 code, no network; it tests which
-controller ingredients prevent the arc-resizing oscillation, "the hallway
-dance", that led Holochain to disable sharding); a **reference
-implementation** on a kitsune2 fork with Wind Tunnel measurements over real
-iroh transport (`REPORT.md` §5–6, `wind_tunnel/`); and the **Stage-3
-robustness studies** (`REPORT_stage3.md`). The model and results below
-describe the Stage-1 core.
+**What we don't claim:** these are simulation + kitsune2-substrate
+measurements on one machine — not a Holochain-conductor deployment, not WAN.
+The false-coverage (liar) attack defeats *any* declaration-trusting
+controller past K = R liars — that needs sensor integrity, not control law
+([REPORT_stage3.md §2](REPORT_stage3.md)). Every number above is
+one-command reproducible; see [Run it](#run-it) and `REPRODUCE.md`.
+
+## The write-ups
+
+- **[REPORT.md](REPORT.md)** — the main study: methodology, the 4,992-sim
+  sweep, adversarial search, the reference implementation and its findings
+  (§6 is the "what simulation hid" section), limitations.
+- **[wind_tunnel/results/REPORT.md](wind_tunnel/results/REPORT.md)** — real
+  iroh transport under Wind Tunnel: settle, storm, timed-storm; op-level
+  reachability verdicts; flake accounting.
+- **[REPORT_stage3.md](REPORT_stage3.md)** — partitions, Byzantine agents,
+  scale, the §6.1 race quantified, and the §6.2 repair rule simulated
+  before implementation.
+
+**The problem in one question:** how should each node in a DHT decide how
+much of the keyspace to store (its "storage arc"), using only stale gossip
+information, without a coordinator, while never letting any data drop below
+a redundancy target R? The sections below describe the Stage-1 simulation
+core that answers it; `wind_tunnel/` and the fork carry the answer onto a
+real network stack.
 
 ## Model
 
@@ -117,3 +132,13 @@ Where the programme stands: the Stage-2 port to a kitsune2 fork is done
 (`REPORT.md`), measured under Wind Tunnel on real iroh transport with live
 churn (`wind_tunnel/results/REPORT.md`), and the open risks from REPORT.md §7
 are tested in Stage 3 (`REPORT_stage3.md`).
+
+---
+
+> **Provenance:** this research began as `research/arc_sim/` on the
+> [ValiChord repo's research branch](https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim)
+> (full commit history preserved here). Links already published to that
+> location remain valid; this repository is the canonical home from
+> 2026-07-13 on. Research directed by Ceri John (topeuph-ai); design
+> elaboration, implementation, and analysis with AI assistance (Claude,
+> Anthropic); all results human-reviewed. Citation: `CITATION.cff`.
