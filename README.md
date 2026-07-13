@@ -5,7 +5,7 @@
 > implementation, findings, and limitations, with a complete artifact
 > inventory for reproduction.
 >
-> **Stage 3: [`REPORT_stage3.md`](REPORT_stage3.md)** — the four risks
+> **Stage 3: [`REPORT_stage3.md`](REPORT_stage3.md)** — the risks
 > REPORT.md §7 left open, tested: netsplits + heal (zero durability loss),
 > forged intents (fail-safe; a cost attack), false-coverage liars (sharp
 > threshold at K = R — the real Byzantine gap), scale to N=5000 (V1 loses
@@ -19,15 +19,20 @@
 > **Provenance:** this research began as `research/arc_sim/` on the [ValiChord repo's research branch](https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim) (full commit history preserved here). Links already published to that location remain valid; this repository is the canonical home from 2026-07-13 on.
 
 
-**What this is:** a Stage-1 simulation study of the *dynamic sharding* problem
+**What this is:** a research programme on the *dynamic sharding* problem
 Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):
 how should each node in a DHT decide how much of the keyspace to store (its
 "storage arc"), using only stale gossip information, without a coordinator,
 while never letting any data drop below a redundancy target R?
 
-This is **not** kitsune2 code and runs no network. It models the control-loop
-dynamics only, to test which controller ingredients prevent the arc-resizing
-oscillation ("the hallway dance") that led Holochain to disable sharding.
+Three stages so far: a **simulation study** of the control-loop dynamics
+(this directory's `*.py` — no kitsune2 code, no network; it tests which
+controller ingredients prevent the arc-resizing oscillation, "the hallway
+dance", that led Holochain to disable sharding); a **reference
+implementation** on a kitsune2 fork with Wind Tunnel measurements over real
+iroh transport (`REPORT.md` §5–6, `wind_tunnel/`); and the **Stage-3
+robustness studies** (`REPORT_stage3.md`). The model and results below
+describe the Stage-1 core.
 
 ## Model
 
@@ -65,7 +70,7 @@ for the storm margin you want — V4 at R+1 dominated V3 at R in our runs.
 3. **flashcrowd** — 60% more agents join at once.
 4. **churn** — continuous ~4%-per-100-ticks turnover.
 
-## Results (seed 42; see `results/summary.md`, plots in `results/`)
+## Stage-1 results (seed 42; see `results/summary.md`, plots in `results/`)
 
 | Finding | Evidence |
 |---|---|
@@ -81,9 +86,14 @@ the ordering holds (V0 always loses data; V3 never does).
 
 ```bash
 pip install numpy matplotlib
-python3 run_experiments.py          # ~45 s, writes results/*.png + summary.md
-python3 check_seeds.py              # seed-robustness check
+python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
+python3 check_seeds.py              # Stage 1: seed-robustness check
+./run_stage3.sh                     # Stage 3: all five studies, ~40 min on 8 cores
 ```
+
+Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
+harness (`wind_tunnel/`) needs the kitsune2 fork cloned as a sibling
+directory — see `wind_tunnel/README.md`.
 
 ## Honest limitations of the Stage-1 model (and what later stages closed)
 
