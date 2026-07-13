@@ -91,6 +91,19 @@ real network stack.
 | **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-priority intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
 | **V4 polite+repair** *(Stage 3)* | + expanding-ring repair: a hole in the level+g ancestor block motivates growth after `grow_need + (g−1)·2·lag` persistence — ring-near agents move first, distant timers reset when the hole closes | expanding-ring search (ad-hoc routing) |
 
+> **TCAS?** The Traffic Collision Avoidance System in aircraft cockpits.
+> When two planes converge, both get *coordinated, complementary* orders —
+> one climbs, the other descends — picked by a deterministic tie-break on
+> transponder ID, never negotiated in the moment. It exists because the
+> failure mode of symmetric reactions is exactly the hallway dance: two
+> people blocking a corridor, each stepping aside to the same side, again
+> and again. The 2021 arc oscillation was nodes doing the hallway dance
+> with storage arcs — everyone reacting identically to the same stale
+> coverage picture. The polite-shrink tie-break applies TCAS's cure to
+> shrinking: when two nodes contend to vacate the same sectors, identity
+> (lowest agent ID) decides who proceeds and who defers — symmetry broken
+> by rule, not by timing or luck.
+
 V0–V3 are the Stage-1 ablation (results below). **V4 is the Stage-3 addition**
 (`repair_sim.py`, REPORT_stage3.md §4): it fixes the sparse-network recovery
 deadlock the clamp otherwise papers over (V3 without the clamp: stuck 5/90
