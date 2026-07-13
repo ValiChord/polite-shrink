@@ -15,7 +15,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | # | Question | Answer |
 |---|---|---|
 | 1 | Does a netsplit + heal orphan data? | **No durability loss in any of 9 runs.** V3's durability floor never left R=5; the heal-time concurrent shrink storm is absorbed. Flapping partitions defeat V1 (1,007 unreachable sector-ticks; never re-settles) but not V3. |
-| 2 | Can forged ShrinkIntents make honest nodes abandon coverage? | **No — the channel is fail-safe by construction and measurement.** Worst-case forgery (whole-ring claims in the highest-priority names) causes zero loss; it is a *cost* attack: 2.3× sync, +60% resizes, arcs pinned wider. |
+| 2 | Can forged ShrinkIntents make honest nodes abandon coverage? | **No — the channel is fail-safe by construction and measurement.** Worst-case forgery (whole-ring claims in the highest-priority names) causes zero loss; it is a *cost* attack: 2.3× sync, +60% resizes, arcs pinned wider. §6: the range-validation defense cuts it to ~4% and is implemented on the fork. |
 | 3 | Can lying about coverage destroy data? | **Yes — catastrophically, and invisibly, past a sharp threshold at K = R.** K full-arc liars: at K=R−1 the network survives on margin 1; at K=R, 27% of the ring has zero real copies while declared coverage reads healthy; at 2R, 70%. No control law can defend: this is sensor integrity, not control. |
 | 4 | Does the controller survive scale? | **V3 yes, V1 no.** At N ≥ 2000 the activation cascade makes V1 lose data (up to 1,474 zero-coverage sector-ticks at N=5000); V3 held floor = R with zero loss at every N up to 5000 on rings up to 16,384 sectors, with per-agent costs flat and settle time growing only mildly. |
 | 5 | Does §6.2's proposed global repair rule work, and is it safe? | **Yes to both, with one characterized trade-off.** The sparse-network deadlock is real (V3 without the clamp: stuck in 5/90 port-scale seeds, 1/30 clustered seeds at N=200); V4 (expanding-ring repair) recovered **every** run while keeping sharding, no thundering herd in dense networks, zero loss across the whole regression battery. Trade-off: V4 tracks the target R more tightly, removing V3's *incidental* ~2× over-provisioning; running V4 at R+1 buys the margin back at comparable cost. |
@@ -70,6 +70,7 @@ claimed agent's declared arc (local, cheap — kills whole-ring forgeries);
 (ii) authenticate sender identity (kitsune2 connections are already
 peer-keyed; third-party forgery requires defeating transport auth);
 (iii) sign intents (REPORT §7 already requires this for production).
+Defense (i) is now measured and implemented — see item 2 of the §6 addendum.
 
 ### 2b. False coverage — the real Byzantine gap, threshold at K = R
 
@@ -97,7 +98,8 @@ never dips below 5 — the damage was done by the *lying*, not the leaving.
 Implication for #160: the shrink path needs declared arcs to be
 *earned* — kitsune2's verified-sync growth gate covers the grow side;
 symmetric auditing (e.g., can this peer actually serve what it declares,
-sampled during gossip) is the missing sensor-integrity primitive. At
+sampled during gossip) is the missing sensor-integrity primitive — its
+dynamics are now validated in simulation (item 3 of the §6 addendum). At
 minimum, R should be provisioned assuming some liar mass: the safety
 margin is exactly R − K.
 

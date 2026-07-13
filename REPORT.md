@@ -186,7 +186,7 @@ Two further implementation notes are recorded as deltas 1–9 in `kitsune2_port_
 
 **Statistical claim scope.** "0/1,248, UB < 0.24%" applies to the *decision rules under the simulated conditions* (N = 200, R = 5, the four scenario families, the stated lag distribution). It does not transfer as a number to other parameter regimes or to the implementation.
 
-**Adversarial search scope.** The evolutionary search covers kill schedules within a fixed budget/window; it does not model Byzantine agents (lying declarations, forged intents), message suppression, or eclipse attacks. Intent messages in the PoC are unauthenticated; production use requires signing them (the codebase has the machinery).
+**Adversarial search scope.** The evolutionary search covers kill schedules within a fixed budget/window; it does not model Byzantine agents (lying declarations, forged intents), message suppression, or eclipse attacks. Intent messages in the PoC are unauthenticated; production use requires signing them (the codebase has the machinery). *(Since addressed in part: receiver-side range-validation of intents is implemented and measured — REPORT_stage3.md §6; Byzantine agents are simulated in REPORT_stage3.md §2.)*
 
 **Implementation validation scope.** The functional test uses 8 in-process nodes, R = 2, accelerated timing, and the (patched) in-memory transport — it validates mechanism wiring end-to-end, not production-scale behaviour, and is timing-based (flake risk on heavily loaded machines; 4/4 locally). The PoC broadcasts intents to all known peers (production would target holders of the vacated range), assumes one local agent per node in its testing (multi-agent paths implemented but lightly exercised), and does not persist controller state across restarts.
 

@@ -20,14 +20,16 @@ we could think of. It hasn't lost a sector yet:
 | **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; **could not make polite shrink lose a single sector** |
 | **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT.md](wind_tunnel/results/REPORT.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
-| **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery) |
+| **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); both Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract (fixed, [PR #572](https://github.com/holochain/kitsune2/pull/572)); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
 **What we don't claim:** these are simulation + kitsune2-substrate
 measurements on one machine — not a Holochain-conductor deployment, not WAN.
 The false-coverage (liar) attack defeats *any* declaration-trusting
-controller past K = R liars — that needs sensor integrity, not control law
-([REPORT_stage3.md §2](REPORT_stage3.md)). Every number above is
+controller past K = R liars — that needs sensor integrity, not control law;
+the serve-audit defense is simulated (it fully rescues a K=2R collapse —
+[REPORT_stage3.md §6](REPORT_stage3.md)) but not yet implemented in
+kitsune2, so R − K remains the deployed margin. Every number above is
 one-command reproducible; see [Run it](#run-it) and `REPRODUCE.md`.
 
 ## The write-ups
@@ -55,10 +57,11 @@ Two places, by design:
   Everything else here is the machinery for attacking those lines.
 - **The rule, as deployable** (Rust, kitsune2 fork):
   [`crates/gossip/src/sharding/`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3/crates/gossip/src/sharding)
-  on branch `feat/sharding-module-v3` — ~1,200 lines behind kitsune2's
+  on branch `feat/sharding-module-v3` — ~1,300 lines behind kitsune2's
   existing `sharding` feature flag, with `ShrinkIntent` as a wire message
-  on the `k2sharding` module channel, plus the storm brake and small-network
-  clamp. It lives on the fork because it is a module *inside* kitsune2's
+  on the `k2sharding` module channel, plus the storm brake, the
+  small-network clamp, and receiver-side range-validation of intents
+  (the forged-intent defense measured in REPORT_stage3.md §6). It lives on the fork because it is a module *inside* kitsune2's
   crate structure, offered upstream via
   [#160](https://github.com/holochain/kitsune2/issues/160); the
   `wind_tunnel/` harness here measures it over real transport.
@@ -137,7 +140,7 @@ the ordering holds (V0 always loses data; V3 never does).
 pip install numpy matplotlib
 python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
 python3 check_seeds.py              # Stage 1: seed-robustness check
-./run_stage3.sh                     # Stage 3: all five studies, ~40 min on 8 cores
+./run_stage3.sh                     # Stage 3 + follow-ups: seven studies, ~50 min on 8 cores
 ```
 
 Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
@@ -151,8 +154,8 @@ directory — see `wind_tunnel/README.md`.
   (`partition_sim.py`); per-pair asymmetric reachability remains unmodelled.*
 - The Stage-1 simulator itself assumes honest agents. *Byzantine behaviour —
   forged intents and false coverage declarations — is now tested in Stage 3
-  (`byzantine_sim.py`); see REPORT_stage3.md §2 for what each attack can and
-  cannot do.*
+  (`byzantine_sim.py`), and both defenses are measured in
+  `defense_sim.py` (REPORT_stage3.md §6).*
 - Sync time linear in sectors; no bandwidth contention; deaths are instant
   (no graceful leave).
 - Instantaneous storm kill means *some* post-storm floor dip is unavoidable —
