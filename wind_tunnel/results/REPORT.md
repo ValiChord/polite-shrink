@@ -97,7 +97,7 @@ R=5, so growth would be waste).
 ## Reproduce
 
 ```bash
-cd research/arc_sim/wind_tunnel
+cd wind_tunnel
 PROFILE=release AGENTS=12 DURATION=600 RUN_ID=settle-r5-a12-1 \
 K2_SHARDING_TARGET_REDUNDANCY=5 K2_SHARDING_CLAMP_MIN_PEERS=8 \
 ./run_experiment.sh settle

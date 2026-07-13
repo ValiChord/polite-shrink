@@ -13,8 +13,8 @@ authors:
     given-names: Ceri
     alias: topeuph-ai
 date-released: "2026-07-12"
-repository-code: "https://github.com/ValiChord/ValiChord"
-url: "https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim"
+repository-code: "https://github.com/ValiChord/polite-shrink"
+url: "https://github.com/ValiChord/polite-shrink"
 abstract: >-
   A dynamic storage-arc controller for kitsune2 (Holochain's DHT layer),
   addressing the control-loop oscillation that led to arcs being fixed at
@@ -41,7 +41,7 @@ keywords:
 references:
   - type: report
     title: "Main study report"
-    url: "https://github.com/ValiChord/ValiChord/blob/research/dht-arc-sharding-sim/research/arc_sim/REPORT.md"
+    url: "https://github.com/ValiChord/polite-shrink/blob/main/REPORT.md"
   - type: software
     title: "Reference implementation (kitsune2 fork, feat/sharding-module-v3)"
     url: "https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3"

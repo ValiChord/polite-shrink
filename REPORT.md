@@ -196,7 +196,7 @@ Two further implementation notes are recorded as deltas 1–9 in `kitsune2_port_
 
 | artifact | location |
 |---|---|
-| simulator, scenarios, variants | `research/arc_sim/arc_sim.py` |
+| simulator, scenarios, variants | `arc_sim.py` |
 | multi-seed sweep driver (checkpointed) | `sweep.py`, `run_sweep_until_done.sh` |
 | adversarial search | `adversary.py` |
 | determinism check / seed audit | `check_determinism.py`, `check_seeds.py` |

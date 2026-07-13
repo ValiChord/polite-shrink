@@ -1,4 +1,4 @@
-# arc_sim — DHT storage-arc controller simulation
+# polite-shrink — dynamic DHT storage-arc controller research
 
 > **Full scientific write-up: [`REPORT.md`](REPORT.md)** — methodology, results
 > (4,992-sim sweep + adversarial search), the kitsune2 reference
@@ -15,6 +15,9 @@
 > before implementation (deadlock real: V3 stuck 5/90 port-scale seeds
 > without the clamp; V4 expanding-ring repair recovers 100% with no
 > herding). One command: `./run_stage3.sh`.
+
+> **Provenance:** this research began as `research/arc_sim/` on the [ValiChord repo's research branch](https://github.com/ValiChord/ValiChord/tree/research/dht-arc-sharding-sim/research/arc_sim) (full commit history preserved here). Links already published to that location remain valid; this repository is the canonical home from 2026-07-13 on.
+
 
 **What this is:** a Stage-1 simulation study of the *dynamic sharding* problem
 Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):

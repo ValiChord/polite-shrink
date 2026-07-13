@@ -42,7 +42,7 @@ merge them, and never add this workspace to `valichord/Cargo.toml`.
 - The sharding fork checked out at `/workspaces/kitsune2` on
   `feat/sharding-module-v3` (scaffolded against commit `82a5896`). The
   `[patch.crates-io]` paths in `Cargo.toml` resolve to
-  `../../../../kitsune2/crates/*` relative to this directory — adjust there if
+  `../../kitsune2/crates/*` relative to this directory — adjust there if
   your checkout lives elsewhere.
 - Rust with edition-2024 support (1.85+).
 
@@ -50,7 +50,7 @@ merge them, and never add this workspace to `valichord/Cargo.toml`.
 
 ```bash
 export PATH="/home/codespace/.cargo/bin:$PATH"
-cd research/arc_sim/wind_tunnel
+cd wind_tunnel
 cargo check --workspace
 ```
 

@@ -70,9 +70,9 @@ kitsune_client_instrumented = { path = "bindings/kitsune_client" }
 # Sharding fork: topeuph-ai/kitsune2, branch feat/sharding-module-v3 (0.5.0-dev.6,
 # satisfies ^0.5.0-dev.4). Requires the fork checked out at /workspaces/kitsune2.
 [patch.crates-io]
-kitsune2 = { path = "../../../../kitsune2/crates/kitsune2" }
-kitsune2_api = { path = "../../../../kitsune2/crates/api" }
-kitsune2_core = { path = "../../../../kitsune2/crates/core" }
-kitsune2_gossip = { path = "../../../../kitsune2/crates/gossip" }
-kitsune2_transport_iroh = { path = "../../../../kitsune2/crates/transport_iroh" }
-kitsune2_bootstrap_srv = { path = "../../../../kitsune2/crates/bootstrap_srv" }
+kitsune2 = { path = "../../kitsune2/crates/kitsune2" }
+kitsune2_api = { path = "../../kitsune2/crates/api" }
+kitsune2_core = { path = "../../kitsune2/crates/core" }
+kitsune2_gossip = { path = "../../kitsune2/crates/gossip" }
+kitsune2_transport_iroh = { path = "../../kitsune2/crates/transport_iroh" }
+kitsune2_bootstrap_srv = { path = "../../kitsune2/crates/bootstrap_srv" }
