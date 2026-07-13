@@ -9,9 +9,12 @@
 > REPORT.md §7 left open, tested: netsplits + heal (zero durability loss),
 > forged intents (fail-safe; a cost attack), false-coverage liars (sharp
 > threshold at K = R — the real Byzantine gap), scale to N=5000 (V1 loses
-> data during activation at N ≥ 2000; V3 doesn't), and the §6.1 race
+> data during activation at N ≥ 2000; V3 doesn't), the §6.1 race
 > measured and extrapolated (churn-dominated; §6.1 proper ≈ 0.002% of
-> holes at R=5). One command: `./run_stage3.sh`.
+> holes at R=5), and §6.2's global repair rule simulated as required
+> before implementation (deadlock real: V3 stuck 5/90 port-scale seeds
+> without the clamp; V4 expanding-ring repair recovers 100% with no
+> herding). One command: `./run_stage3.sh`.
 
 **What this is:** a Stage-1 simulation study of the *dynamic sharding* problem
 Holochain has parked ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160)):

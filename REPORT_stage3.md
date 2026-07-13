@@ -5,9 +5,10 @@
 **Extends:** `REPORT.md` (Stage 1 simulation + Stage 2 kitsune2 port). Its §7
 lists four threats to validity this stage was built to test: network
 partitions, Byzantine behaviour, parameter-regime transfer (scale), and the
-§6.1 residual race left unquantified. Stage-1 code (`arc_sim.py`) is
-untouched; every extension is a subclass in a new file, so the Stage-1
-byte-determinism claims stand.
+§6.1 residual race left unquantified — plus the §6.2 global repair rule,
+which §6.2 explicitly required simulating before implementation. Stage-1
+code (`arc_sim.py`) is untouched; every extension is a subclass in a new
+file, so the Stage-1 byte-determinism claims stand.
 
 ## Summary of findings
 
@@ -17,7 +18,8 @@ byte-determinism claims stand.
 | 2 | Can forged ShrinkIntents make honest nodes abandon coverage? | **No — the channel is fail-safe by construction and measurement.** Worst-case forgery (whole-ring claims in the highest-priority names) causes zero loss; it is a *cost* attack: 2.3× sync, +60% resizes, arcs pinned wider. |
 | 3 | Can lying about coverage destroy data? | **Yes — catastrophically, and invisibly, past a sharp threshold at K = R.** K full-arc liars: at K=R−1 the network survives on margin 1; at K=R, 27% of the ring has zero real copies while declared coverage reads healthy; at 2R, 70%. No control law can defend: this is sensor integrity, not control. |
 | 4 | Does the controller survive scale? | **V3 yes, V1 no.** At N ≥ 2000 the activation cascade makes V1 lose data (up to 1,474 zero-coverage sector-ticks at N=5000); V3 held floor = R with zero loss at every N up to 5000 on rings up to 16,384 sectors, with per-agent costs flat and settle time growing only mildly. |
-| 5 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model, licensing extrapolation: at realistic churn the rate is negligible (worked example below). All holes are transient — median 23 ticks, p90 ≈ 95. |
+| 5 | Does §6.2's proposed global repair rule work, and is it safe? | **Yes to both, with one characterized trade-off.** The sparse-network deadlock is real (V3 without the clamp: stuck in 5/90 port-scale seeds, 1/30 clustered seeds at N=200); V4 (expanding-ring repair) recovered **every** run while keeping sharding, no thundering herd in dense networks, zero loss across the whole regression battery. Trade-off: V4 tracks the target R more tightly, removing V3's *incidental* ~2× over-provisioning; running V4 at R+1 buys the margin back at comparable cost. |
+| 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model, licensing extrapolation: at realistic churn the rate is negligible (worked example below). All holes are transient — median 23 ticks, p90 ≈ 95. |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -120,7 +122,55 @@ fixed 512-sector ring (density grows 25×) and constant-density (ring up to
   with N; activation settle grows mildly (1,104 → 1,694 ticks from N=200
   to 5000-density). No super-linear cascade signature appeared.
 
-## 4. The §6.1 residual race, quantified (`race_quantify.py`)
+## 4. The §6.2 global repair rule, simulated before implementation (`repair_sim.py`)
+
+REPORT.md §6.2 proposed a global under-coverage repair rule to remove the
+clamp dependency in sparse networks, and required simulation before
+implementation because it "introduces dynamics the sweep never validated."
+
+**The rule (V4 = V3 + expanding-ring repair).** Quantised growth cannot be
+steered, but repeated doubling reaches everywhere — so distant holes
+*motivate* growth behind a distance-staggered fuse: an agent reacts to an
+under-covered sector inside its level+g ancestor block (g ≥ 2; g = 1 is
+V3's native sibling-half check) only after the condition persists
+`grow_need + (g−1)·2·lag` ticks. Ring-near agents move first; if they
+close the hole, everyone further out resets and never grows. No new
+message types; growth stays quantised, local-information, hysteresis-gated.
+
+**The deadlock is real, and V4 eliminates it.** In the regime the port
+observed it in (8 nodes, R=2, clamp off), V3 stalled — under-covered ring,
+resize activity ceased — in **5/90 seeds**; a clustered-survivor geometry
+reproduces it even at N=200/R=5 (1/30). **V4 recovered every run in every
+case** (90/90 and 30/30), slightly faster than V3 and at ~5% extra sync,
+*while still sharding* — unlike the clamp, whose rescue is permanent
+full-arc storage on every survivor. Where the deadlock doesn't occur
+(random survivor sets — the common case), V3 and V4 are statistically
+indistinguishable.
+
+**No thundering herd.** Dense-network probe (all declared holders of one
+sector killed at equilibrium, growers counted net of a matched no-kill
+control, 8 seeds): V4 responded with *fewer* growers than V3 (100 vs 114
+over baseline), recovered faster (median 53 vs 62 ticks), at slightly
+lower sync. The staggered fuse holds: distant agents' timers reset when
+near agents close the hole.
+
+**Regression battery: zero loss everywhere, one characterized trade-off.**
+Across activation/storm/flashcrowd/churn × seeds (26 runs), no run lost
+data. But V4 changes the *operating point*: its repair grows fill the
+R−1 holes that stall V3's shrink cascade, so the network settles much
+closer to the true target (measured at seed 42: mean coverage 6.0 ≈ R+1
+vs V3's 10.0 ≈ 2R, with sync cost 8.2k vs 23.0k on activation — 64%
+cheaper). The flip side: V3's clunky equilibrium quietly over-provisions
+~2×, and that incidental buffer absorbs storms. Across seeds the
+post-storm floors overlap (V3: 2–4, V4: 2–5) — no *systematic*
+regression — but the margin is now honest rather than accidental:
+**V4 at R+1 dominates V3 at R** (post-storm floors 4–6 vs 2–4, churn
+floors 4–5 vs 4) at comparable cost. Recommendation for #160: adopt the
+repair rule with R provisioned explicitly for the desired margin, rather
+than relying on hunting-stall over-provisioning that no one designed and
+no spec guarantees.
+
+## 5. The §6.1 residual race, quantified (`race_quantify.py`)
 
 **Method.** V3, N=200; R ∈ {3,5} × lag_max ∈ {24,48,96} (intent_delay =
 2·lag_max+2, warmup scaled 1500+35·lag so slow-hysteresis cells measure a
@@ -173,7 +223,10 @@ clean — no asymmetric reachability, no message loss short of total,
 groups fixed at 2. Liars are maximally crude (full arc, never move);
 stealthier liars (modest arcs, rotating) would trade damage for
 detectability and are unmodelled. Scale stops at N=5000 and inherits the
-Stage-1 clamp default. The tick→seconds mapping used in extrapolation is
+Stage-1 clamp default. The repair rule was tested at one stagger setting
+(2×lag per ring) and its equilibrium-tightening effect was measured in
+depth at one seed; the deadlock frequency estimates (5/90, 1/30) carry
+the usual small-count uncertainty. The tick→seconds mapping used in extrapolation is
 nominal; the dimensionless quantity is p × window. Ground truth remains
 *declared* coverage except where stated (`true_*` metrics). Stage 2
 demonstrated concretely that idealisations hide real constraints; these
@@ -186,6 +239,7 @@ results say where to look next, not that the search is over.
 | partition study | `partition_sim.py` → `results/partition_{split5050,split9010,flapping}.png`, `partition_summary.md`, `partition.json` |
 | Byzantine study | `byzantine_sim.py` → `results/byz_{forge,liar}.png`, `byz_summary.md`, `byzantine.json` |
 | scale study | `scale_sim.py` → `results/scale.png`, `scale_summary.md`, `scale.json` |
+| §6.2 repair-rule study | `repair_sim.py` → `results/repair_deadlock.png`, `repair_summary.md`, `repair.json` (staged: `--study deadlock`, `--study rest`, `--study finish`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | shared style/helpers | `ext_common.py` |
 | one-command runner | `./run_stage3.sh` (≈ 25 min on 8 cores; log → `results/stage3_run.log`) |

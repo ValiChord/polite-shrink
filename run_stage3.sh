@@ -2,7 +2,7 @@
 # Stage-3 extension campaigns, run in order. Log: results/stage3_run.log
 set -u
 cd "$(dirname "$0")"
-for study in partition_sim byzantine_sim scale_sim race_quantify; do
+for study in partition_sim byzantine_sim scale_sim race_quantify repair_sim; do
     echo "=== $study START $(date -u +%F' '%T) ==="
     if python3 "$study.py"; then
         echo "=== $study DONE $(date -u +%F' '%T) ==="
