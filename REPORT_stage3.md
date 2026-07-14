@@ -20,7 +20,9 @@ file, so the Stage-1 byte-determinism claims stand.
 | 4 | Does the controller survive scale? | **V3 yes, V1 no.** At N ≥ 2000 the activation cascade makes V1 lose data (up to 1,474 zero-coverage sector-ticks at N=5000); V3 held floor = R with zero loss at every N up to 5000 on rings up to 16,384 sectors, with per-agent costs flat and settle time growing only mildly. |
 | 5 | Does §6.2's proposed global repair rule work, and is it safe? | **Yes to both, with one characterized trade-off.** The sparse-network deadlock is real (V3 without the clamp: stuck in 5/90 port-scale seeds, 1/30 clustered seeds at N=200); V4 (expanding-ring repair) recovered **every** run while keeping sharding, no thundering herd in dense networks, zero loss across the whole regression battery. Trade-off: V4 tracks the target R more tightly, removing V3's *incidental* ~2× over-provisioning; running V4 at R+1 buys the margin back at comparable cost. |
 | 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model, licensing extrapolation: at realistic churn the rate is negligible (worked example below). All holes are transient — median 23 ticks, p90 ≈ 95. |
-| 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars (per-sector proofs) are future work. |
+| 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars measured in finding 8. |
+| 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
+| 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive 2021 rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -341,6 +343,90 @@ simulated. Determinism holds (audit RNG seeded; two runs byte-identical). A
 reference implementation on the kitsune2 fork is future work: challenges would
 travel on the same `k2sharding` channel as the intents.
 
+## 8. Partial liars against verified coverage (`partial_liar_sim.py`)
+
+§7 closed the *full-arc* liar and named the open edge: a partial liar that
+truly stores a fraction p of its declared arc and can serve *some* challenges.
+The audit must be a sampled range-check — a declared arc covers content that
+does not exist yet, so it cannot be enumerated: challenge `c` random sectors of
+the arc and certify it for the TTL only if all `c` are served. A liar holding
+fraction p therefore certifies with probability p^c and, once certified, is
+trusted over its *whole* declared arc — including the sectors it does not hold.
+
+**Static sweep (K = 2R liars, c = 2 samples, 3 seeds, tail-mean):**
+
+| p held | declared floor | declared ring 0-copy | verified floor | verified 0-copy |
+|---|---|---|---|---|
+| 0.00 | 0.0 | 68.8% | 6.7 | 0% |
+| 0.25 | 0.0 | 4.2% | 5.3 | 0% |
+| 0.50 | 1.0 | 0% | 3.7 | 0% |
+| 0.75 | 3.3 | 0% | 3.8 | 0% |
+| 0.90 | 5.3 | 0% | 5.3 | 0% |
+| 1.00 | 10.0 | 0% | 10.0 | 0% |
+
+Verified coverage loses **no data at any p** (zero dead sectors throughout),
+where declared coverage loses 69% of the ring to full liars. It is not free:
+at intermediate p the true floor dips *below R* (3.7 at p=0.5) — the partial
+liar evades the sample often enough to certify *and* withholds enough real
+coverage to matter. Full liars (p=0) are caught by any sample and excluded
+(floor 6.7); honest peers (p=1) certify and behave normally. The worst case is
+the middle, exactly as the p^c geometry predicts.
+
+**The margin dip is a tunable knob — stringency sweep (p = 0.5, verified):**
+
+| samples c | evade prob p^c | verified floor |
+|---|---|---|
+| 1 | 0.50 | 1.8 |
+| 2 | 0.25 | 3.7 |
+| 3 | 0.12 | 5.6 |
+| 4 | 0.06 | 6.4 |
+| 6 | 0.02 | 7.4 |
+
+Raising the sample count drives evasion down exponentially and lifts the floor
+back over R by c = 3, for more audit bandwidth. Verified coverage does not make
+partial lying *impossible*; it makes it *costly and bounded* — the adversary
+must genuinely store more to stay certified, and the defender sets how much by
+choosing c.
+
+Honest boundary: ground truth counts each liar's real holdings, so a partial
+liar contributes the coverage it actually provides. Still unmodelled — the
+temporal *prove-then-drop* trojan (certify, then abandon within the TTL), a
+liveness-flavoured attack whose knob is `proof_ttl`; and, as in §7, this proves
+possession at audit time, not willingness to serve later.
+
+## 9. Formal safety proof (`spec/`, TLA+ / TLC)
+
+The sweep's 0-losses-in-1,248-runs is strong evidence but still sampling. The
+core safety property is small enough to *prove* — exhaustive model checking
+over every reachable state, in TLA+.
+
+The property is per-sector (for any one sector the covering nodes decide
+independently, so proving it for one sector proves it for the ring):
+
+> a sector never holds fewer than R real copies.
+
+`spec/PoliteShrink.tla` models the two-phase rule: announce unconstrained
+(worst case — everyone announces), execute reading the *current* holder/intent
+sets (what the "wait 2× max lag" delay buys), with the lowest-id-proceeds
+tie-break. TLC checks `SafeCoverage` with **no error — exhaustively** — at
+every configuration tried:
+
+| Nodes | R | distinct states |
+|---|---|---|
+| 6 | 3 | 656 |
+| 7 | 2 | 2,172 |
+| 8 | 4 | 5,984 |
+| 8 | 1 | 6,560 |
+| 8 | 7 | 1,280 |
+
+`spec/NaiveShrink.tla` — the pre-2021 stale-view drop, no wait or tie-break —
+is *violated* at each config (TLC returns the hallway-dance counterexample),
+proving the model has teeth and that the safety is bought by the two phases,
+not the way the model is written. This covers control-loop safety under the
+model's abstraction (one sector, execute-time intent visibility, honest
+holders); it complements, not replaces, the sims, which carry gossip timing,
+Byzantine liars, and geometry. Reproduce: `spec/README.md`.
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
@@ -370,11 +456,13 @@ results say where to look next, not that the search is over.
 | §6.2 repair-rule study | `repair_sim.py` → `results/repair_deadlock.png`, `repair_summary.md`, `repair.json` (staged: `--study deadlock`, `--study rest`, `--study finish`) |
 | Byzantine-defense study | `defense_sim.py` → `results/defense.png`, `defense_summary.md`, `defense.json` |
 | verified-coverage study | `verified_coverage_sim.py` → `results/verified_coverage.png`, `verified_summary.md`, `verified.json` (`--quick` for a 1-seed pass) |
+| partial-liar study | `partial_liar_sim.py` → `results/partial_liar.png`, `partial_summary.md`, `partial_liar.json` (`--quick` for a 1-seed pass) |
+| formal safety proof | `spec/PoliteShrink.tla` + `spec/NaiveShrink.tla` (TLA+/TLC; needs a JRE + `tla2tools.jar`; see `spec/README.md`) |
 | tie-break fairness study | `fairness_sim.py` → `results/fairness.png`, `fairness_summary.md`, `fairness.json` |
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | shared style/helpers | `ext_common.py` |
-| one-command runner | `./run_stage3.sh` (eight studies, ≈ 40 min on 8 cores; log → `results/stage3_run.log`) |
+| one-command runner | `./run_stage3.sh` (nine studies, ≈ 55 min on 8 cores; log → `results/stage3_run.log`) |
 
 Same environment as Stage 1 (`REPRODUCE.md`): Python 3.12, numpy 2.5.1,
 matplotlib 3.11.0. All seeds fixed; `polite_shrink.py` unmodified.
