@@ -374,7 +374,7 @@ results say where to look next, not that the search is over.
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | shared style/helpers | `ext_common.py` |
-| one-command runner | `./run_stage3.sh` (≈ 25 min on 8 cores; log → `results/stage3_run.log`) |
+| one-command runner | `./run_stage3.sh` (eight studies, ≈ 40 min on 8 cores; log → `results/stage3_run.log`) |
 
 Same environment as Stage 1 (`REPRODUCE.md`): Python 3.12, numpy 2.5.1,
 matplotlib 3.11.0. All seeds fixed; `polite_shrink.py` unmodified.

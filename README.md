@@ -49,8 +49,9 @@ margin today is still R − K until the audit ships on the fork. Every number ab
   iroh transport under Wind Tunnel: settle, storm, timed-storm; op-level
   reachability verdicts; flake accounting.
 - **[REPORT_stage3.md](REPORT_stage3.md)** — partitions, Byzantine agents,
-  scale, the §6.1 race quantified, and the §6.2 repair rule simulated
-  before implementation.
+  scale, the §6.1 race quantified, the §6.2 repair rule simulated before
+  implementation, and (§7) proof-gated *verified coverage* closing the
+  false-declaration liar gap.
 
 ## Where is the code?
 
@@ -148,7 +149,7 @@ the ordering holds (V0 always loses data; V3 never does).
 pip install numpy matplotlib
 python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
 python3 check_seeds.py              # Stage 1: seed-robustness check
-./run_stage3.sh                     # Stage 3 + follow-ups: seven studies, ~50 min on 8 cores
+./run_stage3.sh                     # Stage 3 + follow-ups: eight studies, ~65 min on 8 cores
 ```
 
 Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
