@@ -1,6 +1,6 @@
 # polite-shrink — dynamic DHT storage-arc sizing that survives churn
 
-> ## Using the polite-shrink pattern, the arc-shrink race that disabled sharding in 2021 can no longer cause data loss — proven by exhaustive model checking, not just tested.
+> ## Using the polite-shrink pattern, the arc-shrink race that forced Holochain to disable sharding in 2021 can no longer cause data loss — proven by exhaustive model checking, not just tested.
 >
 > *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive 2021 rule fails the same check with a counterexample. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
