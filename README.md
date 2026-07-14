@@ -156,28 +156,37 @@ Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
 harness (`wind_tunnel/`) needs the kitsune2 fork cloned as a sibling
 directory — see `wind_tunnel/README.md`.
 
-## Honest limitations of the Stage-1 model (and what later stages closed)
+## Honest limitations
 
-- Full peer visibility (no partial peer discovery); one lag per viewer, not
-  per pair. *Partitions/netsplits are now tested in Stage 3
-  (`partition_sim.py`); per-pair asymmetric reachability remains unmodelled.*
-- The Stage-1 simulator itself assumes honest agents. *Byzantine behaviour —
-  forged intents and false coverage declarations — is now tested in Stage 3
-  (`byzantine_sim.py`), and both defenses are measured in
-  `defense_sim.py` (REPORT_stage3.md §6).*
-- Sync time linear in sectors; no bandwidth contention; deaths are instant
-  (no graceful leave).
-- Instantaneous storm kill means *some* post-storm floor dip is unavoidable —
-  what's measured is how controllers respond, not whether dips can be prevented.
-- Quantised aligned blocks are a simplification of kitsune2's actual arc
-  mechanics; "ticks" are abstract time.
-- Findings are simulation evidence about this rule-set, not proofs; the V2
-  result in particular may be specific to the exact shrink rule used here.
+What still holds today, after Stage 3 — stated as current constraints, not history:
 
-Where the programme stands: the Stage-2 port to a kitsune2 fork is done
-(`REPORT_stage1.md`), measured under Wind Tunnel on real iroh transport with live
-churn (`wind_tunnel/results/REPORT_stage2_wind_tunnel.md`), and the open risks from REPORT_stage1.md §7
-are tested in Stage 3 (`REPORT_stage3.md`).
+- **The Byzantine defenses are simulated, not yet deployed.** The controller
+  runs on a kitsune2 fork, but the two defenses against nodes that lie about
+  what they store — the serve-audit and proof-gated verified coverage
+  (REPORT_stage3.md §6–§7) — exist only in simulation so far. So a *deployed*
+  network's honest margin against false-coverage declarations is still R − K
+  until the audit ships. And only *full-arc* liars are modelled; a partial liar
+  that stores a strategic fraction needs per-sector proofs — future work.
+- **Reachability is modelled coarsely.** One gossip lag per viewer, not per
+  pair; partitions are binary. Per-pair asymmetric reachability is unmodelled.
+- **Model idealisations.** Sync time is linear in sectors with no bandwidth
+  contention; deaths are instant (no graceful leave); arcs are quantised
+  aligned blocks (a simplification of kitsune2's real mechanics); "ticks" are
+  abstract time.
+- **Storm dips are inherent to the test, by design.** An instantaneous mass
+  kill makes *some* post-storm floor dip unavoidable; the metric is how the
+  controller responds, not whether dips can be prevented.
+- **This is simulation evidence, not proof.** Results characterise this
+  rule-set, not a theorem; the surprising V2 finding (jitter *without* the
+  handoff is harmful) may be specific to the exact shrink rule used here.
+
+For the other side of the ledger — what the controller has been shown to
+**withstand** (33% of the network killed at once on real transport, an
+evolutionary adversary, network partitions, forged intents, scale to 5,000
+agents, and false-coverage liars) — see [Evidence at a glance](#evidence-at-a-glance)
+above. The Stage-2 port to a kitsune2 fork is done (`REPORT_stage1.md`) and
+measured under Wind Tunnel on real iroh transport with live churn
+(`wind_tunnel/results/REPORT_stage2_wind_tunnel.md`).
 
 ---
 
