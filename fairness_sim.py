@@ -38,7 +38,7 @@ import sys
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world, vacate_half
+from polite_shrink import VARIANTS, Config, Sim, make_world, vacate_half
 from ext_common import BASELINE, INK, MUTED, SERIES, VARIANT_COLOR, plt
 
 V3 = VARIANTS[3]

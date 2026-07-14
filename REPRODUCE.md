@@ -8,7 +8,7 @@ so an independent run should match the tables below exactly.
 
 - **Python 3.12.1** (any CPython 3.11–3.12 should match; the RNG streams and the
   one set-iteration site are pinned for portability — see the `sorted()` note in
-  `arc_sim.make_world`).
+  `polite_shrink.make_world`).
 - Dependencies pinned in `requirements.txt`: `numpy==2.5.1`, `matplotlib==3.11.0`.
   numpy commits to stable `default_rng` streams across versions, so nearby numpy
   releases should also reproduce; pin exactly if you want a guaranteed match.

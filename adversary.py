@@ -24,7 +24,7 @@ import time
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 
 WARMUP = 1500          # ticks to reach equilibrium before the attack
 T_END = 2600           # total ticks (700-tick recovery observation)

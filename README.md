@@ -1,5 +1,11 @@
 # polite-shrink — dynamic DHT storage-arc sizing that survives churn
 
+> ### 👉 The contribution is two files
+> - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The whole idea is ~30 lines: `_decide` (announce an intent to vacate instead of dropping) and `_execute_intent` (wait out gossip staleness, re-check, then a lowest-id-proceeds tie-break).
+> - **[`repair_sim.py`](repair_sim.py)** — the V4 expanding-ring repair extension (Stage 3), a subclass that adds recovery for sparse networks.
+>
+> Every other `.py` file is a study that *attacks* those two — sweeps, an evolutionary adversary, partitions, Byzantine agents, scale, the shrink-race. See [Where is the code?](#where-is-the-code) for the full map.
+
 **The problem:** Holochain's DHT disabled dynamic sharding in 2021 after
 arc-resizing oscillation ("the hallway dance") caused data loss — every node
 has stored the full DHT since ([kitsune2 issue
@@ -50,7 +56,7 @@ is still R − K. Every number above is one-command reproducible; see
 Two places, by design:
 
 - **The rule, as proven** (Python, this repo): the entire polite-shrink
-  mechanism is ~30 lines — [`arc_sim.py`](arc_sim.py), `_decide` (phase 1:
+  mechanism is ~30 lines — [`polite_shrink.py`](polite_shrink.py), `_decide` (phase 1:
   announce the vacate intent instead of dropping) and `_execute_intent`
   (phase 2: after the wait, re-check the vacated half counting every
   lower-priority intender as already gone; proceed only if still ≥ R).

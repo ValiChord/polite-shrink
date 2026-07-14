@@ -35,7 +35,7 @@ import time
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 from ext_common import INK, MUTED, VARIANT_COLOR, plt, settle_tick
 
 V1, V3 = VARIANTS[1], VARIANTS[3]

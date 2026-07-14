@@ -50,7 +50,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, block, make_world
+from polite_shrink import VARIANTS, Config, Sim, block, make_world
 from ext_common import (ALERT, BASELINE, INK, MUTED, SERIES, VARIANT_COLOR,
                         plt)
 

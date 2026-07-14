@@ -1,5 +1,14 @@
 """
-arc_sim — Stage-1 simulator for DHT storage-arc dynamics (kitsune2 issue #160).
+polite_shrink — the two-phase "polite shrink" controller and its Stage-1
+simulator for DHT storage-arc dynamics (kitsune2 issue #160).
+
+This is the core contribution. The pattern itself is ~30 lines: `_decide`
+(phase 1 — announce a vacate intent instead of dropping) and
+`_execute_intent` (phase 2 — re-check, then the lowest-id-proceeds
+tie-break). The V4 expanding-ring repair extension subclasses `Sim` in
+`repair_sim.py`. Everything else in the repo is a study built on this file.
+
+(Renamed from `arc_sim.py`; no external reference pointed at the old name.)
 
 Models N agents on a quantised ring of S sectors. Each agent claims an
 *aligned power-of-two block* of sectors containing its fixed home sector

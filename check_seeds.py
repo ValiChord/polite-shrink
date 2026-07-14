@@ -4,7 +4,7 @@ settle per variant. No plots."""
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 from run_experiments import settle_tick
 
 SCEN = [("activation", 2200, 0, {}),

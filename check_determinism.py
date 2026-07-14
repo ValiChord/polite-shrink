@@ -4,7 +4,7 @@ is false. Run in CI / before any handoff."""
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 
 SCEN = [("activation", 2200, {}),
         ("storm", 3000, dict(storm_at=1500, storm_frac=0.30)),

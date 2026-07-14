@@ -16,7 +16,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 
 # --- palette (dataviz reference instance, light mode) -------------------
 SERIES = ["#2a78d6", "#1baf7a", "#eda100", "#008300"]   # slots 1-4, fixed order

@@ -8,7 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from arc_sim import VARIANTS
+from polite_shrink import VARIANTS
 
 SERIES = {"V0 naive": "#e34948", "V1 damped": "#1baf7a",
           "V2 damped+jitter": "#eda100", "V3 full (polite shrink)": "#008300"}

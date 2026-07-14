@@ -7,7 +7,7 @@ lists four threats to validity this stage was built to test: network
 partitions, Byzantine behaviour, parameter-regime transfer (scale), and the
 §6.1 residual race left unquantified — plus the §6.2 global repair rule,
 which §6.2 explicitly required simulating before implementation. Stage-1
-code (`arc_sim.py`) is untouched; every extension is a subclass in a new
+code (`polite_shrink.py`) is untouched; every extension is a subclass in a new
 file, so the Stage-1 byte-determinism claims stand.
 
 ## Summary of findings
@@ -308,4 +308,4 @@ results say where to look next, not that the search is over.
 | one-command runner | `./run_stage3.sh` (≈ 25 min on 8 cores; log → `results/stage3_run.log`) |
 
 Same environment as Stage 1 (`REPRODUCE.md`): Python 3.12, numpy 2.5.1,
-matplotlib 3.11.0. All seeds fixed; `arc_sim.py` unmodified.
+matplotlib 3.11.0. All seeds fixed; `polite_shrink.py` unmodified.

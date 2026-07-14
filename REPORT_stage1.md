@@ -29,7 +29,7 @@ Kitsune2 already contains the safe half of the machinery behind its dormant `sha
 
 ### 2.1 Model
 
-Discrete-time simulator (`arc_sim.py`, Python 3.12.1, numpy 2.5.1, byte-deterministic; see `REPRODUCE.md`):
+Discrete-time simulator (`polite_shrink.py`, Python 3.12.1, numpy 2.5.1, byte-deterministic; see `REPRODUCE.md`):
 
 - **Ring:** S = 512 sectors (= 2^9, matching kitsune2's sector count exactly).
 - **Agents:** N = 200 (initial population), each with a fixed uniformly random *home sector* and a fixed per-viewer gossip staleness ("lag") drawn uniformly from [8, 24] ticks. An agent's view of the world at time *t* is the true declared state at *t − lag*.
@@ -196,7 +196,7 @@ Two further implementation notes are recorded as deltas 1–9 in `kitsune2_port_
 
 | artifact | location |
 |---|---|
-| simulator, scenarios, variants | `arc_sim.py` |
+| simulator, scenarios, variants | `polite_shrink.py` |
 | multi-seed sweep driver (checkpointed) | `sweep.py`, `run_sweep_until_done.sh` |
 | adversarial search | `adversary.py` |
 | determinism check / seed audit | `check_determinism.py`, `check_seeds.py` |

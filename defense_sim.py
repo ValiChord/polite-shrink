@@ -39,10 +39,10 @@ import json
 
 import numpy as np
 
-from arc_sim import Sim, block, make_world, vacate_half
+from polite_shrink import Sim, block, make_world, vacate_half
 from byzantine_sim import ByzantineSim, V3, pick_byz
 from ext_common import ALERT, BASELINE, INK, MUTED, SERIES, plt
-from arc_sim import Config
+from polite_shrink import Config
 
 
 class DefenseSim(ByzantineSim):

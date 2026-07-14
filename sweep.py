@@ -21,7 +21,7 @@ import time
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, make_world
+from polite_shrink import VARIANTS, Config, Sim, make_world
 
 CELLS_FILE = "results/sweep_cells.jsonl"   # one completed (scenario,seed) per line
 

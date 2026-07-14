@@ -49,7 +49,7 @@ import sys
 
 import numpy as np
 
-from arc_sim import VARIANTS, Config, Sim, block, make_world, vacate_half
+from polite_shrink import VARIANTS, Config, Sim, block, make_world, vacate_half
 from ext_common import (ALERT, BASELINE, INK, MUTED, SERIES, VARIANT_COLOR,
                         plt)
 
