@@ -20,6 +20,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 4 | Does the controller survive scale? | **V3 yes, V1 no.** At N ≥ 2000 the activation cascade makes V1 lose data (up to 1,474 zero-coverage sector-ticks at N=5000); V3 held floor = R with zero loss at every N up to 5000 on rings up to 16,384 sectors, with per-agent costs flat and settle time growing only mildly. |
 | 5 | Does §6.2's proposed global repair rule work, and is it safe? | **Yes to both, with one characterized trade-off.** The sparse-network deadlock is real (V3 without the clamp: stuck in 5/90 port-scale seeds, 1/30 clustered seeds at N=200); V4 (expanding-ring repair) recovered **every** run while keeping sharding, no thundering herd in dense networks, zero loss across the whole regression battery. Trade-off: V4 tracks the target R more tightly, removing V3's *incidental* ~2× over-provisioning; running V4 at R+1 buys the margin back at comparable cost. |
 | 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model, licensing extrapolation: at realistic churn the rate is negligible (worked example below). All holes are transient — median 23 ticks, p90 ≈ 95. |
+| 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars (per-sector proofs) are future work. |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -273,6 +274,73 @@ emergent insurance that gave §4's sparse-recovery cascade global reach.
 Real storage fairness would need load-aware growth targets: future
 work, with that tension named.
 
+## 7. Verified coverage — closing the liar window (`verified_coverage_sim.py`)
+
+§2b and §6 left the sensor-integrity gap open: declarations are the
+controller's only coverage signal, so K ≥ R full-arc liars silently destroy
+true replication, and the serve-audit of §2 (`defense_sim.py`) only
+*subtracts* a liar once an auditor has caught it — an optimistic policy with a
+detection-lag window. This study tests the pessimistic inversion.
+
+**Rule.** A declared peer counts toward an agent's coverage *only while that
+agent holds a fresh proof-of-serve from it* — a successful audit within
+`proof_ttl` ticks. Proofs are minted by the same random audits §2 already
+models: an honest peer serves the challenged sector and is certified for the
+TTL; a liar serves nothing and is never certified. The shrink safety re-check
+(`_execute_intent`) then vacates only when *proven* coverage stays ≥ R, so a
+liar contributes zero from the first tick — there is no window and no K = R
+threshold. (The unpredictable-sample challenge is the same primitive family as
+ValiChord's own attestation challenge/response; a deployment would strengthen
+its membership proofs to body-dependent proofs-of-retrievability.)
+
+**Safety** (3 seeds, tail-mean of true coverage; declared and
+reactive-exclusion carried for contrast, R = 5):
+
+| policy | K=0 | K=4 | K=5 (=R) | K=10 (2R) | K=15 (3R) |
+|---|---|---|---|---|---|
+| declared true floor | 5.7 | 1.0 | **0.0** | **0.0** | **0.0** |
+| declared ring 0-copy | 0% | 0% | **25.4%** | **68.8%** | **69.5%** |
+| reactive-exclusion true floor | 5.7 | 5.0 | 5.3 | 5.3 | 5.0 |
+| **verified true floor** | **6.5** | **6.5** | **6.4** | **6.4** | **6.6** |
+| verified ring 0-copy | 0% | 0% | 0% | 0% | 0% |
+
+Declared collapses at the threshold (§2b reproduced). Reactive exclusion
+recovers the floor to ≈R at every K but pays rising audit-churn sync. Verified
+coverage holds the floor at 6.4–6.6 with zero dead sectors at *every* K from 0
+to 3R — the curve is flat, because liars never enter the tally, so there is
+nothing to detect and nothing to recover from.
+
+**The price is pessimism, and it is a knob.** In an all-honest network (K = 0)
+an honest peer un-audited within the TTL also drops out of the tally, so the
+controller over-provisions unless the audit budget keeps enough peers fresh:
+
+| audits/epoch × TTL | mean level (0.94 = declared) | sync (27.4k = declared) | peers fresh (of ~195) |
+|---|---|---|---|
+| 2 × 300 | 3.78 | 205.7k | 78 |
+| 4 × 600 | 1.34 | 39.3k | 172 |
+| 6 × 600 | 0.96 | 31.7k | 189 |
+| 10 × 600 | 0.93 | 31.0k | 198 |
+
+Starving the audit (2/epoch, TTL 300) over-provisions 7.5× on sync and nearly
+disables sharding. Raising the budget buys the efficiency straight back: at
+6–10 audits per agent-epoch and TTL 600 verified coverage matches declared
+coverage's sharding level (0.93–0.96 vs 0.94) at ≈13–16% extra sync. The
+design converts the R − K honest-margin ceiling of §6 into a *bandwidth* cost
+the operator sets directly.
+
+**Granularity and what is not modelled.** A liar here stores nothing and fails
+every audit; a successful audit certifies the peer's *whole declared arc* for
+the TTL (the same whole-arc granularity as §2's exclusion). Partial liars —
+store a strategic fraction, serve some challenges — need *per-sector* proofs to
+pin down and are left as future work; the closed threat is the full-arc liar of
+§6.2, the one invisible to declared coverage. Like the serve-audit, this proves
+possession at audit time, not willingness to serve the eventual reader —
+mitigated in practice by making an audit indistinguishable from a real read
+(refusing audits = refusing service), but that identity is asserted here, not
+simulated. Determinism holds (audit RNG seeded; two runs byte-identical). A
+reference implementation on the kitsune2 fork is future work: challenges would
+travel on the same `k2sharding` channel as the intents.
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
@@ -301,6 +369,7 @@ results say where to look next, not that the search is over.
 | scale study | `scale_sim.py` → `results/scale.png`, `scale_summary.md`, `scale.json` |
 | §6.2 repair-rule study | `repair_sim.py` → `results/repair_deadlock.png`, `repair_summary.md`, `repair.json` (staged: `--study deadlock`, `--study rest`, `--study finish`) |
 | Byzantine-defense study | `defense_sim.py` → `results/defense.png`, `defense_summary.md`, `defense.json` |
+| verified-coverage study | `verified_coverage_sim.py` → `results/verified_coverage.png`, `verified_summary.md`, `verified.json` (`--quick` for a 1-seed pass) |
 | tie-break fairness study | `fairness_sim.py` → `results/fairness.png`, `fairness_summary.md`, `fairness.json` |
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |

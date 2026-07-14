@@ -26,17 +26,18 @@ we could think of. It hasn't lost a sector yet:
 | **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; **could not make polite shrink lose a single sector** |
 | **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
-| **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); both Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network |
+| **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget) |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract (fixed, [PR #572](https://github.com/holochain/kitsune2/pull/572)); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
 **What we don't claim:** these are simulation + kitsune2-substrate
 measurements on one machine — not a Holochain-conductor deployment, not WAN.
-On liars (false coverage declarations): both the attack *and* its defense
+On liars (false coverage declarations): both the attack *and* its defenses
 are measured — past K = R phantom declarations any declaration-trusting
-controller loses data, and the serve-audit fully rescues even a K = 2R
-collapse ([REPORT_stage3.md §6](REPORT_stage3.md)) — but the audit exists
-only in simulation so far, so a *deployed* network's honest margin today
-is still R − K. Every number above is one-command reproducible; see
+controller loses data; the serve-audit rescues even a K = 2R collapse, and
+proof-gated verified coverage removes the threshold outright (flat and
+zero-loss to K = 3R, [REPORT_stage3.md §6–§7](REPORT_stage3.md)) — but both
+defenses exist only in simulation so far, so a *deployed* network's honest
+margin today is still R − K until the audit ships on the fork. Every number above is one-command reproducible; see
 [Run it](#run-it) and `REPRODUCE.md`.
 
 ## The write-ups
