@@ -1,5 +1,9 @@
 # polite-shrink — dynamic DHT storage-arc sizing that survives churn
 
+> ## Formally verified: the arc-shrink race that disabled sharding in 2021 cannot lose data — proven by exhaustive model checking, not just tested.
+>
+> *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive 2021 rule fails the same check with a counterexample. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
+
 > ### 👉 The contribution is two files
 > - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The whole idea is ~30 lines: `_decide` (announce an intent to vacate instead of dropping) and `_execute_intent` (wait out gossip staleness, re-check, then a lowest-id-proceeds tie-break).
 > - **[`repair_sim.py`](repair_sim.py)** — the V4 expanding-ring repair extension (Stage 3), a subclass that adds recovery for sparse networks.
