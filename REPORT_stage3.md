@@ -19,7 +19,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 3 | Can lying about coverage destroy data? | **Yes — catastrophically, and invisibly, past a sharp threshold at K = R.** K full-arc liars: at K=R−1 the network survives on margin 1; at K=R, 27% of the ring has zero real copies while declared coverage reads healthy; at 2R, 70%. No control law can defend: this is sensor integrity, not control. |
 | 4 | Does the controller survive scale? | **V3 yes, V1 no.** At N ≥ 2000 the activation cascade makes V1 lose data (up to 1,474 zero-coverage sector-ticks at N=5000); V3 held floor = R with zero loss at every N up to 5000 on rings up to 16,384 sectors, with per-agent costs flat and settle time growing only mildly. |
 | 5 | Does §6.2's proposed global repair rule work, and is it safe? | **Yes to both, with one characterized trade-off.** The sparse-network deadlock is real (V3 without the clamp: stuck in 5/90 port-scale seeds, 1/30 clustered seeds at N=200); V4 (expanding-ring repair) recovered **every** run while keeping sharding, no thundering herd in dense networks, zero loss across the whole regression battery. Trade-off: V4 tracks the target R more tightly, removing V3's *incidental* ~2× over-provisioning; running V4 at R+1 buys the margin back at comparable cost. |
-| 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model, licensing extrapolation: at realistic churn the rate is negligible (worked example below). All holes are transient — median 23 ticks, p90 ≈ 95. |
+| 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard — in the single-clock model.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model. All holes are transient (median 23 ticks, p90 ≈ 95). **Caveat:** these figures couple death-detection to gossip staleness (one lag); the decoupled death-clock is unquantified and is bounded by the storm brake (§6, item 4), not by this decimal. |
 | 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars measured in finding 8. |
 | 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
 | 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive 2021 rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
@@ -217,6 +217,16 @@ copy), with durations tracked to recovery.
   real transport), bounded (storm brake), and at production-like hazards
   vanishingly rare relative to the ordinary churn floor that R must be
   provisioned for anyway.
+- **Scope of these rates.** Every figure in this section is measured in the
+  single-clock model, where a dead holder fades from stale views on the same
+  gossip lag that governs staleness (`race_quantify.py` subclasses the
+  Stage-1 `Sim`; its detection latency *is* the staleness + wait window).
+  Real transports decouple these — death-detection via connection timeout is
+  a slower, separate clock (the Stage-2 discovery) — which widens the blind
+  window and would raise the raw shrink-hole rate above these numbers. That
+  decoupled regime is unquantified here; it is exactly what the storm brake
+  (not this decimal) exists to bound, and §6 item 4 accordingly rests the
+  "leave it alone" decision on clock-independent grounds.
 
 ## 6. Addendum (same day): the five follow-ups, dispositioned
 
@@ -254,11 +264,17 @@ is future work (it belongs in gossip's sync layer, not the controller);
 until then R − K remains the honest safety margin.
 
 **4. The §6.1 race — deliberately left alone.**
-§5 measured the shrink-race at 0.002% of holes at R=5 under absurd
-hazard, zero at short lags, all holes transient. The storm brake is
-sufficient; further mechanism there would add complexity against the
-wrong risk. The dominant hole source is plain churn = an R-provisioning
-question. Decision recorded here so it isn't re-litigated.
+The decision rests on three clock-*independent* facts, not on the race's
+measured rarity: (i) a shrink-hole's leaver still holds the op data, so it is
+a recoverable *declared*-coverage gap, not data loss — the genuinely lethal
+holes are pure churn, an R-provisioning question, not a controller defect;
+(ii) the storm brake bounds the blind window even when the death-clock
+decouples from staleness (§5 scope note), the regime a single-clock number
+cannot speak to; (iii) any added shrink-race mechanism would buy complexity
+against the wrong risk. The measured rate (§5: 0.002% of holes at R=5 under
+absurd hazard, zero at short lags, all transient) is *corroboration* in the
+single-clock model, not the load-bearing argument. Decision recorded here so
+it isn't re-litigated.
 
 **5. Rotating the tie-break — tested, premise refuted, not adopted.**
 We hypothesised the lowest-id-proceeds rule caused the skewed
@@ -389,10 +405,19 @@ must genuinely store more to stay certified, and the defender sets how much by
 choosing c.
 
 Honest boundary: ground truth counts each liar's real holdings, so a partial
-liar contributes the coverage it actually provides. Still unmodelled — the
-temporal *prove-then-drop* trojan (certify, then abandon within the TTL), a
-liveness-flavoured attack whose knob is `proof_ttl`; and, as in §7, this proves
-possession at audit time, not willingness to serve later.
+liar contributes the coverage it actually provides. Still unmodelled — two
+attacks that step outside the p^c geometry. **(a) The fetch-on-challenge
+liar:** it stores little but proxies each challenged sector from a real holder
+on demand, so it certifies with probability ≈ 1 regardless of `p`. This
+defeats the *detection* model above — the sample no longer measures durable
+holdings — and is precisely why a deployable audit needs a body-dependent
+*proof-of-retrievability* (§7), not a proof-of-can-answer-now. Its data-loss
+reach is self-limiting (the proxy fails once honest copies actually run out,
+at which point verified coverage drops the liar), but quantifying that residue
+is its own study. **(b) The temporal prove-then-drop trojan** (certify, then
+abandon within the TTL), a liveness-flavoured attack whose knob is
+`proof_ttl`. Both share the §7 boundary: this proves possession at audit time,
+not willingness to serve the eventual reader.
 
 ## 9. Formal safety proof (`spec/`, TLA+ / TLC)
 
