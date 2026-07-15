@@ -20,7 +20,18 @@ large a network can grow.
 intent to vacate, wait out gossip staleness, re-check with a deterministic
 TCAS-style tie-break, and only then drop — plus an expanding-ring repair rule
 for sparse networks. Designed by ablation, then attacked from every direction
-we could think of. It hasn't lost a sector yet:
+we could think of.
+
+> **The empirical record: not one sector lost.** Across every test where nodes
+> behave honestly — a 1,248-run sweep (0 lost vs 95.9% for the naive
+> controller), an evolutionary adversary that couldn't break it, network
+> partitions, scale to 5,000 agents, and 33% of the network killed at once on
+> real iroh transport (0 of 23k+ ops lost) — polite-shrink has never dropped a
+> sector below the redundancy target R, and the core safety property is
+> formally proven. The *only* failure mode is nodes that **lie** about what
+> they store — a sensor problem no controller can out-think — and the
+> proof-gated **verified-coverage** extension drives even that to zero data
+> loss.
 
 ## Evidence at a glance
 
