@@ -162,6 +162,38 @@ for the storm margin you want — V4 at R+1 dominated V3 at R in our runs.
 Robustness: `check_seeds.py` repeats activation+storm on seeds 7/99/1234 —
 the ordering holds (V0 always loses data; V3 never does).
 
+## Stage-2 results — the controller on real iroh transport (Wind Tunnel)
+
+Stage 1 is simulation. Stage 2 puts the *same* controller — ported into a
+kitsune2 fork behind the existing `sharding` flag — onto **real iroh transport
+with live connection churn**, and measures it under Wind Tunnel. This is where
+"survives on the model" becomes "survives on the wire." Full report:
+[wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md).
+
+| Finding | Evidence |
+|---|---|
+| Coverage stayed continuous through a **33% simultaneous node loss** on real transport | floor never below 6 (≥ R=5), including through the mass death; **0 orphaned sectors; 0 of 23,745 published ops lost** |
+| The **storm brake** caught the §6.1 intent-death race in the wild | in the timed-storm run, six agents die and the brake cancels **nine** pending shrink intents that had been announced into the die-off on stale views — none executed |
+| Real transport surfaced a bug simulation could not | a broadcast head-of-line **liveness bug**, invisible to the in-memory sim, found and fixed on the fork — plus an upstream mem-transport contract bug fixed ([PR #572](https://github.com/holochain/kitsune2/pull/572)) |
+| Sharding actually happens (not just "doesn't break") | equilibrium arc span shrinks to ~0.58–0.63 of full (≈1.6–1.7× gain at N=12, growing with N) while the floor holds above R |
+
+## Stage-3 results — adversaries, scale, repair, and the one real gap
+
+Stage 3 attacks the controller along the four threats [REPORT_stage1.md](REPORT_stage1.md)
+§7 left open, then the Byzantine "liar" problem and a formal proof — nine
+studies, one command (`./run_stage3.sh`). Full report:
+[REPORT_stage3.md](REPORT_stage3.md).
+
+| Question | Answer |
+|---|---|
+| Netsplit + heal — is data lost? | **No durability loss in 9/9 runs**; V3's floor never left R, and the heal-time shrink storm is absorbed. Flapping partitions defeat the damped controller (V1), not polite shrink. |
+| Forged shrink-intents? | **Fail-safe by construction and measurement** — worst-case forgery is a *cost* attack (2.3× sync, zero loss); receiver-side range-validation cuts it to ~4% and is **implemented on the fork**. |
+| Does it survive scale? | **V3 to N=5,000** (rings up to 16,384 sectors), zero loss, per-agent cost flat — where the damped controller starts losing data at **N ≥ 2,000**. |
+| The sparse-network recovery deadlock? | Real (V3 without the clamp stuck in 5/90 port-scale seeds); **V4 expanding-ring repair recovers 120/120**, still sharding, no thundering herd. |
+| How often does the shrink-race actually bite? | Shrink-executed holes = **0.002% at R=5** (≥99.9% of all holes are generic churn outrunning recovery, not a controller defect), and all transient (median 23 ticks). |
+| Nodes that **lie** about what they store? | The one real gap: past **K=R** phantom declarations, data is lost invisibly — sensor integrity, not control. Proof-gated **verified coverage** removes the threshold (zero loss to K=3R); *partial* liars cause zero data loss with a tunable audit-sample knob. |
+| Provable, not just tested? | **Yes** — TLA+/TLC checks "a sector never drops below R" over *every* reachable state (N ≤ 8, R 1–7); the naive 2021 rule fails the same check with a counterexample. |
+
 ## Run it
 
 ```bash
