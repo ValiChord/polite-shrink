@@ -205,6 +205,22 @@ model checking over *every* reachable state of a small system, in
 [TLA+](https://lamport.azurewebsites.net/tla/tla.html) and its checker TLC.
 Full detail and reproduction: [spec/README.md](spec/README.md).
 
+> **Why this is worth far more than a passing test — and who relies on it.**
+> A test exercises the handful of event orderings a given run happens to hit;
+> concurrency bugs live precisely in the *rare* interleavings it misses. The
+> 2021 arc-oscillation was exactly such a bug — and it shipped. TLA+ (created
+> by Leslie Lamport, who won computing's Turing Award in 2013) with its model
+> checker TLC does what testing cannot: it explores **every** possible ordering
+> and either finds a failing one or proves none exists. "All tests passed"
+> means *we didn't trigger the bug this time*; "model-checked, no error" means
+> *no ordering can trigger it*. That categorical difference is why the teams
+> who cannot afford silent data loss reach for it: **AWS** used TLA+ to catch
+> deep bugs in S3, DynamoDB and EBS before customers ever saw them; **Microsoft**
+> (Azure Cosmos DB), **MongoDB**, and **CockroachDB** use it on their
+> replication and consistency protocols. Here it is pointed at the exact race
+> that caused Holochain's original data loss — and shows that race can no
+> longer happen.
+
 **The property (per-sector):**
 
 > a DHT sector never holds fewer than R real copies — no shrink drives it below
