@@ -23,6 +23,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars measured in finding 8. |
 | 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
 | 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive 2021 rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
+| 10 | Is a *partially* upgraded network (mixed V3/V0 during rollout) safe? | **Yes, from ~10% adoption — no flag day.** Shrink-race loss is zero at every f ≥ 0.10 across 312 seeds in activation/flashcrowd/churn (a cliff, not a slope): a small polite minority forms a redundancy backbone the naive majority free-rides on. Storm keeps a ~0.3% residual — 9/11 unpreventable simultaneous mass-death, 2/11 the §6.1 race, which the storm brake closes. Cost of early rollout: a thinner margin. (`rolling_upgrade_sim.py`, `REPORT_rolling_upgrade.md`) |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -452,6 +453,61 @@ model's abstraction (one sector, execute-time intent visibility, honest
 holders); it complements, not replaces, the sims, which carry gossip timing,
 Byzantine liars, and geometry. Reproduce: `spec/README.md`.
 
+## 10. Rolling upgrade — a partially-adopted network (`rolling_upgrade_sim.py`)
+
+Every study above runs a *homogeneous* network. A real rollout is mixed: some
+nodes run polite shrink (V3), the rest still run the naive controller (V0).
+`MixedSim` makes the controller a per-agent property (a fraction *f*, chosen by a
+seeded permutation, run V3); a faithfulness guard confirms it reduces
+*byte-identically* to `Sim(V0)` at f=0 and `Sim(V3)` at f=1 on all four
+scenarios — the primary defence against a modelling bug. Swept at the canonical
+312 seeds × 4 scenarios. Full write-up: `REPORT_rolling_upgrade.md`.
+
+**No flag day.** In activation, flashcrowd, and churn the shrink-race loss goes
+from *certain* at f=0 to **zero at every f ≥ 0.10, across all 312 seeds** — a
+cliff, not a slope. Even a ~10% minority of polite nodes protects the whole
+network: they form a self-adjusting **redundancy backbone** (the naive majority
+free-rides to level 0 by t≈50; a handful of polite nodes hold the floor at R by
+construction, since a polite node refuses to shrink a sector below R).
+
+**Storm exception, dissected honestly.** Storm keeps a low residual — 11 losing
+runs over f=0.1–0.95 (≈0.3%), and **zero at f=0.99 and f=1.0**. Pure/near-pure V3
+never loses; the *presence of naive free-riders* is what introduces it, by
+thinning and concentrating the over-provisioning margin (at f=0.10, 89 sectors
+sit at bare R vs ~50 at full adoption). Attributing all 11 losses by
+counterfactual and holder-trace (`diag_attribute_all_storm.py`,
+`diag_trace_post_death.py`):
+
+- **9 / 11 are pure correlated death** — all holders of a sector die at once at
+  t=1500; coverage hits zero the instant they die, before any controller acts.
+  No local rule can survive the simultaneous death of a sector's entire holder
+  set.
+- **2 / 11 are the §6.1 intent-death race** — a *polite* node executes a shrink
+  intent announced before the storm, on a stale view that has not yet registered
+  the deaths, and drops an already-thinned sector's last holder. The race
+  surfaces here but not in pure V3, because the thin backbone leaves no margin to
+  absorb the execute; V3's accidental ~2R over-provisioning otherwise hides it.
+
+**The storm brake closes the race (`brake_sim.py`, `brake_storm_sweep.py`).** The
+kitsune2 port already cancels all pending intents when a peer death is detected
+(§6.1); the base sim has none, which is why the raw race showed through. Adding
+it — with death detection on a *separate, faster* clock (`detect_latency`, the
+whole §6.1 point) — closes both race seeds whenever the brake fires before the
+racing execute (detect_latency ≤ 8 closes both; the wider-gap seed tolerates ≤
+15). The full brake storm sweep (312 seeds) confirms it closes the *class*: the
+11 above-baseline storm losses drop to **9 — exactly the 2 §6.1-race cases
+removed, no new loss introduced anywhere**, the remaining 9 being the pure-death
+cases no rule can prevent. This *measures* §6.1's claim: the brake **bounds** the
+race, leaving only the irreducible mass-death residual. **With the brake, polite
+shrink causes zero data loss even in the mixed network at realistic detection
+latencies.**
+
+Design notes for #160: incremental rollout is safe against the shrink race from
+~10% adoption; early rollout concentrates storage on the upgraded nodes and thins
+the margin (resilience to *correlated* failure rises with adoption); and the
+storm brake is **not optional** in a mixed network — the thin backbone surfaces
+the §6.1 race that homogeneous over-provisioning hides.
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
@@ -486,6 +542,7 @@ results say where to look next, not that the search is over.
 | tie-break fairness study | `fairness_sim.py` → `results/fairness.png`, `fairness_summary.md`, `fairness.json` |
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
+| rolling-upgrade study | `rolling_upgrade_sim.py` + `brake_sim.py` → `results/rolling_upgrade_{summary.md,cells.jsonl,png}` + `rolling_upgrade_brake_storm_summary.md`; guard `validate_rolling_upgrade.py`; diagnostics `diag_{rolling_upgrade,margin,attribute_all_storm,trace_post_death,brake_reruns}.py`; full write-up `REPORT_rolling_upgrade.md`. Run separately (long): `python3 rolling_upgrade_sweep.py --seeds 312` (≈2–3 h) + `python3 brake_storm_sweep.py --seeds 312` |
 | shared style/helpers | `ext_common.py` |
 | one-command runner | `./run_stage3.sh` (nine studies, ≈ 55 min on 8 cores; log → `results/stage3_run.log`) |
 
