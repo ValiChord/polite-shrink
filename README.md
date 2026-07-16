@@ -192,7 +192,66 @@ studies, one command (`./run_stage3.sh`). Full report:
 | The sparse-network recovery deadlock? | Real (V3 without the clamp stuck in 5/90 port-scale seeds); **V4 expanding-ring repair recovers 120/120**, still sharding, no thundering herd. |
 | How often does the shrink-race actually bite? | Shrink-executed holes = **0.002% at R=5** (≥99.9% of all holes are generic churn outrunning recovery, not a controller defect), and all transient (median 23 ticks). |
 | Nodes that **lie** about what they store? | The one real gap: past **K=R** phantom declarations, data is lost invisibly — sensor integrity, not control. Proof-gated **verified coverage** removes the threshold (zero loss to K=3R); *partial* liars cause zero data loss with a tunable audit-sample knob. |
-| Provable, not just tested? | **Yes** — TLA+/TLC checks "a sector never drops below R" over *every* reachable state (N ≤ 8, R 1–7); the naive 2021 rule fails the same check with a counterexample. |
+
+The ninth Stage-3 study — a *proof* rather than a test of the core safety
+property — is important enough to stand on its own:
+
+## Formal safety proof — the shrink race *cannot* recur (TLA+ / TLC)
+
+The 1,248-run sweep found zero data loss, but a sweep is still *sampling* — it
+only visits the interleavings its seeds happen to produce. The core safety
+property is small enough to do better than sample: **prove** it, by exhaustive
+model checking over *every* reachable state of a small system, in
+[TLA+](https://lamport.azurewebsites.net/tla/tla.html) and its checker TLC.
+Full detail and reproduction: [spec/README.md](spec/README.md).
+
+**The property (per-sector):**
+
+> a DHT sector never holds fewer than R real copies — no shrink drives it below
+> the redundancy target.
+
+It is *per-sector* by design: for any one sector the nodes covering it decide
+independently whether to drop it, and the arc geometry only sets *which* nodes
+contest *which* sector — so proving it for one contested sector proves it for
+the whole ring.
+
+**Two specs, and a negative control that gives the proof teeth:**
+
+- **`PoliteShrink.tla`** — the real rule. Nodes announce a vacate intent (worst
+  case: everyone announces at once), and *execute* only after reading the
+  current holder/intent sets — exactly what the "wait 2× max gossip lag" delay
+  buys — using the TCAS tie-break (treat every lower-id intender as already
+  gone; proceed only if ≥ R remain). **`SafeCoverage` holds on every reachable
+  state — no error.**
+- **`NaiveShrink.tla`** — the pre-2021 behaviour: no wait, no tie-break, each
+  node drops on its stale view. **TLC returns a counterexample** — holders drop
+  one by one below R, the "hallway dance" in miniature. Same model, minus the
+  two phases, and safety *fails* — so the safety is bought by the mechanism,
+  not by the way the model happens to be written.
+
+Verified with no error, exhaustively, at every configuration tried:
+
+| Nodes | R | distinct states |
+|---|---|---|
+| 6 | 3 | 656 |
+| 7 | 2 | 2,172 |
+| 8 | 4 | 5,984 |
+| 8 | 1 | 6,560 |
+| 8 | 7 | 1,280 |
+
+```bash
+java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # -> No error has been found
+java -cp tla2tools.jar tlc2.TLC spec/NaiveShrink.tla    # -> Invariant SafeCoverage is violated
+```
+
+**Scope, stated honestly.** This proves the *control-loop* safety property —
+concurrent stale-view shrinks can never drive a sector below R — under the
+model's abstraction: one sector, execute-time intent visibility (the wait),
+honest holders, atomic actions. It **complements, not replaces** the
+simulations, which carry the things the proof abstracts away: detailed gossip
+timing, Byzantine liars, and arc geometry. What it removes is any doubt that
+the *rule itself* can be made to lose a copy through an unlucky interleaving —
+it cannot.
 
 ## Run it
 
