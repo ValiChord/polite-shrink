@@ -1,4 +1,4 @@
-# polite-shrink — dynamic DHT storage-arc sizing that survives churn
+# Polite-Shrink — a Proposed Sharding Solution for Holochain's DHT.
 
 > ## Using the polite-shrink pattern, the arc-shrink race that forced Holochain to disable sharding in 2021 can no longer cause data loss — proven by exhaustive model checking, not just tested.
 >
