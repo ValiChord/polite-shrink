@@ -24,6 +24,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
 | 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive 2021 rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
 | 10 | Is a *partially* upgraded network (mixed V3/V0 during rollout) safe? | **Yes, from ~10% adoption — no flag day.** Shrink-race loss is zero at every f ≥ 0.10 across 312 seeds in activation/flashcrowd/churn (a cliff, not a slope): a small polite minority forms a redundancy backbone the naive majority free-rides on. Storm keeps a ~0.3% residual — 9/11 unpreventable simultaneous mass-death, 2/11 the §6.1 race, which the storm brake closes. Cost of early rollout: a thinner margin. (`rolling_upgrade_sim.py`, `REPORT_rolling_upgrade.md`) |
+| 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 even at 2–8× the gossip lag and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -508,6 +509,71 @@ the margin (resilience to *correlated* failure rises with adoption); and the
 storm brake is **not optional** in a mixed network — the thin backbone surfaces
 the §6.1 race that homogeneous over-provisioning hides.
 
+## 11. The §6.1 race under decoupled clocks (`decoupled_sim.py`)
+
+§5 quantified the §6.1 shrink-race in the base model and flagged that the figure
+is a **coupled-clock** number: one parameter (`lag`) governs *both* how stale an
+agent's arc view is *and* how fast a peer death becomes visible. In kitsune2
+these are **independent clocks** — view staleness is peer-store gossip
+propagation; death visibility is *unresponsive marking* (REPORT_stage1.md §6.1).
+This section decouples them and quantifies what §5 left open.
+
+`DecoupledSim` keeps each agent's gossip `lag` (arc/coverage view staleness) and
+adds a separate **death-detection latency** `death_lag`: a peer that dies at tick
+D is still counted in coverage until D + death_lag (its declaration lingers in
+the peer store; unresponsive marking removes it). The §6.1 race is precisely
+coverage over-counting not-yet-detected deaths at an intent's execute re-check.
+When `death_lag = lag` the model is **byte-identical to the base sim**
+(`validate_decoupled.py`, all four scenarios) — the correctness anchor.
+
+**Result (storm, 312 seeds, gossip lag [8,24], races = orphaning *after* the
+death tick).** The race scales with detection latency, and only at a thin
+margin. At the thinnest tested adoption (f=0.1):
+
+| death_lag (detection) | §6.1 races / 312 |
+|---|---|
+| coupled (= own gossip lag) | 1 |
+| 4, 8, 12 — *faster* than gossip | **0** |
+| 16, 24, 32 | 1 |
+| 48, 64 — 2–8× gossip | **2** |
+
+Over-provisioned regimes are effectively immune: f=0.3, 0.5, and 1.0 (pure V3)
+show **zero races at every latency** bar a single stray at death_lag=64 — the
+accidental ~2R margin absorbs the over-count. Pure-death losses are flat across
+all latencies (detection-independent, as expected). So the decoupled death-clock,
+at R=5, keeps the race **bounded and small (≤0.6% even at 2–8× the gossip lag)**
+and drives it to **zero under detection faster than gossip** — the coupled §5
+figure was not hiding a blow-up.
+
+**The brake shares the detection clock — so it bounds, it does not close.** In
+this faithful model, coverage-death-removal *and* the storm brake both run on the
+detection clock, so fast detection makes coverage honest (the execute re-check
+sees the death and self-cancels) *and* fires the brake early; slow detection does
+neither. `DecoupledBrakeSim` (brake on the detection clock) vs no brake, f=0.1:
+
+| death_lag (detection) | §6.1 races / 312, no brake | with detection-clock brake |
+|---|---|---|
+| 4, 8, 12 — faster than gossip | 0 | 0 |
+| 16, 24, 32 | 1 | 1 |
+| 48, 64 — 2–8× gossip | 2 | 2 |
+
+**Identical at every latency** — because the brake fires on the same clock that
+makes coverage honest, it neither adds to nor subtracts from the outcome: fast
+detection closes the race (via the execute re-check) with or without the brake;
+slow detection leaves the same residual either way. The brake's value is real
+only when its detection signal is *faster* than the coverage view's death removal
+(the regime §10's brake sweep measured); once they share a clock, detection
+latency alone decides.
+
+This *refines*, and is consistent with, §10's brake result: "fast death-signal
+closes the race" holds; the governing quantity is **detection latency**, and the
+slow-detection residual is irreducible by any local rule — exactly §6.1's "bound
+it, only" (§10's brake sweep used a brake clock faster than the coverage view,
+i.e. the fast-detection regime where the race is closed). **Design lever for
+#160: the shrink wait must be configured against *death-detection* latency, not
+gossip staleness — the residual is governed by how fast unresponsive marking is,
+not by the shrink rule.**
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
@@ -543,6 +609,7 @@ results say where to look next, not that the search is over.
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | rolling-upgrade study | `rolling_upgrade_sim.py` + `brake_sim.py` → `results/rolling_upgrade_{summary.md,cells.jsonl,png}` + `rolling_upgrade_brake_storm_summary.md`; guard `validate_rolling_upgrade.py`; diagnostics `diag_{rolling_upgrade,margin,attribute_all_storm,trace_post_death,brake_reruns}.py`; full write-up `REPORT_rolling_upgrade.md`. Run separately (long): `python3 rolling_upgrade_sweep.py --seeds 312` (≈2–3 h) + `python3 brake_storm_sweep.py --seeds 312` |
+| decoupled-clock study (§11) | `decoupled_sim.py` → `results/decoupled_{summary.md,cells.jsonl}`; guard `validate_decoupled.py`; sweep `python3 decoupled_sweep.py --seeds 312` (storm, ≈30 min) |
 | shared style/helpers | `ext_common.py` |
 | one-command runner | `./run_stage3.sh` (nine studies, ≈ 55 min on 8 cores; log → `results/stage3_run.log`) |
 
