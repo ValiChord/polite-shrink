@@ -25,6 +25,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive 2021 rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
 | 10 | Is a *partially* upgraded network (mixed V3/V0 during rollout) safe? | **Yes, from ~10% adoption — no flag day.** Shrink-race loss is zero at every f ≥ 0.10 across 312 seeds in activation/flashcrowd/churn (a cliff, not a slope): a small polite minority forms a redundancy backbone the naive majority free-rides on. Storm keeps a ~0.3% residual — 9/11 unpreventable simultaneous mass-death, 2/11 the §6.1 race, which the storm brake closes. Cost of early rollout: a thinner margin. (`rolling_upgrade_sim.py`, `REPORT_rolling_upgrade.md`) |
 | 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 even at 2–8× the gossip lag and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. |
+| 12 | Does *lossy* gossip — dropped messages, so each viewer's coverage picture is incomplete and inconsistent — break polite shrink? | **No, up to 90% per-round drop.** Replacing the complete-but-stale view with a per-viewer, per-peer lossy one (`message_loss_sim.py`, byte-identical to the mixed sim at loss=0), the data-loss rate is **flat in the loss axis** across 6,000 runs (2 scenarios × 3 fractions × 10 loss rates × 100 seeds). Activation: 0/100 at *every* loss rate and fraction. Storm: the only losses are the pre-existing correlated storm-death (every losing run orphans *at* the storm tick, and seed-level attribution shows they occur at loss=0 too and are non-monotonic in loss) — none are lossy over-counting. The two-phase re-check runs on whatever view an agent has and still never shrinks into a hole. |
 
 ## 1. Partitions (`partition_sim.py`)
 
@@ -574,14 +575,68 @@ i.e. the fast-detection regime where the race is closed). **Design lever for
 gossip staleness — the residual is governed by how fast unresponsive marking is,
 not by the shrink rule.**
 
+## 12. Lossy gossip — the incomplete view (`message_loss_sim.py`)
+
+Every study so far gives each agent a view that is *complete* but stale: `_view`
+returns the full declared snapshot, merely delayed by one gossip `lag`. Real gossip
+drops messages, so a viewer's picture is not just stale but **incomplete, and
+inconsistent from peer to peer** — and it can miss exactly the updates that matter
+most for safety. Missing a coverage *decrease* (a peer's shrink or death) makes a
+viewer **over-count** and risk shrinking into a hole; missing a coverage *increase*
+only makes it over-grow (cost, not loss). This is the direct test of whether polite
+shrink's two-phase re-check survives when the view it re-checks against is itself
+lossy — not just the naive controller.
+
+`MessageLossSim` gives each viewer *a* a per-peer last-received level `known[a,p]`.
+Each round, peer *p*'s lag-delayed declaration (exactly what the base sim would
+deliver) reaches *a* with probability `1 − loss`, else *a* keeps its previous value;
+a viewer's coverage is rebuilt incrementally from `known`. A viewer always knows its
+own declaration (self-delivery never drops). At **loss = 0** every update lands, so
+each viewer's coverage equals the base snapshot exactly and the model is
+**byte-identical to the mixed sim** (`validate_message_loss.py`, all four
+scenario/fraction anchors pass) — loss only ever *removes* information. Scope (v1):
+the join-free scenarios (activation, storm), so the viewer×peer matrix has fixed N;
+lossy *intent* gossip is left as future work.
+
+**Result (6,000 runs: activation + storm × f ∈ {0.1, 0.5, 1.0} × loss ∈ {0.0 … 0.9}
+× 100 seeds).** The data-loss rate is **flat in the loss axis — no loss is
+attributable to message drop, up to 90% per-round drop.**
+
+- **Activation: 0/100 at every loss rate and every fraction.** The over-count
+  hazard is present in the model, and polite shrink never shrinks into a hole under
+  it.
+- **Storm: the only losses are the pre-existing correlated storm-death** (§10),
+  **not lossy over-counting.** Every losing run orphans *at* the storm tick
+  (`first_orphan == 1500`), and per-seed attribution confirms the cause is death, not
+  loss:
+  - one storm-f=0.1 seed loses at **every** loss rate **including loss = 0.0** — a
+    base-sim mass-death present even with perfect gossip;
+  - a second loses only at loss 0.2–0.4 and is *fine* at 0.5–0.9 — **non-monotonic**,
+    so not driven by loss (more drop would be worse, not better); a marginal
+    storm-death seed the delivery RNG tips either way;
+  - the single storm-f=1.0 loss is isolated at loss = 0.7 alone, orphaning at the
+    storm tick.
+
+  The residual is exactly the ≈1% load-concentration storm-death already dissected
+  in §10, and it neither appears nor grows because of message loss.
+
+So polite shrink's two-phase re-check runs on each viewer's incomplete, per-peer
+lossy view and still holds the floor: at 90% per-round message drop the only data
+loss is the irreducible simultaneous mass-death no local rule can prevent — the same
+residual as under perfect gossip. **Design note for #160: the safety of the shrink
+rule does not depend on a complete view. A dropped message can only make a viewer
+hold a peer's *older, larger* arc (over-count → over-grow, a cost), and the re-check
+converts that into caution, not loss.**
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)
 point measurements in the Stage-1 idealised model (full visibility within
 a side, one lag per viewer, sync linear in sectors); the race study is the
 only one with per-point statistics (40 seeds). Partitions are binary and
-clean — no asymmetric reachability, no message loss short of total,
-groups fixed at 2. Liars are maximally crude (full arc, never move);
+clean — no asymmetric reachability,
+groups fixed at 2 (lossy gossip short of a total split is studied separately in §12,
+there only for the join-free scenarios and only on coverage/arc gossip, not intents). Liars are maximally crude (full arc, never move);
 stealthier liars (modest arcs, rotating) would trade damage for
 detectability and are unmodelled. Scale stops at N=5000 and inherits the
 Stage-1 clamp default. The repair rule was tested at one stagger setting
@@ -610,6 +665,7 @@ results say where to look next, not that the search is over.
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
 | rolling-upgrade study | `rolling_upgrade_sim.py` + `brake_sim.py` → `results/rolling_upgrade_{summary.md,cells.jsonl,png}` + `rolling_upgrade_brake_storm_summary.md`; guard `validate_rolling_upgrade.py`; diagnostics `diag_{rolling_upgrade,margin,attribute_all_storm,trace_post_death,brake_reruns}.py`; full write-up `REPORT_rolling_upgrade.md`. Run separately (long): `python3 rolling_upgrade_sweep.py --seeds 312` (≈2–3 h) + `python3 brake_storm_sweep.py --seeds 312` |
 | decoupled-clock study (§11) | `decoupled_sim.py` → `results/decoupled_{summary.md,cells.jsonl}`; guard `validate_decoupled.py`; sweep `python3 decoupled_sweep.py --seeds 312` (storm, ≈30 min) |
+| lossy-gossip study (§12) | `message_loss_sim.py` → `results/message_loss_{summary.md,cells.jsonl}`; guard `validate_message_loss.py`; sweep `python3 message_loss_sweep.py --seeds 100` (6,000 cells, resumable — checkpoints to `message_loss_cells.jsonl`) |
 | shared style/helpers | `ext_common.py` |
 | one-command runner | `./run_stage3.sh` (nine studies, ≈ 55 min on 8 cores; log → `results/stage3_run.log`) |
 
