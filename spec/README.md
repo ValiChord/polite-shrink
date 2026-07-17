@@ -25,7 +25,7 @@ and proving it for that sector proves it for the ring.
   every lower-id intender as already gone; proceed only if ≥ R remain).
   **Result: `SafeCoverage` holds on every reachable state.**
 
-- **`NaiveShrink.tla`** — the pre-2021 behaviour: no wait, no tie-break, each
+- **`NaiveShrink.tla`** — the naive behaviour: no wait, no tie-break, each
   node drops on a stale coverage view. **Result: TLC returns a counterexample**
   — holders drop one by one below R (the "hallway dance"). This proves the
   model has teeth: same setup, minus the two phases, and safety fails. So the

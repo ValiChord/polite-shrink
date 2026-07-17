@@ -1,8 +1,8 @@
 # Polite-Shrink — a Proposed Sharding Solution for Holochain's DHT
 
-> ## Using the polite-shrink pattern, the arc-shrink race that forced Holochain to disable sharding in 2021 can no longer cause data loss — proven by exhaustive model checking, not just tested.
+> ## Using the polite-shrink pattern, the arc-shrink race behind the 2021 "hallway dance" oscillation can no longer cause data loss — proven by exhaustive model checking, not just tested.
 >
-> *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive 2021 rule fails the same check with a counterexample. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
+> *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive rule (no wait, no tie-break) fails the same check with a counterexample. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
 > ### 👉 The contribution is two files
 > - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The whole idea is ~30 lines: `_decide` (announce an intent to vacate instead of dropping) and `_execute_intent` (wait out gossip staleness, re-check, then a lowest-id-proceeds tie-break).
@@ -10,11 +10,22 @@
 >
 > Every other `.py` file is a study that *attacks* those two — sweeps, an evolutionary adversary, partitions, Byzantine agents, scale, the shrink-race. See [Where is the code?](#where-is-the-code) for the full map.
 
-**The problem:** Holochain's DHT disabled dynamic sharding in 2021 after
-arc-resizing oscillation ("the hallway dance") caused data loss — every node
-has stored the full DHT since ([kitsune2 issue
-#160](https://github.com/holochain/kitsune2/issues/160)). Full arcs cap how
-large a network can grow.
+**The problem:** during Holochain's 2021 sharding tests, nodes reacting to each
+other's arc changes from slightly stale views produced *oscillation* — the
+["hallway dance"](https://blog.holochain.org/testing-sharding/) (Dev Pulse 107,
+13 Nov 2021, Holochain's own analogy). Dynamic sharding has been off by default
+since. Holochain's account of *why* is that it was not as well-tested as they
+wanted, and switching it off reduced how much had to be tested and maintained
+while the platform reached stability — the machinery was re-enabled in Kitsune2
+in 2025, but nodes still run full-arc by default because the safe-sizing
+controller ([kitsune2 issue
+#160](https://github.com/holochain/kitsune2/issues/160)) has not been picked
+back up. Full arcs cap how large a network can grow.
+
+*Where this study departs from the historical record:* the 2021 oscillation is
+documented; **data loss in 2021 is not** — we make no claim about it. That naive
+control laws both oscillate *and* lose data is a finding of the simulations
+below, about the rules we modelled, not a claim about what Holochain ran.
 
 **The contribution:** a two-phase **"polite shrink"** controller — announce an
 intent to vacate, wait out gossip staleness, re-check with a deterministic
@@ -44,7 +55,7 @@ we could think of.
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget); and **partial liars** (store a strategic fraction, serve some challenges) still cause **zero data loss**, with a mid-fraction margin dip that a higher audit sample-count restores |
 | **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs; the two-phase re-check never needs a complete view |
-| **Formal safety proof** ([spec/](spec/), TLA+/TLC) | "a sector never drops below R" **model-checked exhaustively** — every reachable state, no violation, for N up to 8 (R from 1 to 7); the naive 2021 rule fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety |
+| **Formal safety proof** ([spec/](spec/), TLA+/TLC) | "a sector never drops below R" **model-checked exhaustively** — every reachable state, no violation, for N up to 8 (R from 1 to 7); the naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract (fixed, [PR #572](https://github.com/holochain/kitsune2/pull/572)); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
 **What we don't claim:** these are simulation + kitsune2-substrate
@@ -213,7 +224,8 @@ Full detail and reproduction: [spec/README.md](spec/README.md).
 > **Why this is worth far more than a passing test — and who relies on it.**
 > A test exercises the handful of event orderings a given run happens to hit;
 > concurrency bugs live precisely in the *rare* interleavings it misses. The
-> 2021 arc-oscillation was exactly such a bug — and it shipped. TLA+ (created
+> 2021 arc-oscillation was exactly such a bug — surfaced by a test campaign
+> rather than ruled out in advance. TLA+ (created
 > by Leslie Lamport, who won computing's Turing Award in 2013) with its model
 > checker TLC does what testing cannot: it explores **every** possible ordering
 > and either finds a failing one or proves none exists. "All tests passed"
@@ -244,7 +256,7 @@ the whole ring.
   buys — using the TCAS tie-break (treat every lower-id intender as already
   gone; proceed only if ≥ R remain). **`SafeCoverage` holds on every reachable
   state — no error.**
-- **`NaiveShrink.tla`** — the pre-2021 behaviour: no wait, no tie-break, each
+- **`NaiveShrink.tla`** — the naive behaviour: no wait, no tie-break, each
   node drops on its stale view. **TLC returns a counterexample** — holders drop
   one by one below R, the "hallway dance" in miniature. Same model, minus the
   two phases, and safety *fails* — so the safety is bought by the mechanism,
