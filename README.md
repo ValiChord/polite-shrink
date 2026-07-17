@@ -27,11 +27,7 @@ than "oscillation loses data":
 
 Dynamic sharding has been off by default since 2021. Holochain's account of
 *why* is that it was not as well-tested as they wanted, and switching it off
-reduced how much had to be tested and maintained while the platform reached
-stability — the machinery was re-enabled in Kitsune2 in 2025, but nodes still
-run full-arc by default because the safe-sizing controller ([kitsune2 issue
-#160](https://github.com/holochain/kitsune2/issues/160)) has not been picked
-back up. Full arcs cap how large a network can grow.
+reduced how much had to be tested and maintained while the platform reached stability. Kitsune2 (the 2025 rewrite) carries the sharding machinery behind its off-by-default `sharding` feature flag, but arcs are still clamped — typically to full — rather than dynamically sized, because the safe-sizing controller ([kitsune2 issue #160](https://github.com/holochain/kitsune2/issues/160), opened March 2025) has not yet been built. Full arcs cap how large a network can grow.
 
 *Scoping, so this isn't over-read as history:* the loss rates above are
 properties of the control laws **we** model — the naive rule is a reconstruction
@@ -48,8 +44,8 @@ we could think of.
 > **The empirical record: not one sector lost.** Across every test where nodes
 > behave honestly — a 1,248-run sweep (0 lost vs 95.9% for the naive
 > controller), an evolutionary adversary that couldn't break it, network
-> partitions, scale to 5,000 agents, gossip so lossy that 9 in 10 messages are
-> dropped, and 33% of the network killed at once on
+> partitions, scale to 5,000 agents, coverage gossip so lossy that 9 in 10 declarations are dropped,
+> and 33% of the network killed at once on
 > real iroh transport (0 of 23k+ ops lost) — polite-shrink has never dropped a
 > sector below the redundancy target R, and the core safety property is
 > formally proven. The *only* failure mode is nodes that **lie** about what
@@ -66,7 +62,7 @@ we could think of.
 | **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget); and **partial liars** (store a strategic fraction, serve some challenges) still cause **zero data loss**, with a mid-fraction margin dip that a higher audit sample-count restores |
-| **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs; the two-phase re-check never needs a complete view |
+| **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs; the across 6,000 runs; the two-phase re-check never needs a complete view. **Scope:** coverage/arc declarations are dropped; the intent-announcement channel the handshake relies on is kept reliable here, so robustness to lost *intents* is future work | |
 | **Formal safety proof** ([spec/](spec/), TLA+/TLC) | "a sector never drops below R" **model-checked exhaustively** — every reachable state, no violation, for N up to 8 (R from 1 to 7); the naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. Scope: the proof covers the **gate** (the pre-drop re-check), not the policy around it — see [REPORT_stage1.md §2.2](REPORT_stage1.md) |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract — fix offered upstream ([PR #572](https://github.com/holochain/kitsune2/pull/572), open, awaiting review); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
 
@@ -199,6 +195,13 @@ real network stack.
 > shrinking: when two nodes contend to vacate the same sectors, identity
 > (lowest agent ID) decides who proceeds and who defers — symmetry broken
 > by rule, not by timing or luck.
+>
+> The announce-then-defer structure has an independent precedent in wireless-sensor
+coverage scheduling (Tian & Georganas, 2002), which likewise announces before a
+node withdraws and has neighbours discount it; that line of work later moved from
+random back-off to deterministic priority ordering — the same V2→V3 correction
+found here. The convergence of two unrelated fields on this mechanism is treated
+as evidence for it, not as prior art either reinvented.
 
 V0–V3 are the Stage-1 ablation (results below). **V4 is the Stage-3 addition**
 (`repair_sim.py`, REPORT_stage3.md §4): it fixes the sparse-network recovery
@@ -259,7 +262,7 @@ studies, one command (`./run_stage3.sh`). Full report:
 | Nodes that **lie** about what they store? | The one real gap: past **K=R** phantom declarations, data is lost invisibly — sensor integrity, not control. Proof-gated **verified coverage** removes the threshold (zero loss to K=3R); *partial* liars cause zero data loss with a tunable audit-sample knob. |
 | Is a *partial* rollout safe (mixed new/old nodes)? | **Yes — no flag day.** With a fraction running polite shrink and the rest still naive, the shrink-race loss is **zero from ~10% adoption** across 312 seeds (a small polite minority becomes the redundancy backbone). Early rollout thins the margin, and the storm brake closes the one race it surfaces — full write-up in [REPORT_stage3.md §10](REPORT_stage3.md) / [REPORT_rolling_upgrade.md](REPORT_rolling_upgrade.md). |
 | What if death-detection is a *slower, separate* clock than gossip? | **The §6.1 race stays bounded and small.** Decoupling the death clock from view staleness ([REPORT_stage3.md §11](REPORT_stage3.md)), the race is ≤0.6% even at 2–8× the gossip lag and only at a thin margin; detection *faster* than gossip drives it to zero. It's governed by unresponsive-marking speed, not the shrink rule — so the shrink wait is sized against detection latency. |
-| What if gossip is *lossy* — each viewer's coverage picture incomplete and inconsistent? | **Polite shrink holds, up to 90% message drop.** Giving each viewer a per-peer lossy view (missing a peer's shrink/death makes it *over-count* — the dangerous direction), the data-loss rate is **flat in the loss axis** across 6,000 runs ([REPORT_stage3.md §12](REPORT_stage3.md)): activation loses nothing at any drop rate, and storm's only losses are the pre-existing correlated mass-death (present at zero loss, non-monotonic in loss), never lossy over-counting. The two-phase re-check doesn't need a complete view. |
+| What if gossip is *lossy* — each viewer's coverage picture incomplete and inconsistent? | **Polite shrink holds, up to 90% message drop.** Giving each viewer a per-peer lossy view (missing a peer's shrink/death makes it *over-count* — the dangerous direction), the data-loss rate is **flat in the loss axis** across 6,000 runs ([REPORT_stage3.md §12](REPORT_stage3.md)): activation loses nothing at any drop rate, and storm's only losses are the pre-existing correlated mass-death (present at zero loss, non-monotonic in loss), never lossy over-counting. The two-phase re-check doesn't need a complete view. (Scope: this drops coverage/arc declarations; the intent channel the handshake depends on is kept reliable, so lost-*intent* robustness is future work.) |
 
 The ninth Stage-3 study — a *proof* rather than a test of the core safety
 property — is important enough to stand on its own:
