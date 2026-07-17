@@ -67,3 +67,14 @@ is a complement to, not a replacement for, the simulations: it does not model
 gossip timing in detail, Byzantine liars (see the sim studies for those), or
 the arc geometry. What it removes is any doubt that the *rule itself* can be
 made to lose a copy through unlucky interleaving — it cannot.
+
+It is also narrower than "polite shrink is proven", and deliberately so. What
+is modelled here is the **gate**: the pre-drop re-check — discount your own
+stale declaration, count every lower-id intender as already gone, proceed only
+if R remain. The controller's *policy* — redundancy target, hysteresis
+constants, growth rule, small-network clamp, intent delay — is not modelled and
+is not proven; it is engineering judgement, evidenced by simulation rather than
+by TLC. The property therefore reads: *no agent obeying this gate can take a
+sector below R, whatever policy drove it to want to.* A different policy can
+replace every constant in the controller without invalidating anything in this
+directory.

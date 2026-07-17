@@ -66,6 +66,35 @@ Variant-specific rules:
   4. Growers subtract announced vacates from coverage (move before the hole opens); starting a grow cancels any pending intent (safety first).
   5. Small-network clamp: below 25 visible peers, hold/grow to full arc, never shrink.
 
+**What is proven, and what is chosen.** These are two different kinds of thing,
+and it is worth separating them before any of the evidence below is read.
+
+Rule 2's re-check is a *gate*: count the declared holders of the half this agent
+would vacate, discount the agent's own stale declaration, treat every announced
+lower-id intender as already gone, and proceed only if at least R remain. It
+answers one question — *is this particular drop permitted?* — and it is the whole
+of the safety argument. It is what the TLA+ specification models and what
+`SafeCoverage` is checked over (§9 of [REPORT_stage3.md](REPORT_stage3.md),
+[`spec/`](spec/)); the naive rule fails that same check precisely because it has
+no gate.
+
+Everything else here is *policy*: the redundancy target, the hysteresis dwell
+constants (1.0× and 4.0× measured lag), the sibling-half growth rule, the
+25-peer clamp, the 50-tick intent delay. Policy answers a different question —
+*what size should this agent aim to be?* — which is the question kitsune2 issue
+#160 actually asks. **None of it is proven.** It was arrived at by ablation
+(§3), attacked adversarially (§4), and measured to be sound in simulation, which
+is strong evidence and not a proof.
+
+So the accurate claim is not "this controller is proven safe" but **"no agent
+obeying this gate can take a sector below R, whatever policy drove it to want
+to."** The distinction is practical rather than pedantic: a different policy —
+one sized by disk budget, geography, or a maintainer's own judgement — can
+replace every constant above without touching the safety argument or requiring
+the proof to be redone. The gate is the part that generalises; the policy is
+this study's reference answer, and the part on which reasonable engineers should
+be expected to disagree.
+
 ### 2.3 Scenarios
 
 Worlds (homes, lags, deaths, joins) are pre-generated per seed and **identical across variants** (paired design; differences in outcome are attributable to the controller alone).
