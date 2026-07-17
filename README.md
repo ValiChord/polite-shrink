@@ -93,7 +93,10 @@ margin today is still R − K until the audit ships on the fork. Every number ab
   scale, the §6.1 race quantified, the §6.2 repair rule simulated before
   implementation, (§7) proof-gated *verified coverage* closing the
   false-declaration liar gap, (§8) *partial* liars and the audit-sample knob,
-  and (§9) the TLA+ formal safety proof.
+  and (§9) the TLA+ formal safety proof. Ends with **"Constraints on any sizing
+  policy"** — what these runs establish that *any* target-arc policy has to
+  respect (and why the textbook uniform `R/N` is probably the wrong one), kept
+  separate from the proven gate.
 - **[spec/README.md](spec/README.md)** — the formal proof: the two-phase rule
   model-checked safe over every reachable state, the naive rule falsified.
 

@@ -628,6 +628,83 @@ rule does not depend on a complete view. A dropped message can only make a viewe
 hold a peer's *older, larger* arc (over-count → over-grow, a cost), and the re-check
 converts that into caution, not loss.**
 
+## Constraints on any sizing policy
+
+[REPORT_stage1.md §2.2](REPORT_stage1.md) separates the **gate** (proven: no
+agent obeying it can take a sector below R) from the **policy** (chosen: what
+size to aim for). This section collects what the studies above establish about
+the *policy* half. It is deliberately not a policy. A policy needs facts this
+study does not have — what Holochain apps store and how they read it, whether a
+node is a phone or a server, what durability is worth against what bandwidth,
+and what validation requires a node to hold. Those belong to whoever knows what
+these networks are for. What follows is the weaker, defensible thing: the
+constraints any policy has to respect, whoever writes it, each traceable to a
+run above.
+
+**Start from the observation that the formula is the easy part.** Minimum total
+storage subject to "every sector holds ≥ R" is `R × ring`, so the cost-optimal
+arc is `R/N` of the ring — essentially what #160 already proposes ("recommend an
+appropriate target arc based on the desired redundancy level"). Every difficulty
+is elsewhere: measuring N under stale and possibly dishonest views (§2, §7, §8),
+reaching the target without a race (the gate), not oscillating on the way
+(finding 2 below), and the fact that arcs are quantised into power-of-two halves
+rather than arbitrary fractions.
+
+1. **Hysteresis, scaled to each agent's *own measured* lag, does most of the
+   stabilising.** Grow readily, shrink reluctantly (V1: ⌈1.0 × lag⌉ and
+   ⌈4.0 × lag⌉) takes the data-loss rate from 95.9% of runs to 24.0%
+   ([REPORT_stage1.md §3](REPORT_stage1.md)). It is necessary and it is not
+   sufficient — the remaining 24% is the race, which only the gate closes.
+
+2. **Decision-epoch jitter buys nothing — do not reach for it first.** V2 ≈ V1
+   (24.3% vs 24.0%; 303 vs 300 losing runs, noise-level in both directions).
+   Desynchronising decision epochs is the textbook first response to control-loop
+   oscillation and it does not address this failure mode: staggered unilateral
+   shrinks erode coverage invisibly instead of collapsing it visibly
+   ([REPORT_stage1.md §3](REPORT_stage1.md)).
+
+3. **The small-network clamp is a safety parameter, not a tuning knob.** Below a
+   visible-peer threshold, hold or grow to full arc and never shrink
+   ([REPORT_stage1.md §6.2](REPORT_stage1.md)). Tuning it as if it were a
+   performance dial removes a floor.
+
+4. **Ring granularity must scale with N.** A fixed 512-sector ring drives the
+   coverage floor to 1 at N = 5,000 under storm; the mitigation is more sectors
+   as N grows (§3, §6 item 1). A policy that scales the arc without scaling the
+   grid silently loses resolution exactly when it matters.
+
+5. **Provision R explicitly. Do not inherit V3's accidental margin.** V3's
+   equilibrium sat at roughly 2R, which was never designed — it is a by-product
+   of the shrink cascade stalling on R−1 holes. V4's repair rule removes it and
+   tracks R tightly; running **V4 at R+1** buys the same headroom deliberately,
+   at comparable cost (§4, finding 5). Any policy that tightens toward the
+   optimum should assume the incidental headroom is gone and ask for what it
+   needs by name.
+
+6. **Size the shrink wait against death-detection latency, not gossip
+   staleness.** These are independent clocks on a real transport
+   ([REPORT_stage1.md §6.1](REPORT_stage1.md)). Detection *faster* than gossip
+   drives the residual race to zero; at 2–8× the gossip lag it is ≤2/312 and only
+   at a thin margin, and the storm brake — which shares the detection clock —
+   bounds but cannot close it (§11, finding 11). The wait is therefore a function
+   of unresponsive-marking speed, and a policy that tunes it against gossip
+   timing is tuning against the wrong quantity.
+
+7. **Do not flatten the arc distribution without replacing the reach it
+   provides.** The equilibrium is extremely unequal — the top decile of agents
+   holds ~91% of stored sectors — and the intuitive culprit is wrong: the skew is
+   not id-correlated (≈ +0.08), rotating tie-break priority does not flatten it,
+   and it is hysteresis-freeze path dependence (§6 item 5). It is also
+   *load-bearing*: those large arcs are the emergent insurance that gives the
+   sparse-recovery cascade its global reach (§4). A fairness or uniformity policy
+   — including the textbook uniform `R/N` — would erode it. Real storage fairness
+   needs load-aware growth targets, with that tension named.
+
+**The open question this study cannot answer: what should R be?** Every result
+above is parameterised by it, and none of them decides it. It is a durability
+-versus-cost judgement that belongs to the people who know what these networks
+carry.
+
 ## Limitations
 
 Partition, Byzantine, and scale scenario runs are single-seed (seed 42)

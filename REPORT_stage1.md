@@ -93,7 +93,9 @@ one sized by disk budget, geography, or a maintainer's own judgement — can
 replace every constant above without touching the safety argument or requiring
 the proof to be redone. The gate is the part that generalises; the policy is
 this study's reference answer, and the part on which reasonable engineers should
-be expected to disagree.
+be expected to disagree. What the studies *do* establish about the policy half —
+the constraints any policy has to respect, whoever writes it — is collected in
+[REPORT_stage3.md → "Constraints on any sizing policy"](REPORT_stage3.md).
 
 ### 2.3 Scenarios
 
