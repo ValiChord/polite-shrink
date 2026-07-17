@@ -81,6 +81,39 @@ defenses exist only in simulation so far, so a *deployed* network's honest
 margin today is still R − K until the audit ships on the fork. Every number above is one-command reproducible; see
 [Run it](#run-it) and `REPRODUCE.md`.
 
+## For a maintainer: what any policy must respect
+
+Issue #160 asks for a **policy** — *"recommend an appropriate target arc based on the
+desired redundancy level."* The cost-optimal answer is nearly trivial: minimum storage
+subject to *every sector ≥ R* is `R × ring`, so the ideal arc is `R/N` of it. Every
+difficulty is elsewhere — measuring `N` under stale or dishonest views, reaching the
+target without a race, not oscillating on the way, and arcs being quantised into
+power-of-two halves.
+
+**We deliberately don't propose the policy.** That needs facts this study doesn't have:
+what Holochain apps store and how they read it, whether a node is a phone or a server,
+what durability is worth against what bandwidth, and what validation requires a node to
+hold. What the runs *do* establish is the weaker, defensible thing — the constraints any
+policy has to respect, whoever writes it. (This is the *policy* half. The *gate* — the
+~15 lines that are actually proven — is [REPORT_stage1.md §2.2](REPORT_stage1.md).)
+
+| Constraint | Because |
+|---|---|
+| **Hysteresis, scaled to each agent's *own measured* lag** — grow readily, shrink reluctantly | takes data loss from **95.9% of runs to 24.0%**. Necessary, and *not* sufficient — the rest is the race, which only the gate closes |
+| **Jitter buys nothing — don't reach for it first** | **24.3% vs 24.0%.** Desynchronising decision epochs is the textbook first response to control-loop oscillation, and it does not touch this failure mode |
+| **The small-network clamp is a safety parameter, not a tuning knob** | below the visible-peer threshold, hold or grow to full arc. Tuning it as a performance dial removes a floor |
+| **Ring granularity must scale with N** | a fixed 512-sector ring drives the coverage floor to **1 at N = 5,000** under storm — resolution is lost exactly when it matters |
+| **Provision R explicitly** | V3's ~2R equilibrium was *accidental* — a by-product of the shrink cascade stalling. V4 removes it; **V4 at R+1** buys the headroom back deliberately, at comparable cost |
+| **Size the shrink wait against death-detection latency, not gossip staleness** | they are independent clocks on a real transport. Detection *faster* than gossip drives the residual race to **zero**; the storm brake shares the detection clock, so it bounds but cannot close it |
+| **Don't flatten the arc distribution** | the top decile holds **~91%** of stored sectors — and the skew is hysteresis path-dependence, not the tie-break (corr ≈ +0.08). Those big arcs are the emergent insurance behind sparse recovery's global reach, so **the textbook uniform `R/N` is probably the wrong policy** |
+
+Each constraint traces to a run; sources and full detail in
+[REPORT_stage3.md → *Constraints on any sizing policy*](REPORT_stage3.md).
+
+**And the question this study cannot answer: what should R be?** Every result above is
+parameterised by it, and none of them decides it — that is a durability-versus-cost
+judgement belonging to whoever knows what these networks carry.
+
 ## The write-ups
 
 - **[REPORT_stage1.md](REPORT_stage1.md)** — the main study: methodology, the 4,992-sim
