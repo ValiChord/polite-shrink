@@ -1,6 +1,6 @@
 # Polite-Shrink — a Proposed Sharding Solution for Holochain's DHT
 
-> ## Using the polite-shrink pattern, the arc-shrink race behind the 2021 "hallway dance" oscillation can no longer cause data loss — proven by exhaustive model checking, not just tested.
+> ## Using the polite-shrink pattern, the stale-view arc-shrink race — the one that damping the 2021 "hallway dance" leaves wide open — can no longer cause data loss. Proven by exhaustive model checking, not just tested.
 >
 > *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive rule (no wait, no tie-break) fails the same check with a counterexample. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
@@ -13,19 +13,31 @@
 **The problem:** during Holochain's 2021 sharding tests, nodes reacting to each
 other's arc changes from slightly stale views produced *oscillation* — the
 ["hallway dance"](https://blog.holochain.org/testing-sharding/) (Dev Pulse 107,
-13 Nov 2021, Holochain's own analogy). Dynamic sharding has been off by default
-since. Holochain's account of *why* is that it was not as well-tested as they
-wanted, and switching it off reduced how much had to be tested and maintained
-while the platform reached stability — the machinery was re-enabled in Kitsune2
-in 2025, but nodes still run full-arc by default because the safe-sizing
-controller ([kitsune2 issue
+13 Nov 2021, Holochain's own analogy). What that write-up never recorded is what
+the oscillation **cost**. This study measures it — and the answer is sharper
+than "oscillation loses data":
+
+> **Damping the oscillation doesn't stop the loss.** Hysteresis cuts the
+> data-loss rate from 95.9% of runs to 24%, and decision-epoch jitter — the
+> textbook remedy for control-loop oscillation — adds nothing at all (24.3%).
+> What actually destroys data is a race the oscillation merely *accompanies*:
+> two agents, each acting on a stale view, abandon the same sector at the same
+> moment. That race survives every damping fix we tried. Closing it takes a
+> two-phase handshake — and then the loss goes to **zero in 1,248 runs**.
+
+Dynamic sharding has been off by default since 2021. Holochain's account of
+*why* is that it was not as well-tested as they wanted, and switching it off
+reduced how much had to be tested and maintained while the platform reached
+stability — the machinery was re-enabled in Kitsune2 in 2025, but nodes still
+run full-arc by default because the safe-sizing controller ([kitsune2 issue
 #160](https://github.com/holochain/kitsune2/issues/160)) has not been picked
 back up. Full arcs cap how large a network can grow.
 
-*Where this study departs from the historical record:* the 2021 oscillation is
-documented; **data loss in 2021 is not** — we make no claim about it. That naive
-control laws both oscillate *and* lose data is a finding of the simulations
-below, about the rules we modelled, not a claim about what Holochain ran.
+*Scoping, so this isn't over-read as history:* the loss rates above are
+properties of the control laws **we** model — the naive rule is a reconstruction
+of an undamped controller, not a port of whatever Holochain ran in 2021 — and
+their stated reason for disabling sharding was testing and maintenance burden,
+not observed loss.
 
 **The contribution:** a two-phase **"polite shrink"** controller — announce an
 intent to vacate, wait out gossip staleness, re-check with a deterministic
