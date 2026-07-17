@@ -114,6 +114,10 @@ Each constraint traces to a run; sources and full detail in
 parameterised by it, and none of them decides it — that is a durability-versus-cost
 judgement belonging to whoever knows what these networks carry.
 
+**Every test on one page:** [TEST_LEDGER.md](TEST_LEDGER.md) lists everything polite
+shrink has been put through — simulation, adversarial, real transport, deployment
+realism, and the formal proof — with the result and a link to each write-up.
+
 ## The write-ups
 
 - **[REPORT_stage1.md](REPORT_stage1.md)** — the main study: methodology, the 4,992-sim
