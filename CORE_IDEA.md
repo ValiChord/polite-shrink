@@ -20,7 +20,7 @@ The evidence, in order:
 
 - Lag-scaled **hysteresis** ("grow eager, shrink slow") cuts the data-loss rate from **95.9% of runs to 24%** — a big dent, but the loss doesn't go away.
 - **Jitter** (the textbook first remedy for control-loop oscillation) adds **nothing** — 24.3%.
-- The remaining 24% is the **shrink race**, and it survives every damping fix. Only re-checking before the drop (the gate) closes it — and then loss goes to **zero across 1,248 runs**.
+- The remaining 24% is the **shrink race**, and it survives every damping fix. Only the pre-drop re-check *with its tie-break* (the gate) closes it — and then loss goes to **zero across 1,248 runs**.
 
 The consequence for a rebuilt controller is the useful part: it may well still oscillate — that may be inherent, a matter of physics — but **oscillation and durability turn out to be separable.** Leave the physics alone; close the race, and you don't lose data even while it dances.
 
@@ -37,7 +37,7 @@ Polite-shrink applies exactly that cure to shrinking: when nodes contend to vaca
 Two phases, in [`polite_shrink.py`](polite_shrink.py):
 
 1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors.
-2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, applies the **TCAS tie-break** — count every lower-priority (higher-ID) intender as already gone — and drops **only if ≥ R copies remain**.
+2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, applies the **TCAS tie-break** — count every *lower-ID* intender as already gone, so the lowest ID proceeds and the rest defer — and drops **only if ≥ R copies remain**.
 
 Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, partitions, scale to 5,000 agents, 90%-lossy gossip, and 33% of the network killed at once on real iroh transport — **not one sector ever dropped below R**.
 
