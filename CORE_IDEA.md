@@ -2,7 +2,7 @@
 
 *A one-page on-ramp for the Holochain dev team. Depth is in [README.md](README.md); this is just the idea.*
 
-## In one sentence
+## In a sentence or two
 
 When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every *lower-ID* node that announced the same vacate as already gone** (a deterministic tie-break), instead of dropping immediately.
 
