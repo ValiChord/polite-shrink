@@ -1,5 +1,7 @@
 # Polite-Shrink — a Proposed Sharding Solution for Holochain's DHT
 
+> **New here?** Start with **[CORE_IDEA.md](CORE_IDEA.md)** — the one-page version of everything below.
+
 > ## Using the polite-shrink pattern, the stale-view arc-shrink race — the one that damping the 2021 "hallway dance" leaves wide open — can no longer cause data loss. Proven by exhaustive model checking, not just tested.
 >
 > *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive rule (no wait, no tie-break) fails the same check with a counterexample. What is proven is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
