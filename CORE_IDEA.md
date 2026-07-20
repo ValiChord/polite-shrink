@@ -4,7 +4,9 @@
 
 ## In one sentence
 
-When a DHT node shrinks its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, re-check, and drop only if the redundancy target R would still be met** — instead of dropping immediately. That single change closes the race that caused the 2021 data loss.
+When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every *lower-ID* node that announced the same vacate as already gone** (a deterministic tie-break), instead of dropping immediately.
+
+That last clause is the load-bearing part. Announce-and-re-check *without* the tie-break does **not** close the race: two nodes each removing only themselves both conclude "R will remain" and both drop, and coverage falls below R — the exact 2021 failure. Ordering the contenders by ID so that exactly one proceeds and the rest defer is what actually closes the race that caused the 2021 data loss.
 
 ## The problem it addresses
 
@@ -43,7 +45,7 @@ Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, p
 
 Stated plainly, because the distinction matters:
 
-- **Proven** (TLA+/TLC, exhaustive over every reachable state, N ≤ 8, R = 1–7): the **gate** — the pre-drop re-check — means concurrent stale-view shrinks *cannot* drive a sector below R. The naive rule fails the same check with a counterexample.
+- **Proven** (TLA+/TLC, exhaustive over every reachable state, N ≤ 8, R = 1–7): the **gate** — the pre-drop re-check *with its tie-break* — means concurrent stale-view shrinks *cannot* drive a sector below R. The naive rule (no wait, no tie-break) fails the same check with a counterexample.
 - **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
 
