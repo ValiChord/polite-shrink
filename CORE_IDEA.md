@@ -22,12 +22,20 @@ The evidence, in order:
 
 The consequence for a rebuilt controller is the useful part: it may well still oscillate — that may be inherent, a matter of physics — but **oscillation and durability turn out to be separable.** Leave the physics alone; close the race, and you don't lose data even while it dances.
 
-## The fix (≈30 lines)
+## The insight that made it work: break the symmetry by *rule* (TCAS)
+
+The hallway dance is a **symmetry** problem: every node reacts identically to the same stale coverage picture, so they all step the same way at once. The two failed attempts to fix it both try to break that symmetry the wrong way — hysteresis slows everyone down equally, jitter (V2) desynchronises by *timing*, i.e. by luck. Neither works.
+
+The fix comes from **aircraft collision avoidance (TCAS)**. When two planes converge, TCAS does not let them negotiate or rely on timing — it issues *complementary, deterministic* orders (one climbs, one descends) chosen by a fixed tie-break on transponder ID. It exists precisely because symmetric reactions are the failure mode: two people in a corridor both stepping aside the same way, again and again.
+
+Polite-shrink applies exactly that cure to shrinking: when nodes contend to vacate the same sector, **the lowest ID proceeds and the rest defer** — symmetry broken by *rule*, not by timing or luck. That is the difference between V2 (jitter, still loses data) and V3 (polite, loses none).
+
+## The mechanism (≈30 lines)
 
 Two phases, in [`polite_shrink.py`](polite_shrink.py):
 
 1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors.
-2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, counts every lower-priority intender as already gone (a deterministic **lowest-ID-proceeds** tie-break — the same idea as aircraft TCAS), and drops **only if ≥ R copies remain**.
+2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, applies the **TCAS tie-break** — count every lower-priority (higher-ID) intender as already gone — and drops **only if ≥ R copies remain**.
 
 Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, partitions, scale to 5,000 agents, 90%-lossy gossip, and 33% of the network killed at once on real iroh transport — **not one sector ever dropped below R**.
 
