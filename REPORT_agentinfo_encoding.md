@@ -360,6 +360,57 @@ through the plain `Sim` gives **byte-identical** totals (904 held / 1,305
 declared / 3-of-24), which is the reduction check that lets the per-agent port
 be trusted.
 
+## 4.10 The last three studies: fairness, and the two Byzantine defences
+
+**Fairness — the encoding solves what the rotation fix could not.** V3's
+lowest-id tie-break lets low-id agents shrink first, so high-id agents hold
+bigger arcs; `fairness_sim.py` answers that with a per-epoch rotating priority
+key (V3F), which then has to re-earn the safety proof at epoch boundaries.
+Under this encoding the question dissolves instead: there is no tie-break to be
+unfair. 24 seeds, activation, same metrics as the fairness study:
+
+| variant | corr(aid, level) | level std | top-decile storage share |
+|---|---|---|---|
+| V3 | +0.098 | 2.009 | 92.4% |
+| V3F (rotating key) | −0.021 | 2.014 | 92.7% |
+| **V5** | +0.022 | 1.974 | **43.4%** |
+
+Two things worth separating. The *correlation* is fixed by either approach.
+The *concentration* is not: V3F leaves the top decile holding 92.7%, barely
+distinguishable from V3's 92.4% — consistent with Stage-3's finding that the
+skew is hysteresis path-dependence rather than the tie-break. V5 halves it,
+with no rotation machinery and no new proof obligation.
+
+*Read alongside the Stage-3 constraint "don't flatten the arc distribution":*
+those big arcs were identified as the emergent insurance behind sparse
+recovery's global reach, so halving the concentration is not automatically
+good news. The direct check is §4.8, where V5 still recovers 12/12 with fewer
+repair grows — in those cases the insurance was not needed. That is evidence,
+not a guarantee, and a deployment relying on the skew for reach should measure
+it.
+
+**Both Byzantine defences survive the encoding.** These operate on the coverage
+*sensor* rather than the announcement, so confirmation was expected; the reason
+to run them is that the encoding's gate reads current claimants while verified
+coverage filters to proven peers, and two filters composing could in principle
+misbehave. They do not. 4 seeds each, `true_*` ground truth (honest agents'
+real storage — held coverage would credit a liar that stores nothing):
+
+| study | condition | V3 true zero | V5 true zero |
+|---|---|---|---|
+| verified coverage | K = 0 … 3R full-arc liars | 0.0 | **0.0** |
+| partial liars | p = 0 … 1.0, c = 2, K = 2R | 0.0 | **0.0** |
+
+§7's headline holds under the encoding — verified coverage removes the K = R
+threshold, with zero true loss out to K = 3R. §8's holds too, including its
+known mid-fraction margin dip: the true floor sags to ≈3.6–3.8 at p = 0.5–0.75
+for *both* encodings, against R = 5.
+
+V5 carries a small consistent margin offset throughout — true floor about
+0.2–0.4 copies lower than V3 at the same K or p. Not a threshold change, but
+the same direction as §4.9's finding, and worth naming rather than rounding
+away.
+
 ## 5. Verdict
 
 **The new wire message is not needed. One bit is.**
@@ -369,10 +420,11 @@ Two defensible options, and the choice is not ours to make:
 - **Take encoding A.** Delete `protocol.rs`, `intents.rs` and the `k2sharding`
   channel — about 255 lines and a wire format. Buys: the §6.1 shrink race
   effectively gone (§4.6), zero loss under 90% gossip drop *including* lost
-  announcements (§4.7), V4 repair intact (§4.8), and forged intents removed as
-  a threat model outright, since `AgentInfoSigned` is signed. Costs: a
-  transient reachability dip that worsens with N (§4.2, §4.4), and a
-  6–9× higher frequency of real loss under mass death (§4.9).
+  announcements (§4.7), V4 repair intact (§4.8), storage fairness solved
+  without the rotation machinery that could not solve it (§4.10), and forged
+  intents removed as a threat model outright, since `AgentInfoSigned` is
+  signed. Costs: a transient reachability dip that worsens with N (§4.2,
+  §4.4), and a 6–9× higher frequency of real loss under mass death (§4.9).
 - **Carry the bit explicitly** — one field on `AgentInfo`, a struct already
   gossiped and already signed. Keeps the tie-break, the tighter equilibrium,
   the wide declared arc through the wait, and V3's storm loss frequency; costs
@@ -407,11 +459,14 @@ showing the reachability dip does not materialise, or an operator for whom
   currently reach it.
 - Two Wind Tunnel runs per arm. Enough to say "no difference detected", not
   enough to rank the encodings.
-- Of Stage-3, partitions, scale, the race grid, the liar sweep, lossy gossip
-  and the V4 repair rule have been re-run under this encoding. Not re-run:
-  fairness, verified-coverage, partial-liar, and the decoupled death-clock
-  study. The forged-intent study is inapplicable rather than pending —
-  `AgentInfoSigned` is signed, so there is no intent to forge.
+- **Stage-3 is now complete for this encoding**: partitions, scale, the race
+  grid, liars, lossy gossip, V4 repair, the decoupled death-clock, fairness,
+  verified coverage and partial liars have all been re-run. The forged-intent
+  study is inapplicable rather than pending — `AgentInfoSigned` is signed, so
+  there is no intent to forge.
+- Seed counts vary by study (4–100) and are stated per table. §4.9 is the
+  cautionary case: the durability answer changed between 4 seeds and 100, so
+  treat any single-digit-seed result here as provisional.
 - The lossy-gossip run drops coverage/arc declarations, which under this
   encoding *are* the announcements. It does not separately model an announcer
   whose narrowed claim is delivered to some peers and not others *within* a
