@@ -1,0 +1,26 @@
+files: 2   agents seen: 18   events: 22   duration: 599s
+sector grid: 512 sectors (SECTOR_SIZE 2^23), R = 5, warmup excluded: 30s
+
+controller events:
+  shrink_executed    11
+  other              11
+
+mean arc span (post-warmup): start 1.000 -> min 0.361 -> final 0.542 (1.000 = FULL)
+
+coverage floor (post-warmup): min 6   orphaned sectors: max 0
+final 60s: floor 6 vs R=5
+
+VERDICT continuous coverage (no sector ever orphaned): PASS
+VERDICT final redundancy (floor >= R):                 PASS
+
+ops: said 23526, heard 170962 (context only — op-level loss is not measured here)
+
+wrote runs/agentinfo-storm-1/summary.json
+wrote runs/agentinfo-storm-1/floor.png
+ops published: 23526 by 18 agents (12 survivors, 6 dead at run end)
+reachable from survivors: 23402   replication per op: min 1, median 6
+grey (dead publisher, published within 30s of its last publish — propagation latency, not arc safety): 124
+lost (published, propagated window elapsed, held by no survivor): 0
+
+VERDICT op reachability (zero non-grey ops lost):       PASS
+wrote runs/agentinfo-storm-1/op_summary.json

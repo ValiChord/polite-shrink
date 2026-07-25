@@ -259,6 +259,13 @@ fn sharding_config_from_env() -> anyhow::Result<K2ShardingConfig> {
     )?;
     env_knob("K2_SHARDING_LAG_FLOOR_MS", &mut config.lag_floor_ms)?;
     env_knob("K2_SHARDING_LAG_CEILING_MS", &mut config.lag_ceiling_ms)?;
+    // "true"/"false". Carries the vacate intent on the gossiped AgentInfo arc
+    // claim instead of a ShrinkIntent message, so the same binary measures
+    // both encodings.
+    env_knob(
+        "K2_SHARDING_AGENTINFO_ENCODING",
+        &mut config.agentinfo_encoding,
+    )?;
     Ok(config)
 }
 

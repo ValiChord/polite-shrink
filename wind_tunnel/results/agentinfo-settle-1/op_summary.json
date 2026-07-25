@@ -1,0 +1,16 @@
+{
+  "ops_published": 21657,
+  "publishers": 12,
+  "survivors": 12,
+  "dead": 0,
+  "reachable": 21657,
+  "replication_min": 1,
+  "replication_median": 6,
+  "grey": 0,
+  "grey_ops": [],
+  "lost": 0,
+  "lost_ops": [],
+  "survivor_window_s": 60.0,
+  "grace_s": 30.0,
+  "verdict_op_reachability": true
+}

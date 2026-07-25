@@ -193,3 +193,34 @@ Design elaboration, implementation, and analysis executed with AI assistance
 exclusivity claimed; this note and the repository's public commit history
 (pushed 2026-07-12) exist to date and attribute the work. Citation record:
 [`../../CITATION.cff`](../../CITATION.cff).
+
+---
+
+## Addendum — the AgentInfo-only encoding (2026-07-25)
+
+Five further runs measured the alternative encoding in which the vacate
+intent rides on the gossiped `AgentInfo` arc claim instead of a
+`ShrinkIntent` message (fork flag `agentinfo_encoding`, default false).
+Controls were re-run on the same machine in the same session rather than
+compared against the figures above.
+
+| run | encoding | final span | floor | orphans | ops lost |
+|---|---|---|---|---|---|
+| `agentinfo-settle-1` | on | 0.583 | 6 | 0 | 0 of 21,657 |
+| `agentinfo-storm-1` | on | 0.542 | 6 | 0 | 0 of 23,526 |
+| `agentinfo-storm-2` | on | 0.667 | 6 | 0 | 0 |
+| `control-storm-1` | off | 0.625 | 6 | 0 | 0 |
+| `control-storm-2` | off | 0.542 | 4 | 0 | 0 |
+
+All verdicts PASS on both arms. The encodings are **indistinguishable at
+this scale**: the span ranges overlap and the only sub-R floor came from a
+control run. Two runs per arm cannot rank them.
+
+**Claim boundary, in addition to the one at the top of this report.** These
+runs do *not* test the availability cost that the simulation attributes to
+this encoding, because that is a large-N effect: in simulation it is 0
+sector-ticks at N = 12, 44 at N = 200, and 38,394 at N = 5,000, with bytes
+on disk throughout in every case. The sim predicts zero effect at this
+harness's own sizing, and that is what these runs measured — so their value
+is cross-validation of the simulation, not clearance of the encoding.
+See `../../REPORT_agentinfo_encoding.md`.

@@ -134,6 +134,59 @@ stands down, against one in thirty for the tie-break. The re-publish traffic is
 stand-down) — carried on gossip that already exists rather than on a new
 channel.
 
+## 4.5 Stage-2 — real iroh transport, and what it can and cannot see
+
+The encoding is implemented on the kitsune2 fork behind a config flag
+(`agentinfo_encoding`, default false), so one binary runs both and the Wind
+Tunnel harness compares them directly. Same sizing as the published V3 runs:
+R = 5, 12 agents, clamp 8; the storm adds a 6-agent cohort (33% of the
+18-agent peak) that dies simultaneously.
+
+| run | encoding | final arc span | coverage floor | orphaned sectors | ops lost |
+|---|---|---|---|---|---|
+| settle | **on** | 0.583 | 6 | 0 | 0 of 21,657 |
+| storm 1 | **on** | 0.542 | 6 | 0 | 0 of 23,526 |
+| storm 2 | **on** | 0.667 | 6 | 0 | 0 |
+| storm 1 | off (control) | 0.625 | 6 | 0 | 0 |
+| storm 2 | off (control) | 0.542 | 4 | 0 | 0 |
+
+All verdicts PASS on both encodings — continuous coverage, final redundancy,
+and op reachability. The controls were run on the same machine in the same
+session rather than compared against the earlier published figures.
+
+**The two encodings are indistinguishable at this scale.** Final arc spans
+overlap ({0.542, 0.667} on, {0.625, 0.542} off), and the only floor to dip
+below R came from the *control*, not the encoding. Two runs per arm is not
+enough to rank them, and nothing here should be read as doing so.
+
+**This is not the availability result, and must not be quoted as one.** The
+harness runs 12–18 agents; §4.2's phantom holes are a large-N effect. Running
+the *simulation* at the harness's own sizing settles whether the two methods
+agree:
+
+| | declared loss | held loss |
+|---|---|---|
+| sim, N = 12, settle & storm, V5 | **0** | 0 |
+| sim, N = 5,000 density ring, activation, V5 | 14,718 | 0 |
+| sim, N = 5,000 density ring, storm, V5 | 38,394 | 0 |
+
+The sim predicts *zero* effect at N = 12 — which is exactly what real transport
+measured. So the Wind Tunnel PASS is not evidence that the encoding is safe to
+adopt; it is evidence that **the simulation is right, including about why the
+effect is invisible at this size.** The two methods corroborate each other
+where they overlap, and the divergence at scale is the sim's alone to report
+until a harness can run thousands of agents.
+
+One implementation note, because it nearly became a false finding. The fork's
+8-node storm test first failed under the encoding with *"did not recover to
+target redundancy; min coverage 1"*. That was a bug in this work, not a
+property of the encoding: the storm brake cancels pending intents on peer
+loss, and cancelling a narrowed arc claim without widening it back leaves the
+agent declaring less than `target_level`, after which the arc-match guard in
+`tick_agent` blocks every later decision — including the growth the brake
+exists to permit. With the brake restoring the claim, the test passes in 13.8 s
+against 14.5 s for the control.
+
 ## 5. Verdict
 
 **The new wire message is not needed. One bit is.**
@@ -164,8 +217,19 @@ demonstrably exists is a problem, take the second option.
   wider V5 equilibrium may partly be a tuning artefact: the hysteresis
   constants were fitted with the dedicated-message encoding in play, and were
   not re-tuned for this one.
-- Stage-2 (Wind Tunnel, real iroh transport) and Stage-3 (adversaries, scale,
-  repair) have not been re-run under this encoding.
+- **Scale is the binding limitation on the real-transport evidence.** Wind
+  Tunnel ran 12–18 agents; the availability effect appears in simulation
+  between N = 200 (44 sector-ticks) and N = 5,000 (38,394). No measurement on
+  real transport at the scale where the effect exists, and the harness cannot
+  currently reach it.
+- Two Wind Tunnel runs per arm. Enough to say "no difference detected", not
+  enough to rank the encodings.
+- Of Stage-3, partitions and scale have been re-run under this encoding; the
+  Byzantine/liar studies and `race_quantify` have not. Note the *forged-intent*
+  study becomes inapplicable rather than pending: `AgentInfoSigned` is signed,
+  so there is no intent to forge.
+- The equilibrium-arc comparison in §4.3 is a simulation result at N = 200 and
+  is **not** reproduced on real transport at N = 12, where the spans overlap.
 - `AgentInfo` has an `expires_at`; the interaction between announcement
   lifetime and info expiry is unmodelled.
 
