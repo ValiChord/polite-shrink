@@ -147,6 +147,13 @@ class Metrics:
 
 
 class Sim:
+    # Class-level defaults, not just instance ones: `MixedSim` re-implements
+    # __init__ without calling super() (deliberately, to keep its RNG draws
+    # byte-identical), and still inherits _execute_intent, which counts here.
+    announces = 0
+    cancels = 0
+    publishes = 0
+
     def __init__(self, cfg: Config, variant: Variant, events: dict,
                  initial: list[tuple[int, int]], joins: dict):
         """
@@ -188,6 +195,16 @@ class Sim:
             self.cov_h[i] = snap_cov
             self.lvl_h[i, :len(self.agents)] = snap_lvl
 
+    @property
+    def _agentinfo(self) -> bool:
+        """True when this sim announces by narrowing its arc claim.
+
+        Read through `getattr` because `MixedSim` (the rolling-upgrade,
+        decoupled-clock and message-loss studies) carries a *per-agent*
+        variant and deliberately never sets a sim-level `self.v`."""
+        v = getattr(self, "v", None)
+        return v is not None and v.agentinfo
+
     # ---------------------------------------------------------- snapshots
     def _build_declared(self):
         """Coverage as PEERS see it — built from declared arcs. This is what
@@ -228,7 +245,7 @@ class Sim:
         # so both the grow-side subtraction (cov - icov) and the execute-side
         # tie-break degrade to reading `cov` alone. Leaving these empty *is* the
         # encoding — no other decision code needs to change.
-        if not self.v.agentinfo:
+        if not self._agentinfo:
             for a in self.agents:
                 if a.alive and a.intent_at > self.t:
                     s, e = vacate_half(a.home, a.level, cfg.log2s)
@@ -310,7 +327,7 @@ class Sim:
             if self.v.polite:
                 a.intent_at = self.t + cfg.intent_delay
                 self.announces += 1
-                if self.v.agentinfo:
+                if self._agentinfo:
                     # Phase 1 IS the arc claim: publish the reduced arc now and
                     # keep serving the data until the gate clears.
                     a.decl_level = a.level - 1
@@ -340,7 +357,7 @@ class Sim:
             a.intent_at = -1
             a.shrink_acc = 0
             self.cancels += 1
-            if self.v.agentinfo and a.decl_level >= 0:
+            if self._agentinfo and a.decl_level >= 0:
                 a.decl_level = -1      # stand down: re-publish the wider arc
                 self.publishes += 1
 
@@ -388,7 +405,7 @@ class Sim:
         self.m.mean_level.append(float(np.mean(alive_lv)) if alive_lv else 0.0)
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
-        held = self._build_held() if self.v.agentinfo else cov
+        held = self._build_held() if self._agentinfo else cov
         self._last_held = held      # per-sector, for subclasses that classify
         self.m.held_floor.append(int(held.min()))
         self.m.held_zero.append(int((held == 0).sum()))

@@ -195,6 +195,11 @@ class MixedSim(Sim):
         self.m.mean_level.append(float(np.mean(alive_lv)) if alive_lv else 0.0)
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
+        # Declared == held for every variant this study mixes (V0/V3), so the
+        # durability series is the same numbers; recorded anyway so any consumer
+        # of Metrics sees a fully populated object.
+        self.m.held_floor.append(int(cov.min()))
+        self.m.held_zero.append(int((cov == 0).sum()))
         self.t += 1
 
 
