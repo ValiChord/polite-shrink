@@ -30,7 +30,8 @@ Episode durations are recorded; §6.1 holes are transient by design
 (the leaver still has the data on disk) and the duration bounds how
 long a prompt re-grow takes to close them.
 
-Grid: V3 only. R ∈ {3,5}; lag_max ∈ {24,48,96} (lag_min = lag_max/3,
+Grid: one variant per run (RACE_VARIANT=V5 for the AgentInfo-only
+encoding; outputs are variant-suffixed). R ∈ {3,5}; lag_max ∈ {24,48,96} (lag_min = lag_max/3,
 intent_delay = 2·lag_max + 2, matching the design rule); p over decades.
 Deaths are matched by Poisson joins (stationary population, as the
 Stage-1 churn scenario). Warmup runs once per (R, lag) cell and is
@@ -53,7 +54,14 @@ import numpy as np
 from polite_shrink import VARIANTS, Config, Sim, vacate_half
 from ext_common import ALERT, BASELINE, INK, MUTED, SERIES, plt
 
-V3 = VARIANTS[3]
+# Default V3 (the dedicated-message encoding). RACE_VARIANT=V5 switches to the
+# AgentInfo-only encoding, whose declared-zero episodes are classified
+# "phantom" (still held) rather than counted as controller-caused holes.
+import os as _os
+_IS_V5 = _os.environ.get("RACE_VARIANT") == "V5"
+V3 = VARIANTS[4] if _IS_V5 else VARIANTS[3]
+# Variant-suffixed outputs so a V5 run never clobbers the published V3 grid.
+_SUF = "_v5" if _IS_V5 else ""
 
 OBSERVE = 1500
 
@@ -186,8 +194,12 @@ def observe(args):
         "seed": seed, "p": p,
         "holes_shrink": sum(1 for h in sim.holes if h["kind"] == "shrink"),
         "holes_churn": sum(1 for h in sim.holes if h["kind"] == "churn"),
+        # AgentInfo-only encoding: declared-zero while still held. Counted
+        # apart from the two real classes so it cannot inflate the race rate.
+        "holes_phantom": sum(1 for h in sim.holes if h["kind"] == "phantom"),
         "durations": [h["duration"] for h in sim.holes],
         "zero_sector_ticks": zero_ticks,
+        "held_zero_ticks": int(np.sum(np.array(sim.m.held_zero[-OBSERVE:]))),
         "floor_min": int(min(sim.m.floor[-OBSERVE:])),
     }
 
@@ -209,8 +221,10 @@ def run_cell(r, lag_max, p_values, seeds, workers):
                                   if x["holes_shrink"] + x["holes_churn"]),
             "holes_shrink": sum(x["holes_shrink"] for x in rs),
             "holes_churn": sum(x["holes_churn"] for x in rs),
+            "holes_phantom": sum(x["holes_phantom"] for x in rs),
             "holes_total": n_holes,
             "zero_sector_ticks": sum(x["zero_sector_ticks"] for x in rs),
+            "held_zero_ticks": sum(x["held_zero_ticks"] for x in rs),
             "durations": summarize_durations(
                 [d for x in rs for d in x["durations"]]),
             # rates per 1000 ticks of observation, for cross-cell compare
@@ -220,7 +234,8 @@ def run_cell(r, lag_max, p_values, seeds, workers):
         }
         print(f"  R={r} lag={lag_max} p={p:.0e}: "
               f"holes={n_holes} (shrink {out[p]['holes_shrink']} / churn "
-              f"{out[p]['holes_churn']}) in {len(rs)} runs; "
+              f"{out[p]['holes_churn']} / phantom "
+              f"{out[p]['holes_phantom']}) in {len(rs)} runs; "
               f"runs_with_hole={out[p]['runs_with_hole']}", flush=True)
     print(f"  cell R={r} lag={lag_max} done in {time.time()-t0:.0f}s "
           f"(equilibrium floor at snapshot: {eq_floor})", flush=True)
@@ -341,7 +356,7 @@ def main():
     ser = {f"R{r}_lag{lag}": {str(p): {k: v for k, v in cell[p].items()}
                               for p in cell}
            for (r, lag), cell in all_cells.items()}
-    with open("results/race.json", "w") as f:
+    with open(f"results/race{_SUF}.json", "w") as f:
         json.dump({"warmup": "1500 + 35*lag_max", "observe": OBSERVE,
                    "seeds_per_cell": seeds, "cells": ser}, f)
 
@@ -361,17 +376,21 @@ def main():
                       [cell[p]["rate_per_kticks"] for p in sorted(cell)])
         if s is not None:
             slopes.append(f"R={r} lag={lag}: fitted log-log slope {s:.2f}")
-    with open("results/race_summary.md", "w") as f:
+    with open(f"results/race_summary{_SUF}.md", "w") as f:
         f.write("# §6.1 residual-race quantification\n\n"
-                f"V3 only, N=200, warmup 1500+35*lag_max, observe {OBSERVE} ticks, "
+                f"{V3.name}, N=200, warmup 1500+35*lag_max, observe "
+                f"{OBSERVE} ticks, "
                 f"{seeds} seeds/point. Hole = declared coverage of a sector "
                 "hits 0. shrink = a shrink executed over the sector that "
-                "tick (§6.1 race proper); churn = deaths alone. Zero holes "
+                "tick (§6.1 race proper); churn = deaths alone; phantom = "
+                "declared-zero while the data is still held locally (only "
+                "reachable under the AgentInfo-only encoding, and excluded "
+                "from the real-hole classes). Zero holes "
                 "at a point = upper bound only, not a rate.\n\n"
                 + "\n".join(lines) + "\n\n## Fitted scaling\n\n"
                 + ("\n".join(f"- {s}" for s in slopes) if slopes
                    else "- insufficient nonzero points to fit") + "\n")
-    plot(all_cells, "results/race.png")
+    plot(all_cells, f"results/race{_SUF}.png")
     print("\n".join(slopes) if slopes else "no fittable cells")
 
 

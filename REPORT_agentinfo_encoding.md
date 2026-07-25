@@ -187,6 +187,54 @@ agent declaring less than `target_level`, after which the arc-match guard in
 exists to permit. With the brake restoring the claim, the test passes in 13.8 s
 against 14.5 s for the control.
 
+## 4.6 Two more Stage-3 axes: the shrink race, and liars
+
+**The §6.1 shrink race all but disappears.** Re-running the full
+race-quantification grid (R ∈ {3,5}, lag_max ∈ {24,48,96}, seven hazard rates,
+40 seeds per point — 1,680 runs) under the encoding:
+
+| | V3 | V5 |
+|---|---|---|
+| shrink-caused holes | 1,732 | **5** |
+| churn-caused holes | 2,281,073 | 2,283,704 |
+| shrink holes as a share of real holes | 0.0759% | **0.0002%** |
+
+A 346× reduction, with churn holes unchanged to within 0.1%. This is the
+conservative gate doing exactly what it should: it is strictly stricter than
+the tie-break, so it almost never fires a shrink that opens a hole. Only two
+cells in the whole grid produced any shrink hole at all (R=3/lag=24/p=0.016,
+and R=5/lag=96/p=0.032). Phantom episodes are counted as their own class and
+excluded from both figures: 25,836 episodes, 174,306 sector-ticks, 0.2% of all
+zero-declared sector-ticks.
+
+*Read this study's hazard rates carefully.* It deliberately escalates churn far
+past anything realistic until holes occur, so both variants show real data loss
+here — that is the point of the study, and it does not contradict the
+`held_loss = 0` results at the designed rates in §4.
+
+**The liar threshold does not move.** The Stage-3 false-coverage attack (agents
+declaring a full arc while storing nothing) collapses both encodings at exactly
+K = R:
+
+| K | K/R | V3 true floor / zero sectors | V5 true floor / zero sectors |
+|---|---|---|---|
+| 4 | 0.8 | 1 / 0 | 1 / 0 |
+| 5 | 1.0 | 0 / 139 | 0 / 44 |
+| 6 | 1.2 | 0 / 354 | 0 / 354 |
+| 10 | 2.0 | 0 / 357 | 0 / 357 |
+
+Identical above the threshold, and marginally better for V5 at the knee. That
+is the expected result rather than a reassuring one: a liar signs a false arc
+claim about itself under either encoding, so the encoding was never the
+defence. The *forged-intent* attack is a different matter — it becomes
+inapplicable rather than merely unmeasured, because there is no intent message
+to forge and `AgentInfoSigned` is signed.
+
+Note the durability measure used in the liar study is `true_*` (honest agents'
+real storage), not the declared/held split used elsewhere: `_build_held`
+credits every alive agent, and a liar is alive with a full-arc level while
+storing nothing.
+
 ## 5. Verdict
 
 **The new wire message is not needed. One bit is.**
@@ -224,10 +272,11 @@ demonstrably exists is a problem, take the second option.
   currently reach it.
 - Two Wind Tunnel runs per arm. Enough to say "no difference detected", not
   enough to rank the encodings.
-- Of Stage-3, partitions and scale have been re-run under this encoding; the
-  Byzantine/liar studies and `race_quantify` have not. Note the *forged-intent*
-  study becomes inapplicable rather than pending: `AgentInfoSigned` is signed,
-  so there is no intent to forge.
+- Of Stage-3, partitions, scale, the race grid and the liar sweep have been
+  re-run under this encoding. Not re-run: the repair (V4) interaction,
+  fairness, verified-coverage, partial-liar, decoupled-clock and lossy-gossip
+  studies. The forged-intent study is inapplicable rather than pending —
+  `AgentInfoSigned` is signed, so there is no intent to forge.
 - The equilibrium-arc comparison in §4.3 is a simulation result at N = 200 and
   is **not** reproduced on real transport at N = 12, where the spans overlap.
 - `AgentInfo` has an `expires_at`; the interaction between announcement
