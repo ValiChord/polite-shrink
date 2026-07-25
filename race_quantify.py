@@ -92,8 +92,15 @@ class RaceSim(Sim):
         cov = self.cov_h[(self.t - 1) % self.H]
         zero = cov == 0
         t0 = self.t - 1
+        held = getattr(self, "_last_held", cov)
         for k in np.nonzero(zero & ~self._prev_zero)[0]:
-            kind = "shrink" if self._shrunk_now[k] else "churn"
+            if held[k] > 0:
+                # Declared-zero but still held: an announcer under the
+                # AgentInfo encoding has un-declared a sector it is serving.
+                # Not a hole in the data, only in what peers can route to.
+                kind = "phantom"
+            else:
+                kind = "shrink" if self._shrunk_now[k] else "churn"
             self._open[int(k)] = (t0, kind)
         for k in np.nonzero(self._prev_zero & ~zero)[0]:
             onset, kind = self._open.pop(int(k))

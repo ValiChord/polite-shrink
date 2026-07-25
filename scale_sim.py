@@ -38,7 +38,7 @@ import numpy as np
 from polite_shrink import VARIANTS, Config, Sim, make_world
 from ext_common import INK, MUTED, VARIANT_COLOR, plt, settle_tick
 
-V1, V3 = VARIANTS[1], VARIANTS[3]
+V1, V3, V5 = VARIANTS[1], VARIANTS[3], VARIANTS[4]
 
 NS = [200, 500, 1000, 2000, 5000]
 TICKS = 4200
@@ -73,6 +73,7 @@ def one_run(args):
         "floor_min": int(np.min(m.floor[t_dist:])),
         "exposure": int(under[t_dist:].sum()),
         "loss": int(zeros[t_dist:].sum()),
+        "held_loss": int(np.array(m.held_zero)[t_dist:].sum()),
         "resizes_per_agent": float(np.sum(m.resizes) / n),
         "sync_per_agent": float(m.cum_sync[-1] / n),
         "mean_level_end": float(m.mean_level[-1]),
@@ -94,7 +95,7 @@ def grid(quick):
             if n == 200 and series == "density":
                 continue          # identical to fixed at N=200
             for scen in scens:
-                for v in (V1, V3):
+                for v in (V1, V3, V5):
                     jobs.append((n, series, scen, v.name))
     return jobs
 
@@ -107,7 +108,7 @@ def plot(rows, out):
     storm = [r for r in rows if r["scenario"] == "storm"]
 
     styles = {"fixed": "-", "density": "--"}
-    for vname in (V1.name, V3.name):
+    for vname in (V1.name, V3.name, V5.name):
         for series in ("fixed", "density"):
             pts = sorted([r for r in storm
                           if r["variant"] == vname and (

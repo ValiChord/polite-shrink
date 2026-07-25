@@ -97,9 +97,13 @@ class PartitionSim(Sim):
             if not a.alive:
                 continue
             alive_groups.add(g)
-            s, e = block(a.home, a.level, cfg.log2s)
+            # Per-group coverage is what peers in that group SEE, so it is
+            # built from declared arcs (identical to held for V0-V3).
+            s, e = block(a.home, a.declared, cfg.log2s)
             gcov[g, s:e] += 1
-            if a.intent_at > self.t:
+            # Under the AgentInfo-only encoding there is no intent channel to
+            # partition: an announcer has already left gcov above.
+            if a.intent_at > self.t and not self.v.agentinfo:
                 vs, ve = vacate_half(a.home, a.level, cfg.log2s)
                 gicov[g, vs:ve] += 1
                 glists[g].append((a.aid, vs, ve))
@@ -187,8 +191,13 @@ def summarize(key, name, m, cfg, windows, ticks):
     split_ticks = [t for s, e in windows for t in range(s, e)]
     return {
         "scenario": key, "variant": name,
+        # Declared-arc durability. Under the AgentInfo-only encoding an
+        # announcer un-declares a sector it is still holding, so these read
+        # low; the held_* pair below is the real bytes-on-disk figure.
         "dur_floor_min": int(min(m.floor[t0:])),
         "dur_loss_ticks": int(sum(m.zero_sectors[t0:])),
+        "dur_floor_min_held": int(min(m.held_floor[t0:])),
+        "dur_loss_ticks_held": int(sum(m.held_zero[t0:])),
         "avail_floor_min_split": int(min(m.avail_floor[t] for t in split_ticks)),
         "avail_zero_ticks_split": int(sum(m.avail_zero[t] for t in split_ticks)),
         "avail_zero_ticks_postheal": int(sum(m.avail_zero[heal:])),
@@ -258,6 +267,7 @@ def main():
                      for name, m in results.items()}
 
     hdr = ["scenario", "variant", "dur_floor_min", "dur_loss_ticks",
+           "dur_floor_min_held", "dur_loss_ticks_held",
            "avail_floor_min_split", "avail_zero_ticks_split",
            "avail_zero_ticks_postheal", "heal_settle", "resizes", "sync_cost"]
     lines = ["| " + " | ".join(hdr) + " |",

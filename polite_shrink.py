@@ -389,6 +389,7 @@ class Sim:
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
         held = self._build_held() if self.v.agentinfo else cov
+        self._last_held = held      # per-sector, for subclasses that classify
         self.m.held_floor.append(int(held.min()))
         self.m.held_zero.append(int((held == 0).sum()))
         self.t += 1

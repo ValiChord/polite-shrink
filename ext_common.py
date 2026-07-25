@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # --- palette (dataviz reference instance, light mode; validated) --------
-SERIES = ["#2a78d6", "#1baf7a", "#eda100", "#008300"]   # slots 1-4, fixed order
+SERIES = ["#2a78d6", "#1baf7a", "#eda100", "#008300", "#4a3aa7"]  # fixed order
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK_2 = "#52514e"
@@ -30,6 +30,7 @@ VARIANT_COLOR = {
     "V1 damped": SERIES[1],
     "V2 damped+jitter": SERIES[2],
     "V3 full (polite shrink)": SERIES[3],
+    "V5 polite (AgentInfo-only)": SERIES[4],
 }
 
 plt.rcParams.update({
