@@ -31,6 +31,66 @@ and proving it for that sector proves it for the ring.
   model has teeth: same setup, minus the two phases, and safety fails. So the
   safety is bought by the mechanism, not by the way the model is written.
 
+## Three more specs: can the intent ride on `AgentInfo`?
+
+The rule above assumes a dedicated announcement — `Msg::ShrinkIntent` on the
+kitsune2 fork. Reviewing the fork, Paul d'Aoust (Holochain core) pointed out
+that `AgentInfo` is **already gossiped** and could carry the same signal, and
+that a new message type is plumbing the idea does not need. These three specs
+test that, because the substitution is not free: with a dedicated message a
+peer can tell *"announced but still holding"* from *"already gone"*; with the
+arc claim alone it cannot, since both are simply absent from the claim set.
+The TCAS lower-id tie-break needs exactly that distinction as its input.
+
+All three model announcing as **publishing the reduced arc while still holding
+the data** — `declared ⊆ holds`, and an intender is a node in `holds \ declared`.
+
+- **`AgentInfoConservative.tla`** (encoding A) — give the tie-break up and read
+  only what is observable: proceed iff ≥ R *other* nodes are still claiming the
+  sector. **No error.** Safe for a structural reason rather than a subtle one:
+  `declared ⊆ holds` and the executing node has already un-declared, so the R
+  survivors it counts are real. The "discount your own stale declaration" step
+  of the original gate drops out for free.
+- **`AgentInfoOptimistic.tla`** (encoding B, the negative control) — keep the
+  tie-break by assuming every un-declared node is an intender that is still
+  holding. This is the faithful optimistic port, not a strawman: it is what you
+  get by taking "reuse `AgentInfo`" literally and leaving the gate as written.
+  **Violated.** The counterexample is not an unlucky interleaving but a
+  *sequential drain* — departed nodes stay on the books forever, so each
+  departure looks individually safe while coverage falls from 6 to 2 at R = 3.
+- **`AgentInfoAgeGated.tla`** (encoding C) — try to recover the missing bit from
+  `AgentInfo.created_at`: a claim that shrank recently reads as an unexecuted
+  intent, an older one as a departure. Modelled as an oracle correct except for
+  at most `Budget` departed nodes misread as intenders. **`Budget = 0`: no
+  error** — and it reduces exactly to `PoliteShrink.tla`. **`Budget = 1`:
+  violated.** Only the dangerous direction of error is modelled; misreading a
+  live intender as departed makes the gate stricter, which is safe.
+
+| Nodes | R | A conservative | C age-gated, `Budget=0` | B optimistic | C age-gated, `Budget=1` |
+|---|---|---|---|---|---|
+| 6 | 3 | no error (656) | no error (656) | violated (566) | violated (566) |
+| 7 | 2 | no error (2,172) | no error (2,172) | violated (2,153) | violated (2,153) |
+| 8 | 4 | no error (5,984) | no error (5,984) | violated (4,861) | violated (4,861) |
+| 8 | 1 | no error (6,560) | no error (6,560) | violated (6,561) | violated (6,561) |
+| 8 | 7 | no error (1,280) | no error (1,280) | violated (214) | violated (214) |
+
+Every "no error" state count is identical to `PoliteShrink`'s below, consistent
+with the encoding being a re-coordinatisation of the same state space
+(`intend ≡ holds \ declared`) whose stricter gate removes no reachable state.
+
+**What this settles.** The announcement needs no new wire message — but it does
+need one bit distinguishing *intending* from *departed*, and that bit cannot be
+inferred from the arc claim. Either drop the tie-break (A, safe, and a probe
+invariant confirms it still drains a sector to exactly R — so the cost is
+cancel-and-retry under concurrency, not failure to reach the target), or carry
+the bit explicitly. What is ruled out is deriving it from claim age: `Budget = 1`
+falsifies safety, so the heuristic would have to be *perfect* under churn.
+
+**What this does not settle.** These are untimed, unfair models: they establish
+reachability, not guaranteed progress. How many cancel/retry cycles encoding A
+costs when several nodes contend — and the two extra `AgentInfo` publishes per
+announce-then-abort — is a question for the simulation, not for TLC.
+
 ## What was checked
 
 `PoliteShrink` `SafeCoverage` verified with **no error** — exhaustively, all
@@ -54,9 +114,15 @@ Needs a JRE and `tla2tools.jar` (the TLA+ tools; ~4 MB,
 ```bash
 java -cp tla2tools.jar tlc2.TLC PoliteShrink.tla   # -> No error has been found
 java -cp tla2tools.jar tlc2.TLC NaiveShrink.tla    # -> Invariant SafeCoverage is violated
+
+# the AgentInfo-only encoding
+java -cp tla2tools.jar tlc2.TLC AgentInfoConservative.tla  # -> No error has been found
+java -cp tla2tools.jar tlc2.TLC AgentInfoOptimistic.tla    # -> Invariant SafeCoverage is violated
+java -cp tla2tools.jar tlc2.TLC AgentInfoAgeGated.tla      # -> depends on Budget in the .cfg
 ```
 
-Edit the `CONSTANTS` block in the `.cfg` files to check other `Nodes` / `R`.
+Edit the `CONSTANTS` block in the `.cfg` files to check other `Nodes` / `R`
+(and `Budget`, for `AgentInfoAgeGated`).
 
 ## Scope and honesty
 

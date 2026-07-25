@@ -2,3 +2,4 @@ states/
 *_TTrace_*
 *.st
 *.fp
+tla2tools.jar
