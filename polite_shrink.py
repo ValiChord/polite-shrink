@@ -205,6 +205,13 @@ class Sim:
         v = getattr(self, "v", None)
         return v is not None and v.agentinfo
 
+    def _agentinfo_for(self, a: Agent) -> bool:
+        """Per-agent form. `MixedSim` gives each agent its own variant, so a
+        mixed population can run both encodings at once; the plain sim has one
+        variant for everybody and falls back to it."""
+        v = getattr(a, "variant", None)
+        return v.agentinfo if v is not None else self._agentinfo
+
     # ---------------------------------------------------------- snapshots
     def _build_declared(self):
         """Coverage as PEERS see it — built from declared arcs. This is what
@@ -245,12 +252,12 @@ class Sim:
         # so both the grow-side subtraction (cov - icov) and the execute-side
         # tie-break degrade to reading `cov` alone. Leaving these empty *is* the
         # encoding — no other decision code needs to change.
-        if not self._agentinfo:
-            for a in self.agents:
-                if a.alive and a.intent_at > self.t:
-                    s, e = vacate_half(a.home, a.level, cfg.log2s)
-                    icov[s:e] += 1
-                    ilist.append((a.aid, s, e))
+        for a in self.agents:
+            if (a.alive and a.intent_at > self.t
+                    and not self._agentinfo_for(a)):
+                s, e = vacate_half(a.home, a.level, cfg.log2s)
+                icov[s:e] += 1
+                ilist.append((a.aid, s, e))
         self.icov_h[idx] = icov
         self.ilist_h[idx] = ilist
 
@@ -357,7 +364,7 @@ class Sim:
             a.intent_at = -1
             a.shrink_acc = 0
             self.cancels += 1
-            if self._agentinfo and a.decl_level >= 0:
+            if self._agentinfo_for(a) and a.decl_level >= 0:
                 a.decl_level = -1      # stand down: re-publish the wider arc
                 self.publishes += 1
 
@@ -405,7 +412,10 @@ class Sim:
         self.m.mean_level.append(float(np.mean(alive_lv)) if alive_lv else 0.0)
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
-        held = self._build_held() if self._agentinfo else cov
+        held = (self._build_held()
+                if self._agentinfo
+                or any(a.decl_level >= 0 for a in self.agents)
+                else cov)
         self._last_held = held      # per-sector, for subclasses that classify
         self.m.held_floor.append(int(held.min()))
         self.m.held_zero.append(int((held == 0).sum()))

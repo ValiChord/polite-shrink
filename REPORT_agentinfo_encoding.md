@@ -80,10 +80,17 @@ Seed robustness (`check_seeds.py`, seeds 7 / 99 / 1234 × activation + storm):
 **V5 `held = 0` in all six runs**, and declared `loss = 0` in all six — the 44
 sector-ticks above are specific to seed 42.
 
-### 4.1 Durability is untouched
+### 4.1 Durability — untouched at these seeds, but see §4.9
 
-`held_loss = 0` in every scenario and every seed. The measurement agrees with
-the proof: no sector's bytes ever went to zero.
+`held_loss = 0` in every scenario above and in all six `check_seeds` runs. At
+this sample size the measurement agrees with the proof: no sector's bytes went
+to zero.
+
+> **That claim does not survive a larger sample.** A 100-seed storm sweep
+> (§4.9) finds real loss in 6–9% of V5 runs against 1% for V3 — more frequent,
+> though smaller per event. The proof is unaffected (it bounds what the *gate*
+> can do, not what a mass death can do), but "durability untouched" was an
+> artefact of testing four seeds. Read §4.9 before quoting anything here.
 
 ### 4.2 The cost is reachability, not durability
 
@@ -297,6 +304,62 @@ needs less repairing. Consistent with the wider equilibrium in §4.3.
 differentiator: the scenario kills all but 5–15 of 200 agents at once, so real
 loss during recovery is inherent to the setup rather than to any controller.)
 
+## 4.9 The correction: more seeds change the durability answer
+
+Every "held_loss = 0" result above rests on four seeds or fewer. Running the
+storm scenario at 100 seeds per arm, on the plain simulator, at two severities:
+
+| storm kill | encoding | runs with real loss | total held-loss sector-ticks |
+|---|---|---|---|
+| 30% | V3 | **1 / 100** | 4,447 |
+| 30% | **V5** | **6 / 100** | **2,028** |
+| 40% | V3 | **1 / 100** | 8,316 |
+| 40% | **V5** | **9 / 100** | **3,723** |
+
+**Both columns have to be quoted together, because they point opposite ways.**
+V5 loses real data 6–9× more often, and loses less than half as much of it in
+total. V3's losses are rare and large; V5's are more frequent and small. Which
+is worse depends on whether the operator's exposure is `P(any loss)` or
+`E[loss]` — and for a DHT built around a hard redundancy invariant it is
+usually the former, so this counts against the encoding.
+
+The mechanism is not the gate. Loss opens *at* the mass-death tick, not after
+it (`held_race` is 0% at every death-detection latency ≤ 48 in the decoupled
+sweep), and both encodings enter the storm with an identical pre-storm held
+floor of exactly R. The two simply settle into different arc configurations,
+and V5's is unluckier more often while failing smaller.
+
+This was found only because the sample grew from 4 seeds to 100. It is the
+single most important correction in this report: **§4.1's "durability
+untouched" was an artefact of sample size**, and every durability claim here
+should be read as "at the seeds tested", with the seed count stated.
+
+### The decoupled death-clock (§11)
+
+The same sweep across death-detection latencies (24 seeds, gossip lag_max 24):
+
+| death lag | V3 held loss | V5 held loss | V5 `held_race` |
+|---|---|---|---|
+| coupled | 0 | 904 | 0% |
+| 8 | 0 | 680 | 0% |
+| 16 | 0 | 1,040 | 0% |
+| 24 | 0 | 1,280 | 0% |
+| 48 | 949 | 2,144 | 0% |
+| 96 | 3,895 | 4,320 | 4.2% |
+| 192 | 17,128 | 9,328 | 8.3% |
+
+§11's V3 finding holds — loss grows with detection latency and is zero when
+detection outruns gossip. V5 carries the §4.9 offset at every latency, and
+crosses below V3 at the extreme (192 = 8× the gossip lag), consistent with the
+"more often, smaller" shape. `held_race` stays at 0% up to 48, confirming these
+are not post-storm gate races.
+
+A methodological note worth keeping: these runs go through `MixedSim`, whose
+`__init__` is a deliberate re-implementation. Running the identical seeds
+through the plain `Sim` gives **byte-identical** totals (904 held / 1,305
+declared / 3-of-24), which is the reduction check that lets the per-agent port
+be trusted.
+
 ## 5. Verdict
 
 **The new wire message is not needed. One bit is.**
@@ -304,19 +367,29 @@ loss during recovery is inherent to the setup rather than to any controller.)
 Two defensible options, and the choice is not ours to make:
 
 - **Take encoding A.** Delete `protocol.rs`, `intents.rs` and the `k2sharding`
-  channel — about 255 lines and a wire format — and accept a transient
-  reachability dip plus a wider equilibrium arc. Durability is proven and
-  measured intact. Forged intents stop being a threat model at all, because
-  `AgentInfoSigned` is signed: the §6 forgery study and its receiver-side
-  range-validation both become moot rather than needing to ship.
+  channel — about 255 lines and a wire format. Buys: the §6.1 shrink race
+  effectively gone (§4.6), zero loss under 90% gossip drop *including* lost
+  announcements (§4.7), V4 repair intact (§4.8), and forged intents removed as
+  a threat model outright, since `AgentInfoSigned` is signed. Costs: a
+  transient reachability dip that worsens with N (§4.2, §4.4), and a
+  6–9× higher frequency of real loss under mass death (§4.9).
 - **Carry the bit explicitly** — one field on `AgentInfo`, a struct already
-  gossiped and already signed. Keeps the tie-break, the tighter equilibrium and
-  the wide declared arc through the wait; costs a field on a shared type.
+  gossiped and already signed. Keeps the tie-break, the tighter equilibrium,
+  the wide declared arc through the wait, and V3's storm loss frequency; costs
+  a field on a shared type.
 
-Which is right depends on something this study cannot settle: whether a
-transient hole in *declared* coverage is acceptable in Holochain, where the arc
-claim drives what peers ask you for. If a reader failing to find data that
-demonstrably exists is a problem, take the second option.
+**On the evidence here, the second option.** Two independent findings point the
+same way and neither is about elegance: the reachability cost grows with
+network size, which is the one axis sharding exists to serve; and the frequency
+of real loss under mass death is several times higher, which is the number a
+DHT operator with a hard redundancy target actually budgets against. Encoding A
+is genuinely better on the race and on lossy gossip, and if `P(any loss)` were
+not the binding constraint that trade might go the other way — but it usually
+is.
+
+What would change this recommendation: a real-transport measurement at large N
+showing the reachability dip does not materialise, or an operator for whom
+`E[loss]` rather than `P(any loss)` is the exposure that matters.
 
 ## 6. Limitations
 

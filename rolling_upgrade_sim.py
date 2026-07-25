@@ -151,6 +151,13 @@ class MixedSim(Sim):
         elif shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0:
             if v.polite:
                 a.intent_at = self.t + cfg.intent_delay
+                self.announces += 1
+                if v.agentinfo:
+                    # Per-agent here, unlike the base sim's sim-level check:
+                    # announcing IS narrowing this agent's own arc claim, so a
+                    # mixed population can carry both encodings at once.
+                    a.decl_level = a.level - 1
+                    self.publishes += 1
             else:
                 self._do_shrink(a)
 
@@ -195,11 +202,13 @@ class MixedSim(Sim):
         self.m.mean_level.append(float(np.mean(alive_lv)) if alive_lv else 0.0)
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
-        # Declared == held for every variant this study mixes (V0/V3), so the
-        # durability series is the same numbers; recorded anyway so any consumer
-        # of Metrics sees a fully populated object.
-        self.m.held_floor.append(int(cov.min()))
-        self.m.held_zero.append(int((cov == 0).sum()))
+        # Declared == held unless some agent is mid-announcement under the
+        # AgentInfo encoding (a mixed population may contain such agents), in
+        # which case durability has to be measured on what is actually held.
+        held = (self._build_held()
+                if any(a.decl_level >= 0 for a in self.agents) else cov)
+        self.m.held_floor.append(int(held.min()))
+        self.m.held_zero.append(int((held == 0).sum()))
         self.t += 1
 
 
