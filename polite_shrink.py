@@ -69,6 +69,7 @@ class Variant:
     hysteresis: bool
     jitter: bool
     polite: bool
+    agentinfo: bool = False     # carry the intent on the arc claim, not a message
 
 
 VARIANTS = [
@@ -76,6 +77,8 @@ VARIANTS = [
     Variant("V1 damped", hysteresis=True, jitter=False, polite=False),
     Variant("V2 damped+jitter", hysteresis=True, jitter=True, polite=False),
     Variant("V3 full (polite shrink)", hysteresis=True, jitter=True, polite=True),
+    Variant("V5 polite (AgentInfo-only)", hysteresis=True, jitter=True,
+            polite=True, agentinfo=True),
 ]
 
 
@@ -85,13 +88,21 @@ class Agent:
     home: int
     lag: int
     phase: int
-    level: int                  # currently synced/declared block level
+    level: int                  # block level actually HELD (synced, data present)
     alive: bool = True
     sync_until: int = -1        # tick when in-flight grow completes (-1 = none)
     sync_target: int = -1
     grow_acc: int = 0           # ticks the grow condition has persisted
     shrink_acc: int = 0
     intent_at: int = -1         # tick a pending vacate-intent executes (-1 = none)
+    decl_level: int = -1        # block level DECLARED to peers; -1 = same as held
+                                # (they differ only under the AgentInfo-only
+                                # encoding, where announcing means publishing the
+                                # reduced arc while still holding the data)
+
+    @property
+    def declared(self) -> int:
+        return self.level if self.decl_level < 0 else self.decl_level
 
 
 def block(home: int, level: int, log2s: int) -> tuple[int, int]:
@@ -121,12 +132,18 @@ def vacate_half(home: int, level: int, log2s: int) -> tuple[int, int]:
 
 @dataclass
 class Metrics:
-    floor: list = field(default_factory=list)        # min sector coverage
+    floor: list = field(default_factory=list)        # min DECLARED coverage
     frac_under: list = field(default_factory=list)   # fraction of sectors < R
     zero_sectors: list = field(default_factory=list) # sectors with 0 copies
     mean_level: list = field(default_factory=list)
     resizes: list = field(default_factory=list)      # arc changes this tick
     cum_sync: list = field(default_factory=list)     # cumulative sectors synced
+    # Durability ground truth: bytes on disk, regardless of what is claimed.
+    # Identical to the declared series above for every variant except the
+    # AgentInfo-only one, where the gap between them is the cost of announcing
+    # by un-declaring — reachable coverage dips while durability does not.
+    held_floor: list = field(default_factory=list)
+    held_zero: list = field(default_factory=list)
 
 
 class Sim:
@@ -146,6 +163,9 @@ class Sim:
         self.m = Metrics()
         self.sync_cost = 0
         self.resize_events = 0
+        self.announces = 0      # shrink intents raised
+        self.cancels = 0        # intents that stood down at the re-check
+        self.publishes = 0      # AgentInfo re-publishes the encoding costs
 
         S, H = cfg.sectors, cfg.lag_max + 2
         self.H = H
@@ -170,15 +190,30 @@ class Sim:
 
     # ---------------------------------------------------------- snapshots
     def _build_declared(self):
+        """Coverage as PEERS see it — built from declared arcs. This is what
+        decisions read, and what a reader can actually route to."""
         cfg = self.cfg
         cov = np.zeros(cfg.sectors, dtype=np.int16)
         lvl = np.full(len(self.agents), -1, dtype=np.int8)
         for a in self.agents:
             if a.alive:
+                s, e = block(a.home, a.declared, cfg.log2s)
+                cov[s:e] += 1
+                lvl[a.aid] = a.declared
+        return cov, lvl
+
+    def _build_held(self):
+        """Coverage of bytes actually on disk — the durability ground truth.
+        Identical to declared for every variant except the AgentInfo-only one,
+        where an announced-but-unexecuted node still holds what it no longer
+        claims."""
+        cfg = self.cfg
+        cov = np.zeros(cfg.sectors, dtype=np.int16)
+        for a in self.agents:
+            if a.alive:
                 s, e = block(a.home, a.level, cfg.log2s)
                 cov[s:e] += 1
-                lvl[a.aid] = a.level
-        return cov, lvl
+        return cov
 
     def _store_snapshot(self):
         cfg = self.cfg
@@ -188,11 +223,17 @@ class Sim:
         self.lvl_h[idx, :len(self.agents)] = lvl
         icov = np.zeros(cfg.sectors, dtype=np.int16)
         ilist = []
-        for a in self.agents:
-            if a.alive and a.intent_at > self.t:
-                s, e = vacate_half(a.home, a.level, cfg.log2s)
-                icov[s:e] += 1
-                ilist.append((a.aid, s, e))
+        # Under the AgentInfo-only encoding there is no intent channel: an
+        # announcer has already removed itself from the declared coverage above,
+        # so both the grow-side subtraction (cov - icov) and the execute-side
+        # tie-break degrade to reading `cov` alone. Leaving these empty *is* the
+        # encoding — no other decision code needs to change.
+        if not self.v.agentinfo:
+            for a in self.agents:
+                if a.alive and a.intent_at > self.t:
+                    s, e = vacate_half(a.home, a.level, cfg.log2s)
+                    icov[s:e] += 1
+                    ilist.append((a.aid, s, e))
         self.icov_h[idx] = icov
         self.ilist_h[idx] = ilist
 
@@ -212,12 +253,16 @@ class Sim:
         a.sync_target = a.level + 1
         a.sync_until = self.t + self._sync_ticks(added)
         a.grow_acc = a.shrink_acc = 0
+        if a.intent_at >= 0 and a.decl_level >= 0:
+            a.decl_level = -1          # abort: re-publish the wider arc
+            self.publishes += 1
         a.intent_at = -1
         self.sync_cost += added
         self.resize_events += 1
 
     def _do_shrink(self, a: Agent):
         a.level -= 1
+        a.decl_level = -1              # declared and held coincide again
         a.grow_acc = a.shrink_acc = 0
         a.intent_at = -1
         self.resize_events += 1
@@ -264,6 +309,12 @@ class Sim:
         elif shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0:
             if self.v.polite:
                 a.intent_at = self.t + cfg.intent_delay
+                self.announces += 1
+                if self.v.agentinfo:
+                    # Phase 1 IS the arc claim: publish the reduced arc now and
+                    # keep serving the data until the gate clears.
+                    a.decl_level = a.level - 1
+                    self.publishes += 1
             else:
                 self._do_shrink(a)
 
@@ -288,6 +339,10 @@ class Sim:
         else:
             a.intent_at = -1
             a.shrink_acc = 0
+            self.cancels += 1
+            if self.v.agentinfo and a.decl_level >= 0:
+                a.decl_level = -1      # stand down: re-publish the wider arc
+                self.publishes += 1
 
     # ---------------------------------------------------------- main loop
     def step(self):
@@ -333,6 +388,9 @@ class Sim:
         self.m.mean_level.append(float(np.mean(alive_lv)) if alive_lv else 0.0)
         self.m.resizes.append(self.resize_events)
         self.m.cum_sync.append(self.sync_cost)
+        held = self._build_held() if self.v.agentinfo else cov
+        self.m.held_floor.append(int(held.min()))
+        self.m.held_zero.append(int((held == 0).sum()))
         self.t += 1
 
     def run(self, ticks: int):

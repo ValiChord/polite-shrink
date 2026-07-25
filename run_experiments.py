@@ -19,7 +19,7 @@ import numpy as np
 from polite_shrink import VARIANTS, Config, Sim, make_world
 
 # --- palette (dataviz reference instance, light mode) -------------------
-SERIES = ["#2a78d6", "#1baf7a", "#eda100", "#008300"]   # slots 1-4, fixed order
+SERIES = ["#2a78d6", "#1baf7a", "#eda100", "#008300", "#4a3aa7"]  # fixed order
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK_2 = "#52514e"
@@ -61,10 +61,11 @@ def settle_tick(resizes, t_dist, rate=1.0, hold=300):
     return None
 
 
-def summarize(name, m, cfg, t_dist):
+def summarize(name, m, cfg, t_dist, sim=None):
     S = cfg.sectors
     under = np.array(m.frac_under) * S
     zeros = np.array(m.zero_sectors)
+    held_zeros = np.array(m.held_zero)
     post = slice(t_dist, None)
     st = settle_tick(m.resizes, t_dist)
     return {
@@ -73,8 +74,11 @@ def summarize(name, m, cfg, t_dist):
         "floor_min": int(np.min(m.floor[t_dist:])),
         "exposure": int(under[post].sum()),      # sector-ticks below R
         "loss": int(zeros[post].sum()),          # sector-ticks at zero copies
+        "held_loss": int(held_zeros[post].sum()), # ... with bytes still on disk
         "resizes": int(np.sum(m.resizes)),
         "sync_cost": int(m.cum_sync[-1]),
+        "cancels": sim.cancels if sim else 0,
+        "publishes": sim.publishes if sim else 0,
     }
 
 
@@ -85,8 +89,8 @@ def run_scenario(label, ticks, t_dist, world_kw, cfg):
         t0 = time.time()
         sim = Sim(cfg, v, events, initial, joins)
         m = sim.run(ticks)
-        results[v.name] = m
-        print(f"  {label:12s} {v.name:24s} {time.time()-t0:5.1f}s "
+        results[v.name] = (m, sim)
+        print(f"  {label:12s} {v.name:26s} {time.time()-t0:5.1f}s "
               f"floor_min(post)={min(m.floor[t_dist:])} "
               f"resizes={sum(m.resizes)}")
     return results
@@ -97,7 +101,7 @@ def plot_scenario(label, title, results, cfg, t_dist, out):
     fig.suptitle(title, fontsize=12, fontweight="bold", color=INK)
     ax_floor, ax_rate, ax_lvl, ax_cost = axes.flat
 
-    for i, (name, m) in enumerate(results.items()):
+    for i, (name, (m, _sim)) in enumerate(results.items()):
         c = SERIES[i]
         ax_floor.plot(m.floor, color=c, lw=1.6, label=name)
         ax_rate.plot(rolling(m.resizes), color=c, lw=1.6, label=name)
@@ -112,7 +116,10 @@ def plot_scenario(label, title, results, cfg, t_dist, out):
     ax_floor.text(0.02, 0.6, "0 = data loss", transform=ax_floor.get_yaxis_transform(),
                   ha="left", fontsize=8, color="#d03b3b", alpha=0.8)
     ax_floor.set_ylim(-0.8, 25)
-    ax_floor.set_title("Redundancy floor (min copies of any sector; y clipped at 25)")
+    # "declared" matters from V5 on: an announcer un-declares a sector it is
+    # still holding, so this floor can dip below the bytes actually on disk.
+    ax_floor.set_title("Redundancy floor (min declared copies of any sector; "
+                       "y clipped at 25)")
     ax_floor.set_ylabel("copies")
 
     ax_rate.set_title("Arc-resize rate (rolling 100-tick mean)")
@@ -165,12 +172,13 @@ def main():
         print(f"scenario: {key}")
         results = run_scenario(key, ticks, t_dist, kw, cfg)
         plot_scenario(key, title, results, cfg, t_dist, f"results/{key}.png")
-        for name, m in results.items():
-            rows.append({"scenario": key, **summarize(name, m, cfg, t_dist)})
+        for name, (m, sim) in results.items():
+            rows.append({"scenario": key,
+                         **summarize(name, m, cfg, t_dist, sim)})
 
     # summary table
     hdr = ["scenario", "variant", "settle", "floor_min", "exposure",
-           "loss", "resizes", "sync_cost"]
+           "loss", "held_loss", "resizes", "sync_cost", "cancels", "publishes"]
     lines = ["| " + " | ".join(hdr) + " |",
              "|" + "|".join("---" for _ in hdr) + "|"]
     for r in rows:
@@ -183,7 +191,15 @@ def main():
                 "< 1/tick for 300 ticks; floor_min = worst redundancy floor "
                 "after disruption; exposure = sector-ticks below R; loss = "
                 "sector-ticks at zero copies (data loss); sync_cost = total "
-                "sectors fetched+validated.\n\n" + table + "\n")
+                "sectors fetched+validated.\n\n"
+                "All coverage columns are measured on **declared** arcs — what "
+                "a reader can route to. `held_loss` is the same count over "
+                "bytes actually on disk, and differs from `loss` only for the "
+                "AgentInfo-only encoding (V5), where announcing means "
+                "un-declaring a sector you are still serving. `cancels` = "
+                "intents that stood down at the re-check; `publishes` = "
+                "AgentInfo re-publishes that encoding costs.\n\n"
+                + table + "\n")
     print("\n" + table)
 
 

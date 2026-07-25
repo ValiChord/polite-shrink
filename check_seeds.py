@@ -18,8 +18,12 @@ for seed in (7, 99, 1234):
         for v in VARIANTS:
             m = Sim(cfg, v, events, initial, joins).run(ticks)
             loss = int(np.sum(m.zero_sectors[t_dist:]))
+            held = int(np.sum(m.held_zero[t_dist:]))
             floor = int(np.min(m.floor[t_dist:]))
             st = settle_tick(m.resizes, t_dist)
-            row.append(f"{v.name.split()[0]}: loss={loss} floor={floor} "
+            # held= is printed only where it can differ from loss (V5), so the
+            # V0-V3 output stays byte-identical to the published run.
+            h = f" held={held}" if v.agentinfo else ""
+            row.append(f"{v.name.split()[0]}: loss={loss}{h} floor={floor} "
                        f"settle={'never' if st is None else st - t_dist}")
         print(f"seed={seed:5d} {key:11s} | " + " | ".join(row))
