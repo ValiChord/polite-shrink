@@ -67,6 +67,7 @@ we could think of.
 | **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs; the across 6,000 runs; the two-phase re-check never needs a complete view. **Scope:** coverage/arc declarations are dropped; the intent-announcement channel the handshake relies on is kept reliable here, so robustness to lost *intents* is future work | |
 | **Formal safety proof** ([spec/](spec/), TLA+/TLC) | "a sector never drops below R" **model-checked exhaustively** — every reachable state, no violation, for N up to 8 (R from 1 to 7); the naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. Scope: the proof covers the **gate** (the pre-drop re-check), not the policy around it — see [REPORT_stage1.md §2.2](REPORT_stage1.md) |
 | **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract — fix offered upstream ([PR #572](https://github.com/holochain/kitsune2/pull/572), open, awaiting review); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
+| **Does the announcement need its own wire message?** ([REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)) | **No — but it needs one bit.** Carrying the intent on the already-gossiped `AgentInfo` arc claim is model-checked safe and removes ~255 lines plus a wire format; what it cannot carry is *"intending to leave"* vs *"already gone"*, and deriving that from claim age is falsified by a single misclassification. The encoding wins on the shrink race (346× fewer holes), 90%-lossy gossip and storage fairness; it loses on reachability at scale and on how *often* a mass die-off costs data (6–9% of runs vs 1%) |
 
 **What we don't claim:** these are simulation + kitsune2-substrate
 measurements on one machine — not a Holochain-conductor deployment, not WAN.
@@ -108,6 +109,19 @@ policy has to respect, whoever writes it. (This is the *policy* half. The *gate*
 Each constraint traces to a run; sources and full detail in
 [REPORT_stage3.md → *Constraints on any sizing policy*](REPORT_stage3.md).
 
+**And what adopting the gate would actually cost.** Not a new wire message —
+the announcement can ride on the `AgentInfo` arc claim kitsune2 already gossips
+and signs. It does need **one bit** that claim cannot carry: whether a narrowed
+arc means *intending to leave* or *already gone*. That is either one field on
+an existing struct, or the ID tie-break on a dedicated signal; it cannot be
+inferred from the claim's age (a single misclassification loses a copy —
+model-checked). Mechanically, `update_storage_arcs` already moves the stored
+arc toward a target hint; what is missing is the rule that sets the hint, and
+the shrink direction `storage_arc.rs` explicitly leaves to "the host
+implementation or some sharding logic". Full comparison of both encodings, and
+the axes where the message-free one is *worse*, in
+[REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+
 **And the question this study cannot answer: what should R be?** Every result above is
 parameterised by it, and none of them decides it — that is a durability-versus-cost
 judgement belonging to whoever knows what these networks carry.
@@ -124,6 +138,11 @@ realism, and the formal proof — with the result and a link to each write-up.
 - **[wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)** — real
   iroh transport under Wind Tunnel: settle, storm, timed-storm; op-level
   reachability verdicts; flake accounting.
+- **[REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)** — can the
+  intent ride on `AgentInfo` instead of its own message? Three TLA+ specs, the
+  whole Stage-3 battery re-run under the alternative encoding, and Wind Tunnel
+  on real transport. Includes the correction that matters most in this repo:
+  a durability claim that held at four seeds did not hold at a hundred.
 - **[REPORT_stage3.md](REPORT_stage3.md)** — partitions, Byzantine agents,
   scale, the §6.1 race quantified, the §6.2 repair rule simulated before
   implementation, (§7) proof-gated *verified coverage* closing the
@@ -184,6 +203,7 @@ real network stack.
 | **V2 +jitter** | desynchronised decision epochs | TCP-RED: break lockstep reactions |
 | **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-priority intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
 | **V4 polite+repair** *(Stage 3)* | + expanding-ring repair: a hole in the level+g ancestor block motivates growth after `grow_need + (g−1)·2·lag` persistence — ring-near agents move first, distant timers reset when the hole closes | expanding-ring search (ad-hoc routing) |
+| **V5 polite (AgentInfo-only)** *(2026-07-25)* | the intent rides on the gossiped arc claim instead of a dedicated message: announcing = publishing the *reduced* arc while still holding the data. No tie-break (peers cannot tell an intender from a departed node), so the gate counts current claimants only | reviewer feedback from Holochain core — reuse what is already gossiped |
 
 > **TCAS?** The Traffic Collision Avoidance System in aircraft cockpits.
 > When two planes converge, both get *coordinated, complementary* orders —

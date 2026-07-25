@@ -6,7 +6,9 @@
 
 When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every *lower-ID* node that announced the same vacate as already gone** (a deterministic tie-break), instead of dropping immediately.
 
-That last clause is the load-bearing part. Announce-and-re-check *without* the tie-break does **not** close the race: two nodes each removing only themselves both conclude "R will remain" and both drop, and coverage falls below R — the exact 2021 failure. Ordering the contenders by ID so that exactly one proceeds and the rest defer is what actually closes the race that caused the 2021 data loss.
+That last clause is the load-bearing part. Announce-and-re-check *while everyone still counts each other as present* does **not** close the race: two nodes each removing only themselves both conclude "R will remain" and both drop, and coverage falls below R — the exact 2021 failure.
+
+What closes it is that **a node about to vacate must stop counting toward the redundancy of the nodes it is racing.** The ID tie-break is one way to arrange that: order the contenders so exactly one proceeds and the rest defer. There is a second way, which falls out of carrying the announcement on the arc claim that is already gossiped rather than on a message of its own — then announcing *is* removing yourself from everyone's count, and no ordering is needed. Both are model-checked safe; they trade differently, and the comparison is in [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
 
 ## The problem it addresses
 
@@ -45,13 +47,15 @@ Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, p
 
 Stated plainly, because the distinction matters:
 
-- **Proven** (TLA+/TLC, exhaustive over every reachable state, N ≤ 8, R = 1–7): the **gate** — the pre-drop re-check *with its tie-break* — means concurrent stale-view shrinks *cannot* drive a sector below R. The naive rule (no wait, no tie-break) fails the same check with a counterexample.
+- **Proven** (TLA+/TLC, exhaustive over every reachable state, N ≤ 8, R = 1–7): the **gate** — the pre-drop re-check in which an announcing node no longer counts toward its rivals' redundancy — means concurrent stale-view shrinks *cannot* drive a sector below R. This holds both for the ID tie-break and for the arc-claim encoding that achieves the same thing without one. The naive rule (no wait, no discount) fails the same check with a counterexample, as does the plausible-looking middle option of *guessing* which un-declared peers have really left: one wrong guess loses a copy.
 - **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
 
 ## Relation to the Kitsune2 Github repository issue #160
 
 #160 asks for a **policy** (recommend a target arc for a redundancy level). The cost-optimal target is nearly trivial (`R/N` of the ring); every hard part is elsewhere — measuring N under stale/dishonest views, reaching the target without a race, and not oscillating on the way. Polite-shrink is the **safety gate** that makes any such policy safe to run, plus the constraint list for whoever writes the policy.
+
+**What it would cost kitsune2 to adopt.** No new wire message: the vacate announcement can ride on the `AgentInfo` arc claim that is already gossiped and already signed. It does need one bit that claim cannot carry — whether a narrowed arc means *"intending to leave"* or *"already gone"* — and that bit cannot be inferred from the claim's age. So it is either one field on an existing struct, or the ID tie-break on a dedicated signal. `update_storage_arcs` already moves the stored arc toward a target hint; what is missing is the rule that sets the hint, and the shrink direction that `storage_arc.rs` currently leaves to "the host implementation or some sharding logic".
 
 ## Where to look next
 

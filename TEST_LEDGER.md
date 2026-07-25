@@ -16,7 +16,10 @@ Two things worth stating up front:
   [REPORT_stage1.md §2.2](REPORT_stage1.md).
 
 Throughout, **V3 / polite shrink** is the controller being tested; **V0 naive**, **V1
-damped**, **V2 jittered** are the weaker variants it's compared against.
+damped**, **V2 jittered** are the weaker variants it's compared against. **V5** is the
+same gate with the announcement carried on the already-gossiped `AgentInfo` arc claim
+instead of a dedicated message — the section at the end lists what happened when the
+whole battery was re-run against it.
 
 ---
 
@@ -63,6 +66,27 @@ damped**, **V2 jittered** are the weaker variants it's compared against.
 | **TLA+ / TLC model check** | "a sector never drops below R", checked over **every reachable state** (N ≤ 8, R from 1 to 7) | **no violation.** The naive rule fails the same check with a counterexample — which isolates the two-phase tie-break as the thing that buys safety ([spec/](spec/), [REPORT_stage3 §9](REPORT_stage3.md)) |
 
 ---
+
+## The same battery, re-run under the AgentInfo-only encoding (2026-07-25)
+
+Announcement carried on the gossiped arc claim, no dedicated message. Full detail and the
+trade-off analysis: [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+
+| What was tested | Result |
+|---|---|
+| Formal safety of the encoding (TLA+/TLC, N ≤ 8, R 1–7) | **Safe** without a tie-break; the optimistic reading is **falsified** by a sequential drain, and the age-gated guess is **falsified** by a single misclassification |
+| Stage-1 four scenarios | Durability held at the tested seeds; declared-coverage dips appear (phantom holes — bytes on disk, unreachable) |
+| Partitions (netsplit + heal, 3 geometries) | Held floor stays at exactly R; zero data loss; availability recovers fully post-heal |
+| Scale to N = 5,000 | Zero data loss; the reachability cost grows sharply with N (44 sector-ticks at N=200 → 38,394 at N=5,000) |
+| §6.1 shrink-race grid (1,680 runs) | **5 shrink-caused holes vs V3's 1,732** — 0.0002% of real holes against 0.0759% |
+| Lossy gossip to 90% drop | Zero data loss — and this closes §12's own caveat, since here the dropped channel *is* the announcement channel |
+| V4 expanding-ring repair, clamp = 0 | 12/12 recovery, nothing stuck, ~4× fewer repair grows |
+| False-coverage liars | Threshold unchanged: both collapse at K = R |
+| Verified coverage / partial liars | Both defences hold; zero true loss to K = 3R and at every held-fraction |
+| Storage fairness | Top-decile share **92.4% → 43.4%**, which the rotating-key fix (92.7%) did not achieve |
+| Decoupled death-clock | §11's shape holds; V5 carries a consistent small offset |
+| Wind Tunnel, real iroh transport (5 runs) | All verdicts PASS both arms; 0 of 21,657 and 0 of 23,526 ops lost. Indistinguishable from the control **at this scale** — the harness runs 12–18 agents, and the sim predicts zero effect there, so this validates the simulation rather than clearing the encoding |
+| **Mass-death frequency, 100 seeds** | **The correction.** Real loss in 6–9% of V5 storm runs vs 1% for V3 — more often, though less than half the total volume. Earlier "zero loss" readings rested on ≤4 seeds |
 
 ## What we don't claim
 

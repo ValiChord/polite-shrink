@@ -1,5 +1,12 @@
 # Dynamic DHT Storage-Arc Sizing: Controller Design, Robustness Evidence, and a Reference Implementation for Kitsune2
 
+> **Later work (2026-07-25).** The V0–V3 ablation below is unchanged. A fifth
+> variant has since been added — the same gate with the announcement carried on
+> the gossiped `AgentInfo` arc claim rather than a dedicated message, which is
+> safe without the ID tie-break and trades differently. See
+> [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+
+
 **Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic) — roles in §9 Provenance; citation record in [`CITATION.cff`](CITATION.cff)
 **Study period:** 2026-07-11 → 2026-07-12
 **Status:** complete (Stages 1, 1c, 2); design note published on [holochain/kitsune2#160](https://github.com/holochain/kitsune2/issues/160#issuecomment-4949241059)

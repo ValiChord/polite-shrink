@@ -1,5 +1,16 @@
 # Stage 3: partitions, Byzantine agents, scale, and the §6.1 race quantified
 
+> **Later work (2026-07-25).** Every study in this report has since been re-run
+> with the vacate announcement carried on the already-gossiped `AgentInfo` arc
+> claim instead of a dedicated message. The findings below are unchanged and
+> stand as the record of *this* campaign; the comparison lives in
+> [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md). One caveat in
+> §12 is now closed rather than open — "lossy intent gossip is future work"
+> applies only to the dedicated-message design, because under the alternative
+> encoding the dropped channel *is* the announcement channel, and the loss
+> result holds there too.
+
+
 **Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic)
 **Date:** 2026-07-13
 **Extends:** `REPORT_stage1.md` (Stage 1 simulation + Stage 2 kitsune2 port). Its §7
