@@ -235,6 +235,68 @@ real storage), not the declared/held split used elsewhere: `_build_held`
 credits every alive agent, and a liar is alive with a full-arc level while
 storing nothing.
 
+## 4.7 Lossy gossip — the encoding closes §12's own caveat
+
+§12 measured polite shrink with each viewer's coverage picture incomplete *and*
+inconsistent, and found data loss flat out to 90% message drop. It carried one
+scope limit, stated in `message_loss_sim.py`: *"Intents (icov/ilist) stay on the
+base lag — lossy intent gossip is future work."*
+
+Under this encoding that gap closes itself, because the announcement **is** the
+arc declaration: the channel §12 drops is now the channel the handshake depends
+on. So this run answers a question §12 could not — does the gate hold when the
+*intent* messages are the ones going missing?
+
+5 seeds × 5 drop rates × 2 scenarios (`agentinfo_message_loss.py`):
+
+| drop rate | V3 held loss | V5 held loss | V5 declared loss (activation) |
+|---|---|---|---|
+| 0% | 0 | **0** | 224 |
+| 25% | 0 | **0** | 44 |
+| 50% | 0 | **0** | 304 |
+| 75% | 0 | **0** | 132 |
+| 90% | 0 | **0** | 218 |
+
+**Zero data loss for both encodings at every drop rate**, and V5's held floor
+stays at exactly R = 5 through activation even at 90% drop. The declared-loss
+column is flat and non-monotonic in the loss axis — the same signature §12
+reported — so what little there is comes from announcements, not from the
+dropping.
+
+This is the one axis where the encoding is arguably *better* placed than the
+dedicated message: a `ShrinkIntent` on its own channel has never been tested
+against message loss at all, and here the equivalent signal is lost by
+construction and the invariant still holds.
+
+## 4.8 The repair rule (V4) — and a hypothesis of mine that was wrong
+
+V4 is the variant this work would actually recommend, so the encoding has to be
+checked against it. §6.2's deadlock cases, run with `clamp_min_peers = 0` so the
+small-network safety net is removed and the repair rule is the only thing that
+can recover the network — 12 seeds per case (`agentinfo_repair.py`):
+
+| case | encoding | recovered | stuck | median recovery | repair grows |
+|---|---|---|---|---|---|
+| random-5 | V3 | 12/12 | 0 | 224 | 51 |
+| random-5 | **V5** | **12/12** | 0 | 186 | **12** |
+| random-15 | V3 | 12/12 | 0 | 127 | 51 |
+| random-15 | **V5** | **12/12** | 0 | 119 | **12** |
+| clustered-15 | V3 | 12/12 | 0 | 127 | 52 |
+| clustered-15 | **V5** | **12/12** | 0 | 127 | **13** |
+| sparse-8@R2 | V3 | 12/12 | 0 | 38 | 0 |
+| sparse-8@R2 | **V5** | **12/12** | 0 | 54 | 1 |
+
+Full recovery under both, no deadlock anywhere. **The hypothesis this study was
+built to test was wrong**: I expected phantom holes to provoke *spurious*
+repair growth, since a declared-zero sector is a hole as far as the repair rule
+can tell. The opposite happened — V5 triggers about a quarter as many repair
+grows, because it shrinks less in the first place and the network therefore
+needs less repairing. Consistent with the wider equilibrium in §4.3.
+
+(The held-loss figures in these runs are large for both encodings and are not a
+differentiator: the scenario kills all but 5–15 of 200 agents at once, so real
+loss during recovery is inherent to the setup rather than to any controller.)
+
 ## 5. Verdict
 
 **The new wire message is not needed. One bit is.**
@@ -272,11 +334,16 @@ demonstrably exists is a problem, take the second option.
   currently reach it.
 - Two Wind Tunnel runs per arm. Enough to say "no difference detected", not
   enough to rank the encodings.
-- Of Stage-3, partitions, scale, the race grid and the liar sweep have been
-  re-run under this encoding. Not re-run: the repair (V4) interaction,
-  fairness, verified-coverage, partial-liar, decoupled-clock and lossy-gossip
-  studies. The forged-intent study is inapplicable rather than pending —
+- Of Stage-3, partitions, scale, the race grid, the liar sweep, lossy gossip
+  and the V4 repair rule have been re-run under this encoding. Not re-run:
+  fairness, verified-coverage, partial-liar, and the decoupled death-clock
+  study. The forged-intent study is inapplicable rather than pending —
   `AgentInfoSigned` is signed, so there is no intent to forge.
+- The lossy-gossip run drops coverage/arc declarations, which under this
+  encoding *are* the announcements. It does not separately model an announcer
+  whose narrowed claim is delivered to some peers and not others *within* a
+  single decision — the per-viewer `known` matrix does produce exactly that,
+  but it has not been isolated as its own study.
 - The equilibrium-arc comparison in §4.3 is a simulation result at N = 200 and
   is **not** reproduced on real transport at N = 12, where the spans overlap.
 - `AgentInfo` has an `expires_at`; the interaction between announcement
