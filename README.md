@@ -153,6 +153,11 @@ realism, and the formal proof — with the result and a link to each write-up.
   separate from the proven gate.
 - **[spec/README.md](spec/README.md)** — the formal proof: the two-phase rule
   model-checked safe over every reachable state, the naive rule falsified.
+- **[RELATED_regularisation.md](RELATED_regularisation.md)** — *a reading aid, not a result.*
+  The shrink race read as an L1 problem, for readers coming from statistics or ML: why the
+  objective determines coverage but provably cannot determine which nodes hold it, and why the
+  ID tie-break is a Gauss–Seidel sweep order manufactured without a coordinator. Includes what
+  the analogy does **not** license.
 
 ## Where is the code?
 
