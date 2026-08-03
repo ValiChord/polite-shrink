@@ -403,10 +403,56 @@ the write-agent anchor has converged, so they draw from a single-entry link set.
 writer's own announce link is retrievable immediately; a zero-arc writer's must first reach a
 full-arc node, and the second full-arc writer's has not propagated either.
 
-⚠️ **The direct test has NOT been run** — log `links.len()` inside
-`get_random_agent_with_write_behaviour`, or re-select periodically instead of once. Do that
-before asserting the mechanism as fact; everything above is the draw distribution, which is
-solid, plus an inference from it, which is not the same thing.
+### ✅ DIRECT TEST RUN 2026-08-03 — mechanism CONFIRMED, and it is worse than inferred
+
+`links.len()` was logged inside `get_random_agent_with_write_behaviour` and the scenario run
+in a fresh space at the baseline's own 300s duration. **Two runs, identical result:**
+
+| run | selection calls returning 0 candidates | returning 1 | returning 2 or 3 |
+|---|---|---|---|
+| diag-4 (300s) | 1618 | **3** (one per reader) | **0** |
+| diag-5 (300s) | 1916 | **3** (one per reader) | **0** |
+
+**The candidate set is never larger than ONE.** Readers poll and see nothing for ~27s, then
+all three simultaneously see a single link, select it, and stop calling.
+
+🔴 **And the one visible writer was a FULL-arc writer in both runs.** Neither the zero-arc
+writer *nor the second full-arc writer* ever became visible at selection time:
+
+| run | visible candidate | not visible |
+|---|---|---|
+| diag-4 | `uhCAkPx83E0…` (full_write) | `uhCAkVBz3…` (zero_write), `uhCAkW4q_…` (full_write) |
+| diag-5 | `uhCAk8WUoQ…` (full_write) | `uhCAkLjpEd9…` (zero_write), `uhCAkAofNZ0…` (full_write) |
+
+So the §7.7 inference was right about the mechanism and **understated the problem**: it is
+not merely that the zero-arc author is never read — **only one of three announced writers is
+ever a candidate.** The scenario's reader population collapses onto a single peer, which is
+also why the read-side metrics are effectively a measurement of one connection (§7.6).
+
+### ⚠️ Two methodological findings from running it — both cost real time
+
+1. 🔴 **Zome `debug!` is INVISIBLE by default in a release build.** `wasm_trace` filters on
+   `WASM_LOG`, default `[wasm_trace]=debug` — that is **span** filter syntax, and the
+   `wasm_trace` span only exists when Holochain is built with the `instrument` feature.
+   A release build has no such span, so the filter matches nothing and instrumentation
+   silently produces zero output. **Set `WASM_LOG=debug`.** One full diagnostic cycle was
+   run and thrown away before this was spotted.
+2. 🟠 **Instrumenting this scenario CANNOT avoid changing the space.** Editing the zome
+   changes the DNA hash, which changes the space — so the diagnostic never runs in the same
+   network as the measurement. Controlled for as follows, and the confound is real:
+
+   | condition | space | iroh connect timeouts | readers found a peer |
+   |---|---|---|---|
+   | instrumented, 60s | fresh | 13, 13, 15 | **never** (0 candidates in 6945 calls) |
+   | **upstream zome, 60s, 3 min later** | established | 1, 0 | **yes — 3/3 readers, both runs** |
+   | instrumented, 300s | fresh | — | yes, after ~27s |
+
+   Same box, same duration, minutes apart — **so the difference is the SPACE, not load or
+   time of day.** A fresh space did not converge within 60s; the established space did.
+   ⚠️ **This means the §7.5 baseline ran in a space already populated by earlier runs.**
+   Whether that population was only our own prior conductors or included foreign agents was
+   NOT established. Either way it is a reproducibility caveat on the baseline: a
+   cold-start network behaves differently, and 60s runs in a fresh space fail outright.
 
 **Why this matters for Campaign B:** if it holds, the scenario never exercises *"read a
 zero-arc author's activity"* — the case where the data must be served **entirely** by
@@ -427,10 +473,19 @@ the full-arc serving cost.**
 **Blocking Campaign B's validity — resolve BEFORE the comparison arm:**
 - [ ] Establish what `open_connections` counts (peer gossip only, or bootstrap/relay too).
       The ThetaSinner comparison in §7.5 is uninterpretable until this is settled.
-- [ ] Direct test of the §7.7 mechanism: log `links.len()` in
-      `get_random_agent_with_write_behaviour`. ⚠️ **If readers really never query a zero-arc
-      author, mixed-arc results do NOT cover the full-arc serving cost** — the headline
-      question — and the scenario needs periodic re-selection or a forced peer assignment.
+- [x] Direct test of the §7.7 mechanism — **DONE, mechanism confirmed.** Only ONE of three
+      announced writers is ever a candidate, and it was a full-arc writer in both runs.
+- [ ] 🔴 **Decide what to do about it, because it invalidates the scenario as a probe of the
+      #214 question as currently run.** Readers never query a zero-arc author, so mixed-arc
+      results do **not** cover the full-arc serving cost — the headline question. Options:
+      periodic re-selection instead of once; forced peer assignment by behaviour; or a
+      longer warm-up before readers select. ⚠️ Any of these is a **change to upstream's
+      scenario**, so it trades the "measured in the maintainers' own harness" claim (§2) for
+      a measurement that actually answers the question. **That trade is the real decision
+      facing Campaign B — take it deliberately, and if the scenario is modified, say so
+      plainly rather than implying an unmodified upstream run.**
+- [ ] Consider reporting the single-candidate finding upstream — it affects anyone using
+      these scenarios, and #214/#416 are the natural threads. Draft, do not send unsolicited.
 - [ ] Decide whether read-side metrics can carry a comparison at all. Per-peer variation is
       12× within a single run (§7.6); write-side metrics (9–14% spread) are the usable ones.
 
