@@ -460,6 +460,89 @@ full-arc nodes, which is the most load-bearing part of #214's question and the c
 shrink most needs to speak to. **Check this before treating mixed-arc results as covering
 the full-arc serving cost.**
 
+### 7.8 🔴 CAMPAIGN B CANNOT COMPARE POLITE-SHRINK ON THESE SCENARIOS — premise error
+
+**Found 2026-08-03 while preparing the comparison arm, before the build was run.** Two
+independent reasons, both from the fork's own source:
+
+**1. Polite shrink cannot engage at this scale.** `K2ShardingConfig::clamp_min_peers`
+defaults to **25**. `crates/gossip/src/sharding/controller.rs:308`:
+
+```rust
+// Small-network clamp: too few visible peers, hold a full arc.
+if (visible_peers as u32) < cfg.clamp_min_peers {
+    if ctl.declared_level < MAX_LEVEL { self.start_grow(agent, ctl); }
+    return;
+}
+```
+
+Below 25 peers the controller does not merely decline to shrink — it **grows** agents
+toward a full arc. The scenario runs **6**. So a patched run would either be identical to
+stock, or would actively fight the scenario by growing its pinned zero-arc nodes. The
+module's own docs say small networks "gain nothing from sharding and are the most fragile
+under it", so lowering the clamp to force engagement would test polite shrink in the regime
+it explicitly excludes — a result that is easy to attack and deserves to be.
+
+**2. The deeper mismatch — the scenarios pin the variable polite shrink computes.** Every
+one of upstream's seven arc scenarios sets the arc statically via conductor config
+(`with_target_arc_factor(0)`). Polite shrink's whole thesis is that the arc should be
+derived dynamically under a redundancy floor. The two answer complementary questions —
+*"what does a mixed-arc network cost?"* versus *"can a network reach a mixed-arc
+configuration safely?"* — and a stock-vs-patched run on a pinned-arc scenario tests neither.
+
+⚠️ **This is a premise error in §2, not a problem with the fork.** "Use upstream's own arc
+scenarios as the baseline" is a good instinct for credibility and the wrong instrument for
+this claim. **A conductor-level polite-shrink test needs a purpose-built scenario:** ~25+
+nodes, arcs left dynamic, measuring whether redundancy ever drops below target while load
+falls. That is Stage-2's experiment lifted to conductor level, and it is real work — do not
+smuggle it in as "one more scenario".
+
+✅ **What survives, and it is the better deliverable.** The scenario defect (§7.7), the fix,
+and the zero-arc visibility result (§7.9) are self-contained, are what upstream's own
+instrumentation was built to surface, and stand whether or not anyone is interested in
+polite shrink. Ship that; treat the conductor-level polite-shrink test as separate work.
+
+### 7.9 🆕 RESULT — a zero-arc author's chain is nearly invisible to readers
+
+With the §7.7 fix applied, readers cover all three writers for the first time and the
+zero-arc author is read. **6 runs × 300s.** ❌ **An early single-run reading of "5.4%
+visible" was quoted before replication and did NOT hold — the magnitude is unstable. The
+direction did hold.**
+
+**Zero-arc author visibility, every run where coverage was complete:**
+
+| run | authored | max seq visible | visible | full-arc peers, same run |
+|---|---|---|---|---|
+| fixed/1 | 3177 | 172 | **5.4%** | 99.7%, 97.2% |
+| fixed/3 | 3174 | 6 | **0.2%** | 93.5%, 99.1% |
+| fixed2/2 | 3358 | 2336 | **69.6%** | 92.8%, 99.9% |
+
+**What replicates and what does not:**
+- ✅ **Direction, 3 of 3:** the zero-arc author is read *less completely than every full-arc
+  author in the same run*, every time. Full-arc sits at **93–100%** across all runs.
+- ❌ **Magnitude, not at all:** 0.2% / 5.4% / 69.6%. **Do not quote a figure.** The honest
+  claim is "substantially and variably worse, never better".
+- ✅ **Zero-arc nodes author the MOST, 4 of 4:** 3177, 3174, 3358, 3086 versus ~1900–2750
+  for full-arc. The §7.5 write-side signal replicates under the fixed scenario.
+
+⚠️ **Announcement propagation is itself unreliable, and this is arguably the bigger finding.**
+Only **3 of 6** runs reached full writer visibility:
+
+| outcome | runs | what the reader did |
+|---|---|---|
+| all 3 writers visible | 3 | full coverage, zero-arc author read |
+| only 2 visible | 2 | bounded fallback selected from 2; **no zero-arc coverage** |
+| never selected at all | 1 | first fix version, before the fallback existed |
+
+That last row was a flaw in the **fix**, not only in the scenario: v1 traded "always selects,
+but only one peer" for "selects correctly or not at all", and produced a run with healthy
+writers (7741 entries), zero failures, zero iroh timeouts — and no reader data whatsoever.
+Fixed with a bounded wait plus a new **`write_peers_visible_at_selection`** metric tagged
+`complete: true|false`. Verified doing its job: the two fallback runs recorded
+`value: 2, complete: false`, the full run `value: 3, complete: true`. **That metric is the
+part most worth proposing upstream** — it converts a silent, invisible degradation into
+something every ordinary run records.
+
 ---
 
 ## 8. Definition of done
