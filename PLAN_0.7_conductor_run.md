@@ -549,14 +549,28 @@ something every ordinary run records.
 not survive.** A three-point write-rate sweep (3 runs each, 300s, same box, same build) shows
 it was contention on this machine, not a property of zero-arc nodes.
 
-*visibility = highest action seq a reader observed for an author ÷ entries that author wrote.
-Over 100% because the seq includes ~5 genesis actions.*
+*visibility = highest action seq a reader observed ÷ (entries the author wrote + 5).*
+
+❌ **Denominator corrected 2026-08-03.** The first version divided by the raw entry count and
+produced visibilities **above 100%**, which is nonsense and would have been the first thing a
+maintainer queried. Chain seq counts **all** actions, not just sample entries: each writer has 6
+actions before its first entry (Dna, AgentValidationPkg, agent key, InitZomesComplete, the cap
+grant from `admin_authorize_signing_credentials`, the `announce_write_behaviour` link), so N
+entries put the head at seq **N+5**. Verified: observed-minus-authored is exactly +5 on every
+fully-tracked writer row. **Numbers below are the corrected ones.**
 
 | write rate | zero-arc visibility | full-arc visibility | runs with complete writer coverage |
 |---|---|---|---|
-| **0 ms** — the scenario's current default, ~10/s | **0.2%, 5.4%, 69.6%** | 85–100% | **3 of 6** |
-| **250 ms** — ~3/s | **96.9%, 98.9%, 99.6%** | 100.3–100.5% | **3 of 3** |
-| **1000 ms** — ~0.9/s | **100.4%, 100.4%, 100.7%** | 101.8% ×6 | **3 of 3** |
+| **0 ms** — the scenario's current default, ~10/s | **0.2%, 5.4%, 69.5%** | 85.2–99.6% (n=10) | **3 of 6** |
+| **250 ms** — ~3/s | **96.4%, 98.4%, 99.1%** | 99.8–100.0% | **3 of 3** |
+| **1000 ms** — ~0.9/s | **98.6%, 98.6%, 98.9%** | 100.0% ×6 | **3 of 3** |
+
+🆕 **The corrected denominator exposes something the broken one hid: a small residual gap.** Once
+the machine can keep up, zero-arc authors sit at **96–99%** against a flat **100%** for full-arc —
+**6 of 6 runs**. That is consistent with the extra hop a zero-arc author's data must make before
+it is readable, and it is a lag of a handful of actions, not a collapse. **This is the honest
+version of what §7.9 tried to claim:** the structural effect is real, consistent, and *small*;
+the dramatic numbers were load.
 
 **Throttle the writer even slightly and a zero-arc author is tracked as completely as a
 full-arc one.** There is no structural zero-arc read penalty in this data. ⚠️ **Do not repeat
