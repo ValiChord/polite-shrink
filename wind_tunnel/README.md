@@ -11,8 +11,15 @@ Results from this workspace are **"measured under Wind Tunnel at the kitsune2
 substrate layer over real iroh transport with live churn."** That is the layer
 the sharding module lives at and the layer the kitsune team owns.
 
-- This is **not** a full Holochain-conductor run. Holochain pins kitsune2 0.4.x;
-  rebuilding it against the fork is out of scope.
+- This is **not** a full Holochain-conductor run — none has been done.
+  ⚠️ **The reason recorded here has expired.** It read *"Holochain pins kitsune2 0.4.x;
+  rebuilding it against the fork is out of scope"*, which was true of Holochain 0.6.x.
+  **Holochain 0.7.0 pins kitsune2 `0.5.0`** — the same line this fork was built against
+  (`0.5.0-dev.4`) — so the gap is now a dev→release delta, not a whole-line mismatch.
+  A conductor run is therefore plausible rather than out of scope; it would need the
+  fork rebased onto the `0.5.0` release and Holochain built with a `[patch.crates-io]`
+  override. Verified 2026-08-03 against the shipped `holochain-0.7.0` manifest; see
+  `PROVENANCE.md` §2.
 - As of 2026-07-12 the settle and storm runs in `results/` are complete: V3
   **has now been measured under Wind Tunnel at this layer** (both verdicts
   PASS — see `results/REPORT_stage2_wind_tunnel.md` for exactly what that does and does not

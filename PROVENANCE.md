@@ -34,6 +34,50 @@ reproduction of the simulation results has also occurred (see repository history
 Append newest entry first. Each entry: date · source (commit/PR/issue) · observation ·
 which polite-shrink pattern it relates to · verbatim quote where useful.
 
+### 2026-08-03 — Holochain 0.7.0 pins kitsune2 **0.5.0**; a full-conductor run is no longer out of scope
+
+Checked against the shipped `holochain-0.7.0` tag's workspace manifest:
+
+```
+kitsune2      = { version = "0.5.0", ... }
+kitsune2_api  = "0.5.0"
+kitsune2_core = "0.5.0"
+kitsune2_transport_iroh = { version = "0.5.0", ... }
+```
+
+**Why this matters for the claim boundary.** `wind_tunnel/README.md` has said since the
+Stage-2 campaign that results are measured *at the kitsune2 substrate layer* and that a
+full Holochain-conductor run is out of scope, because *"Holochain pins kitsune2 0.4.x"*.
+That was true of Holochain 0.6.x. It is **no longer true of 0.7.0**: Holochain now pins
+the same **0.5.0** line the sharding fork was built against (`0.5.0-dev.4`, per the
+wind-tunnel rev this workspace pins). The gap is now a dev→release delta inside one
+line, not a whole-line mismatch.
+
+This does **not** claim a conductor run has been done — none has. It records that the
+stated reason it could not be attempted has expired, so the README no longer implies a
+door that is shut. Doing it would require rebasing the fork from `0.5.0-dev.4` onto the
+`0.5.0` release (which includes the authenticated-relay work merged between `dev.6` and
+release) and building Holochain 0.7 with a `[patch.crates-io]` override.
+
+Relates to: the Stage-2 Wind Tunnel campaign's claim boundary, and to the maintainer
+feedback that the 0.7 data model and validation×sharding are the real blocker — a
+0.7-era conductor run is the measurement that would speak to it directly.
+
+**Also observed the same day, `holochain/wind-tunnel`:** its mixed full-arc / zero-arc
+scenario work is **complete** — issues #161 (closed 2025-09-26), #214 (closed 2025-12-17,
+opened by ThetaSinner, who also opened kitsune2 #160) and #416 (closed 2026-02-12, adding
+the *get requests served by full-arc nodes* metric, which required Holochain 0.6 via
+holochain PR #5451). Seven arc scenarios ship in `scenarios/` today:
+`full_arc_create_validated_zero_arc_read`, `mixed_arc_get_agent_activity`,
+`mixed_arc_must_get_agent_activity`, `zero_arc_create_and_read`, `zero_arc_create_data`,
+`zero_arc_create_data_validated`, `unyt_chain_transaction_zero_arc`.
+
+⚠️ **Consequence for framing:** #214's premise was *"what we don't know is how hard the
+full arc conductors will have to work to carry the validation load and serve data for the
+zero arc conductors"*. The scenarios and the metric now exist, so **that may no longer be
+unknown** — do not assert that the full-arc serving cost is unmeasured without checking
+for results first.
+
 ### 2026-07-18 — baseline, code-verified against `holochain/kitsune2` @ `62cf344` (2026-07-17)
 
 State of the relevant machinery at the time this log was opened:
