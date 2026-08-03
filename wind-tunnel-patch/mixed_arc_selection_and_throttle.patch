@@ -1,0 +1,171 @@
+diff --git a/scenarios/mixed_arc_get_agent_activity/src/main.rs b/scenarios/mixed_arc_get_agent_activity/src/main.rs
+index 347e6b4..c74d270 100644
+--- a/scenarios/mixed_arc_get_agent_activity/src/main.rs
++++ b/scenarios/mixed_arc_get_agent_activity/src/main.rs
+@@ -7,6 +7,44 @@ use holochain_zome_types::prelude::AgentActivityStatus;
+ 
+ const RECORD_OPEN_CONNECTIONS_PERIOD_MS: i64 = 3_000;
+ 
++/// How many write-behaviour agents a reader waits to see before selecting one.
++///
++/// Defaults to the 3 writers of this scenario's documented local shape
++/// (`zero_write:1 full_write:2`). Override when running a different mix.
++fn expected_write_agents() -> usize {
++    std::env::var("EXPECTED_WRITE_AGENTS")
++        .ok()
++        .and_then(|v| v.parse().ok())
++        .unwrap_or(3)
++}
++
++/// Pause between writes, in milliseconds. Default 0 = unthrottled, i.e. the
++/// behaviour this scenario has today.
++///
++/// Note the sibling scenario `mixed_arc_must_get_agent_activity` DOES throttle
++/// (batches of 10 then a 5s sleep, ~2 entries/s), while this one writes flat out
++/// at ~10/s. Used here to separate load-induced propagation lag from structural
++/// lag: if a zero-arc author's visibility recovers as the rate drops, the lag was
++/// load; if it does not, it is not.
++fn write_sleep_ms() -> u64 {
++    std::env::var("WRITE_SLEEP_MS")
++        .ok()
++        .and_then(|v| v.parse().ok())
++        .unwrap_or(0)
++}
++
++/// How long a reader waits for every expected writer to become visible before
++/// giving up and selecting from whatever it can see.
++///
++/// Default 90s: measured convergence was ~27s when it happened at all, and one
++/// run in three never reached the full set within 300s.
++fn selection_timeout_s() -> f64 {
++    std::env::var("SELECTION_TIMEOUT_S")
++        .ok()
++        .and_then(|v| v.parse().ok())
++        .unwrap_or(90.0)
++}
++
+ #[derive(Debug, Default, Clone, Copy)]
+ pub struct ObservedChainHead {
+     pub action_seq: u32,
+@@ -16,6 +54,9 @@ pub struct ObservedChainHead {
+ #[derive(Debug, Default)]
+ pub struct ScenarioValues {
+     write_peer: Option<AgentPubKey>,
++    /// When this reader first looked for a write peer, so selection can fall
++    /// back after a bounded wait instead of never selecting at all.
++    first_selection_attempt_micros: Option<i64>,
+     entries_created_count: u32,
+     retrieval_errors_count: u32,
+     last_observed_chain_head: ObservedChainHead,
+@@ -105,6 +146,12 @@ fn agent_behaviour_write(
+         .with_field("value", ctx.get().scenario_values.entries_created_count);
+     ctx.runner_context().reporter().clone().add_custom(metric);
+ 
++    // Same idiom as the sibling scenario's SLEEP_INTERVAL_WRITE_BEHAVIOUR_MS.
++    let sleep_ms = write_sleep_ms();
++    if sleep_ms > 0 {
++        std::thread::sleep(std::time::Duration::from_millis(sleep_ms));
++    }
++
+     Ok(())
+ }
+ 
+@@ -173,16 +220,53 @@ fn agent_behaviour_get_agent_activity(
+             }
+         }
+         None => {
+-            let maybe_write_peer: Option<AgentPubKey> = call_zome(
++            // FIX: do not select until every expected writer has propagated.
++            //
++            // `get_random_agent_with_write_behaviour` selects from whatever links
++            // are visible on the first call. Measured on Holochain 0.7.0, that set
++            // holds exactly ONE link for the first ~27s, so all readers picked the
++            // same peer and the zero-arc writer was never selected in 27 draws --
++            // meaning the scenario never exercised "read a zero-arc author", the
++            // case where full-arc nodes must serve everything.
++            let write_peers: Vec<AgentPubKey> = call_zome(
+                 ctx,
+                 "agent_activity",
+-                "get_random_agent_with_write_behaviour",
++                "get_agents_with_write_behaviour",
+                 (),
+             )?;
+ 
+-            if let Some(write_peer) = maybe_write_peer {
+-                ctx.get_mut().scenario_values.write_peer = Some(write_peer.clone());
++            let now = Timestamp::now().0;
++            let waiting_since = *ctx
++                .get_mut()
++                .scenario_values
++                .first_selection_attempt_micros
++                .get_or_insert(now);
++            let waited_s = (now - waiting_since) as f64 / 1e6;
++
++            // Bounded wait. Without a fallback, a writer whose announcement never
++            // propagates leaves the reader selecting nothing AT ALL and recording
++            // nothing -- observed in 1 of 3 runs at 300s, where all writers were
++            // healthy but only 2 of 3 links ever became visible.
++            let ready = write_peers.len() >= expected_write_agents();
++            if ready || (waited_s >= selection_timeout_s() && !write_peers.is_empty()) {
++                // Deterministic assignment over a sorted set: guarantees every
++                // writer is covered, including the zero-arc one, and removes a
++                // source of run-to-run variance. Falls out evenly when readers
++                // outnumber writers.
++                let index = ctx.agent_index() % write_peers.len();
++                ctx.get_mut().scenario_values.write_peer = Some(write_peers[index].clone());
++
++                // Record how many writers were actually visible when this reader
++                // committed. Without this the shortfall is invisible in results:
++                // a run can look healthy while every reader watched the same peer.
++                reporter.add_custom(
++                    ReportMetric::new("write_peers_visible_at_selection")
++                        .with_tag("agent", ctx.get().cell_id().agent_pubkey().to_string())
++                        .with_tag("complete", ready.to_string())
++                        .with_field("value", write_peers.len() as u64),
++                );
+             }
++            // Otherwise leave write_peer unset and retry on the next iteration.
+         }
+     }
+ 
+diff --git a/zomes/agent_activity/coordinator/src/lib.rs b/zomes/agent_activity/coordinator/src/lib.rs
+index 9ae3e12..35d4f95 100644
+--- a/zomes/agent_activity/coordinator/src/lib.rs
++++ b/zomes/agent_activity/coordinator/src/lib.rs
+@@ -32,6 +32,36 @@ fn announce_write_behaviour() -> ExternResult<ActionHash> {
+     )
+ }
+ 
++/// Returns every agent that has announced a write behaviour, in a stable order.
++///
++/// `get_random_agent_with_write_behaviour` selects immediately from whatever has
++/// propagated by the time it is first called. Measured on Holochain 0.7.0, that is
++/// a **single** link for the first ~27s of a run, so every reader selects the same
++/// peer and some writers are never selected at all. Callers that need coverage of
++/// all writers should poll this until the expected count is visible, then choose
++/// deterministically.
++#[hdk_extern]
++fn get_agents_with_write_behaviour() -> ExternResult<Vec<AgentPubKey>> {
++    let links = get_links(
++        LinkQuery::try_new(write_agents_anchor()?, LinkTypes::AgentBehaviour)?,
++        GetStrategy::default(),
++    )?;
++    let mut agents = links
++        .into_iter()
++        .map(|l| {
++            AgentPubKey::try_from(l.target.clone()).map_err(|_| {
++                wasm_error!(WasmErrorInner::Guest(
++                    "Failed to cast to AgentPubKey".to_string()
++                ))
++            })
++        })
++        .collect::<ExternResult<Vec<AgentPubKey>>>()?;
++    // Sorted so that every reader derives the same ordering from the same set,
++    // which is what makes index-based assignment give full coverage.
++    agents.sort();
++    Ok(agents)
++}
++
+ #[hdk_extern]
+ fn get_random_agent_with_write_behaviour() -> ExternResult<Option<AgentPubKey>> {
+     let mut links = get_links(

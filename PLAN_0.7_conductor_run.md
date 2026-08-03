@@ -1,6 +1,67 @@
 # Plan — test polite-shrink against the current Holochain tooling
 
-**Status: PLAN + EXECUTION LOG. NO MEASUREMENT RESULT IS CLAIMED HERE.**
+**Status: PLAN + EXECUTION LOG. NO POLITE-SHRINK RESULT IS CLAIMED HERE.**
+
+---
+
+## ⭐ READ THIS FIRST — state as of 2026-08-03 end of day
+
+This file grew by accretion and **contains claims that were later retracted**. Sections are kept
+in the order they happened, so §7.9 states something §7.10 overturns. **This block is the current
+truth. Where it conflicts with anything below, this block wins.**
+
+### Where the work actually is
+
+| artefact | location | survives a Codespace restart? |
+|---|---|---|
+| The scenario fix | `wind-tunnel-patch/mixed_arc_selection_and_throttle.patch` (this repo) | ✅ |
+| Sweep results + analysis scripts | `wind-tunnel-patch/` (this repo) | ✅ |
+| Draft issues for upstream | `UPSTREAM_ISSUE_DRAFT_TEMP.md` (this repo, uncommitted) | ✅ |
+| Rebased fork | `/workspaces/kitsune2`, branch `sharding-v3-on-v0.5.0` | ✅ local, ⚠️ **NOT pushed** |
+| wind-tunnel clone, Holochain source build, all run logs | `/tmp/…/scratchpad` | ❌ **GONE** — rebuild ~15 min |
+
+### What is TRUE
+
+1. **Campaign B's comparison premise is dead** (§7.8). Polite shrink cannot be compared on
+   upstream's arc scenarios: `clamp_min_peers` defaults to **25** and the scenarios run 6, and
+   every arc scenario *pins* the arc that polite shrink exists to compute. **No stock-vs-patched
+   comparison was run, and none should be on these scenarios.**
+2. **Two real defects were found in upstream's scenario**, both measured:
+   - Readers commit to a **single** peer — candidate set measured at exactly 1 (§7.7).
+   - The **default write rate saturates a single machine** and destroys the scenario's own
+     measurement; the sibling scenario already throttles, this one doesn't (§7.10).
+3. **A fix exists and is validated** — bounded wait, deterministic assignment, plus a new
+   `write_peers_visible_at_selection` metric (§7.9, §7.11).
+4. **The fork rebases cleanly** onto kitsune2 `v0.5.0` — 6 commits, zero conflicts (§7.11).
+5. **Corrected result:** at write rates the machine can sustain, a zero-arc author is read at
+   **96–99%** vs **100%** for full-arc, 6/6 runs — a small, consistent extra-hop cost.
+
+### What is RETRACTED — do not repeat
+
+- ❌ **"A zero-arc author's chain is only ~5% visible."** Load on one box, not a property of
+  zero-arc nodes. See §7.10.
+- ❌ **Any visibility figure over 100%.** The denominator was wrong; corrected to `authored + 5`.
+- ❌ **"Holochain #5288 explains the read instability."** Raised and dropped the same day (§7.6).
+
+### ⚠️ Two analysis bugs I made, both caught late — assume more exist
+
+1. A regex read `agent:` **inside** `write_agent:`, so every reader identity in the first
+   selection analysis was wrong. Caught only because a reader appeared to be watching itself.
+2. Visibility divided by raw entry count, producing **impossible >100%** figures. Caught by the
+   user reading the table, not by me.
+
+**Neither was caught by the analysis itself.** Re-derive numbers from
+`wind-tunnel-patch/RESULTS_*.txt` before quoting them anywhere.
+
+### Next session — suggested order
+
+1. **Review the two draft issues** in `UPSTREAM_ISSUE_DRAFT_TEMP.md`; post ISSUE 2 first.
+2. Decide whether to push `sharding-v3-on-v0.5.0` to the fork remote so the rebase isn't
+   trapped on this machine.
+3. Only then consider a purpose-built polite-shrink scenario (~25+ nodes, dynamic arcs) — that
+   is the real conductor-level test and it is separate work.
+
+---
 
 Written 2026-08-03 and parked on the branch `plan/0.7-conductor-run` so it is not lost.
 It is deliberately NOT on `main`: `main` carries results, this carries an intention.

@@ -1,0 +1,77 @@
+
+======================================================================================
+0ms (unthrottled, current default)
+======================================================================================
+
+run1.log   writers=3  selection_coverage=n/a  zero-arc author read: YES
+    full-arc  uhCAkZnqqAqew9…  authored=1896   max_seq=1842   visibility= 96.9%  (obs=156)
+    full-arc  uhCAkeCYwZo1HT…  authored=1997   max_seq=1992   visibility= 99.5%  (obs=696)
+    ZERO-ARC  uhCAkTMNzxRvez…  authored=3177   max_seq=172    visibility=  5.4%  (obs=1238)
+
+run3.log   writers=3  selection_coverage=n/a  zero-arc author read: YES
+    full-arc  uhCAkGAhZnj5Ae…  authored=1931   max_seq=1913   visibility= 98.8%  (obs=163)
+    full-arc  uhCAknz9PMOTw5…  authored=1917   max_seq=1793   visibility= 93.3%  (obs=190)
+    ZERO-ARC  uhCAkEQU94nYnf…  authored=3174   max_seq=6      visibility=  0.2%  (obs=1)
+
+run1.log   writers=3  selection_coverage=2/3 complete=false  zero-arc author read: no
+    full-arc  uhCAko-NBMSwBS…  authored=1884   max_seq=1609   visibility= 85.2%  (obs=10)
+    full-arc  uhCAkwcIeqvIBo…  authored=2007   max_seq=1936   visibility= 96.2%  (obs=37)
+
+run2.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAk30nL88ZNU…  authored=2007   max_seq=2004   visibility= 99.6%  (obs=1057)
+    full-arc  uhCAkiGLU0yNYg…  authored=2755   max_seq=2558   visibility= 92.7%  (obs=45)
+    ZERO-ARC  uhCAkBHE5ADC_6…  authored=3358   max_seq=2336   visibility= 69.5%  (obs=686)
+
+run3.log   writers=3  selection_coverage=2/3 complete=false  zero-arc author read: no
+    full-arc  uhCAkh1Bj5Z1d6…  authored=1914   max_seq=1873   visibility= 97.6%  (obs=8)
+    full-arc  uhCAk-tGyPCWu3…  authored=2014   max_seq=2002   visibility= 99.2%  (obs=136)
+
+-- 0ms (unthrottled, current default): pooled by author arc --
+   ZERO-ARC  n=3  0.2%  5.4%  69.5%
+   full-arc  n=10  85.2%  92.7%  93.3%  96.2%  96.9%  97.6%  98.8%  99.2%  99.5%  99.6%
+
+======================================================================================
+250ms
+======================================================================================
+
+run-250-1.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAkjcRAz-Po9…  authored=925    max_seq=928    visibility= 99.8%  (obs=5584)
+    full-arc  uhCAkr61gKJIpb…  authored=925    max_seq=930    visibility=100.0%  (obs=5477)
+    ZERO-ARC  uhCAk8ZSGpKJTK…  authored=981    max_seq=970    visibility= 98.4%  (obs=5171)
+
+run-250-2.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAkPfmtZfKR5…  authored=933    max_seq=938    visibility=100.0%  (obs=5769)
+    full-arc  uhCAkG93JuGWaO…  authored=939    max_seq=944    visibility=100.0%  (obs=5517)
+    ZERO-ARC  uhCAkf8hYCkSRQ…  authored=1005   max_seq=1001   visibility= 99.1%  (obs=5682)
+
+run-250-3.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAk5knLFYYWK…  authored=930    max_seq=934    visibility= 99.9%  (obs=5583)
+    full-arc  uhCAkVVM7Na0nW…  authored=933    max_seq=938    visibility=100.0%  (obs=5696)
+    ZERO-ARC  uhCAkr8dRxQ9oD…  authored=993    max_seq=962    visibility= 96.4%  (obs=2866)
+
+-- 250ms: pooled by author arc --
+   ZERO-ARC  n=3  96.4%  98.4%  99.1%
+   full-arc  n=6  99.8%  99.9%  100.0%  100.0%  100.0%  100.0%
+
+======================================================================================
+1000ms
+======================================================================================
+
+run-1000-1.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAk2Ct6S-xbo…  authored=277    max_seq=282    visibility=100.0%  (obs=13418)
+    full-arc  uhCAkrxl8160cy…  authored=276    max_seq=281    visibility=100.0%  (obs=14050)
+    ZERO-ARC  uhCAkvNgGAxkMr…  authored=277    max_seq=278    visibility= 98.6%  (obs=1593)
+
+run-1000-2.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAk3H74HMexb…  authored=276    max_seq=281    visibility=100.0%  (obs=13684)
+    full-arc  uhCAkFzncHzrCv…  authored=277    max_seq=282    visibility=100.0%  (obs=13221)
+    ZERO-ARC  uhCAk3njSQ9-xY…  authored=277    max_seq=279    visibility= 98.9%  (obs=14330)
+
+run-1000-3.log   writers=3  selection_coverage=3/3 complete=true  zero-arc author read: YES
+    full-arc  uhCAk5ahEjsjX1…  authored=277    max_seq=282    visibility=100.0%  (obs=13772)
+    full-arc  uhCAkukOLG829_…  authored=277    max_seq=282    visibility=100.0%  (obs=13810)
+    ZERO-ARC  uhCAkFKDi6a_Xv…  authored=277    max_seq=278    visibility= 98.6%  (obs=1703)
+
+-- 1000ms: pooled by author arc --
+   ZERO-ARC  n=3  98.6%  98.6%  98.9%
+   full-arc  n=6  100.0%  100.0%  100.0%  100.0%  100.0%  100.0%
