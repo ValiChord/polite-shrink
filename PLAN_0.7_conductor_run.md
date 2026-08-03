@@ -5,11 +5,16 @@
 Written 2026-08-03 and parked on the branch `plan/0.7-conductor-run` so it is not lost.
 It is deliberately NOT on `main`: `main` carries results, this carries an intention.
 
-⚠️ **Updated 2026-08-03, later the same day: Campaign B was STARTED. It is not finished and
-it has produced NO measurement.** The harness builds and runs, but every scenario run so far
-has failed before recording a single operation, for a reason now diagnosed (§7). Nothing in
-§1's four claims has changed, and no fifth claim exists. **Read §7 before §3 or §4** — it
-corrects §2's cost model and adds four traps that cost real time.
+⚠️ **Updated 2026-08-03, later the same day: Campaign B's STOCK ARM has run. There is still
+NO polite-shrink result and no comparison.** The blocker is cleared, and a stock baseline
+exists (3 × 300s, §7.5). **Nothing in §1's four claims has changed and no fifth claim
+exists** — a stock baseline is a measurement *of upstream*, not of polite shrink. The fork
+has not been rebased and has not been run.
+
+**Read §7 before §3 or §4.** It corrects §2's cost model, records four traps that cost real
+time, and carries two findings that change how Campaign B should be run at all: the read-side
+metrics vary **per-peer not per-run** (§7.6), and **readers never query the zero-arc writer**
+(§7.7) — which is the case §214 most needs covered.
 
 **If you are a future session picking this up: read §0, §5 and §7 before doing anything.**
 §5 and §7 are the parts that are easy to get wrong and hard to undo.
@@ -305,17 +310,134 @@ trade-off, not an obvious win, and should be a deliberate decision.
 
 ---
 
+### 7.4 ✅ The blocker is CLEARED, and it cost 13 minutes
+
+Holochain 0.7.0 built from source, `--release`, with
+`--features unstable-functions,unstable-countersigning`: **13m02s** on an 8-core box.
+The scenario then ran with **0 import errors and 0 behaviour failures**.
+
+⚠️ **This softens §7.1 but does not overturn it.** "B is cheaper than A" is still wrong —
+B still contains A's build step — but the step is a 13-minute cost, not an afternoon. Do
+not let the correction in §2 be read as "B is expensive"; it is not.
+
+### 7.5 STOCK BASELINE — 3 × 300s runs, 2026-08-03
+
+Upstream's documented local shape (`--agents 6 --behaviour zero_read:3 --behaviour
+zero_write:1 --behaviour full_write:2`), repeated 3× so there is a spread rather than one
+number. **This is the stock arm only. There is no comparison and no polite-shrink result.**
+
+| metric | full-arc (×2) | zero-arc writer (×1) | zero-arc readers (×3) |
+|---|---|---|---|
+| `open_connections` | **5.00, 5.00, 5.00** (0.0% spread) | 3.85 (6.5%) | 3.91 (24.7%) |
+| entries created | 1579, 2053 / 1587, 2095 / 2107, 2129 | **3101, 3037, 3326** | — |
+| zome calls per run | 25962, 26510, 22912 (14.3% spread) | | |
+| `retrieval_error_count` | — | — | exactly 3 per run (0.0%) |
+
+🆕 **The #214 signal is present and unanimous.** The single zero-arc writer out-produced
+**both** full-arc writers in **every run — 6/6 pairwise comparisons.** Full-arc mean 1,925
+entries/node vs zero-arc 3,155, i.e. the zero-arc writer produces **~64% more**. That is the
+shape #214 predicts: full-arc nodes paying validation-and-serving cost out of their own write
+throughput. ⚠️ Direction is unanimous; **magnitude is one machine, n=3 — quote 64% as
+indicative, never as a measurement.**
+
+⚠️ **ThetaSinner's connection prediction does not match, but this is NOT a refutation.** His
+#214 comment expects zero-arc open connections ≈ the number of full-arc nodes (2 here),
+since *"we don't expect 0-arc nodes to gossip with each other once the network is
+bootstrapped."* Observed: **~3.9 of a possible 5**, consistently, across all runs. **Before
+this is repeated anywhere, establish what the metric counts** — it is
+`network_stats.transport_stats.connections.len()`, which may include bootstrap/relay
+connections and not only peer gossip. That distinction decides the whole question.
+
+### 7.6 🔬 Read-side instability — DIAGNOSED: it is per-PEER, not per-run
+
+The read-side metrics were unusable at first sight: `chain_head_delay` spread **209%**,
+`highest_observed_action_seq` spread **243%**, driven by a 17× swing in sample count
+(253, 259, **4420**). The cause is now identified.
+
+**Readers draw ONE write peer at start (`get_random_agent_with_write_behaviour`) and keep it
+for the whole run. How well that particular peer's chain propagates is what varies.**
+
+The decisive evidence is *inside a single run*, where readers split across two full-arc peers
+under identical conditions:
+
+| run | peer drawn | authored | max seq observed | tracked | head-moves |
+|---|---|---|---|---|---|
+| run1 | uhCAkQ-bf5WS | 1579 | 1258 | 0.80× | 80, 96, 77 |
+| run2 | uhCAkw4FLNPv | 1587 | 1004 | 0.63× | 94, 93, 72 |
+| **run3** | **uhCAksHDgA3Y** | 2129 | **2133** | **1.00×** | **2122, 2120** |
+| **run3** | **uhCAkjrdnd7x** | 2107 | 1682 | 0.80× | **178** |
+
+One peer was trackable in near-real-time (2,122 observed advances; seq 2133 against 2129
+authored — essentially every action). The other gave 178 chunky updates and lagged by 425.
+**A 12× difference in the same run.** So this is not "network conditions on the day".
+
+⚠️ **Low sample count means STALENESS, not less polling.** The scenario emits these metrics
+only when the observed head *changes* (`n_jump != 0`), and readers polled at comparable rates
+throughout (total zome calls within 14%).
+
+❌ **Holochain #5288 is NOT the explanation — hypothesis raised and dropped the same day.**
+#5288 is about `get_agent_activity` returning *empty* responses when the only known peers are
+local, which described this setup and looked compelling. **The data refutes it:** reads
+succeeded and returned real sequence numbers, with only 3 retrieval errors per run (one per
+reader, at startup). The reads are **stale, not empty.** Recorded so nobody re-derives it —
+and so the ValiChord warrant-gate concern that cites #5288 is not wrongly reinforced by this.
+
+### 7.7 ⚠️ Readers never query the ZERO-arc writer — scenario-coverage gap
+
+**Measured over 9 runs — 3 × 300s baseline + 6 × 60s selection samples — giving 27
+independent reader-draws:**
+
+| observation | count | p under uniform draw from 3 writers |
+|---|---|---|
+| draws that selected the **zero-arc** writer | **0 / 27** | (2/3)²⁷ ≈ **1.8 × 10⁻⁵** |
+| runs where all 3 readers drew the **same** peer | **8 / 9** | ≈ **1.9 × 10⁻⁷** |
+
+Selection is `get_links` on an anchor → `shuffle` → take first, so a uniform draw from three
+announced writers is the null. **Both results reject it decisively.** This is not chance.
+
+🆕 **Only ONE full-arc writer is visible per run** — not two, not three. Shuffle-then-first
+returns a fixed element only when the list has **one** element.
+
+**Inferred mechanism (strongly supported, not yet directly observed):** readers select before
+the write-agent anchor has converged, so they draw from a single-entry link set. A full-arc
+writer's own announce link is retrievable immediately; a zero-arc writer's must first reach a
+full-arc node, and the second full-arc writer's has not propagated either.
+
+⚠️ **The direct test has NOT been run** — log `links.len()` inside
+`get_random_agent_with_write_behaviour`, or re-select periodically instead of once. Do that
+before asserting the mechanism as fact; everything above is the draw distribution, which is
+solid, plus an inference from it, which is not the same thing.
+
+**Why this matters for Campaign B:** if it holds, the scenario never exercises *"read a
+zero-arc author's activity"* — the case where the data must be served **entirely** by
+full-arc nodes, which is the most load-bearing part of #214's question and the case polite
+shrink most needs to speak to. **Check this before treating mixed-arc results as covering
+the full-arc serving cost.**
+
+---
+
 ## 8. Definition of done
 
 **Shared prerequisite (blocks BOTH campaigns — see §7.1):**
-- [ ] Holochain 0.7.0 built from source, `--release`, with
-      `--features unstable-functions,unstable-countersigning`
-- [ ] That conductor runs one upstream arc scenario to a non-empty operations summary
+- [x] Holochain 0.7.0 built from source, `--release`, with
+      `--features unstable-functions,unstable-countersigning` — 13m02s, 2026-08-03
+- [x] That conductor runs one upstream arc scenario to a non-empty operations summary
       (⚠️ check recorded operations, not exit code — §7.2 trap 1)
 
+**Blocking Campaign B's validity — resolve BEFORE the comparison arm:**
+- [ ] Establish what `open_connections` counts (peer gossip only, or bootstrap/relay too).
+      The ThetaSinner comparison in §7.5 is uninterpretable until this is settled.
+- [ ] Direct test of the §7.7 mechanism: log `links.len()` in
+      `get_random_agent_with_write_behaviour`. ⚠️ **If readers really never query a zero-arc
+      author, mixed-arc results do NOT cover the full-arc serving cost** — the headline
+      question — and the scenario needs periodic re-selection or a forced peer assignment.
+- [ ] Decide whether read-side metrics can carry a comparison at all. Per-peer variation is
+      12× within a single run (§7.6); write-side metrics (9–14% spread) are the usable ones.
+
 **Campaign B — baseline, then comparison:**
-- [ ] Baseline: upstream mixed-arc scenarios, stock kitsune2, with
-      `--reporter in-memory-with-custom-metrics`
+- [x] Baseline: `mixed_arc_get_agent_activity`, stock kitsune2, 3 × 300s, with
+      `--reporter in-memory-with-custom-metrics` — §7.5
+- [ ] Baseline: the other six arc scenarios (only one of seven has been run)
 - [ ] Fork rebased onto kitsune2 `v0.5.0`, conflicts recorded
 - [ ] Comparison: same scenarios, polite-shrink fork, `sharding` canary confirms the patch
       is in effect
