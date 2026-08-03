@@ -543,6 +543,53 @@ Fixed with a bounded wait plus a new **`write_peers_visible_at_selection`** metr
 part most worth proposing upstream** — it converts a silent, invisible degradation into
 something every ordinary run records.
 
+### 7.10 ❌ §7.9's zero-arc finding is RETRACTED — it was LOAD, and a rate sweep proves it
+
+**The single most important correction in this file. §7.9's zero-arc visibility deficit does
+not survive.** A three-point write-rate sweep (3 runs each, 300s, same box, same build) shows
+it was contention on this machine, not a property of zero-arc nodes.
+
+*visibility = highest action seq a reader observed for an author ÷ entries that author wrote.
+Over 100% because the seq includes ~5 genesis actions.*
+
+| write rate | zero-arc visibility | full-arc visibility | runs with complete writer coverage |
+|---|---|---|---|
+| **0 ms** — the scenario's current default, ~10/s | **0.2%, 5.4%, 69.6%** | 85–100% | **3 of 6** |
+| **250 ms** — ~3/s | **96.9%, 98.9%, 99.6%** | 100.3–100.5% | **3 of 3** |
+| **1000 ms** — ~0.9/s | **100.4%, 100.4%, 100.7%** | 101.8% ×6 | **3 of 3** |
+
+**Throttle the writer even slightly and a zero-arc author is tracked as completely as a
+full-arc one.** There is no structural zero-arc read penalty in this data. ⚠️ **Do not repeat
+the §7.9 numbers anywhere.** They measure this Codespace under self-inflicted overload.
+
+🆕 **The announcement-propagation unreliability was the same cause.** Complete writer coverage
+went from 3-of-6 unthrottled to **3-of-3 at both throttled rates**. So §7.9's "only half the
+runs achieve coverage" is also load, not a network property.
+
+### 7.11 ✅ What actually survives — and it is a cleaner contribution
+
+1. **The selection defect is real and independent of load.** The candidate set was measured
+   directly at **exactly one** (§7.7's direct test). Selection races announcement propagation
+   with no lower bound, so it *can* commit to a single peer. Under overload it does so every
+   time. ⚠️ **Not established: whether it still bites at low load** — the throttled runs all
+   had the fix active, so they cannot answer that. Say so.
+2. **🆕 The scenario's default write rate overloads a single machine badly enough to destroy
+   its own measurement.** At 0 ms it produced 0.2% visibility and half the runs without full
+   coverage; at 250 ms everything is near-perfect. **And the sibling scenario
+   `mixed_arc_must_get_agent_activity` already throttles** — batches of 10 then a 5s sleep,
+   ~2/s — while `mixed_arc_get_agent_activity` has no throttle at all. A ~5× difference in
+   write pressure between two scenarios in the same family, which also means **their results
+   are not comparable with each other.** That reads as an oversight rather than a decision,
+   and it is the easiest thing here for upstream to accept.
+3. **`write_peers_visible_at_selection`** — turns a silent degradation into a recorded number.
+4. **The fork rebase**: `feat/sharding-module-v3` onto kitsune2 `v0.5.0`, 6 commits, **zero
+   conflicts** (branch `sharding-v3-on-v0.5.0`), answering §3 step 2.
+
+⚠️ **Method note worth keeping.** The retraction came from asking "can we just run it slower?"
+before publishing. A load-induced artefact and a structural finding look identical at one
+operating point; **a rate sweep is cheap and separates them.** Do this before quoting any
+number off a saturated machine — the sweep cost ~35 minutes and prevented a false claim.
+
 ---
 
 ## 8. Definition of done
