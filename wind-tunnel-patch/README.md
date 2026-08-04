@@ -62,6 +62,40 @@ so a liveness check on the binary proves nothing here. A 49 s in-place rebuild f
 re-packed the DNA/hApp, which also removes any stale-pack doubt. `rebuild-env.sh` builds in place
 and never hits this.
 
+## Node-count ceiling on this box — measured 2026-08-04
+
+`clamp_min_peers` defaults to **25**, so a real polite-shrink test needs >=25 conductors. Whether
+this machine could host that was unknown. It can.
+
+8 cores, 31 GB RAM. Each run 120 s, proportional behaviour mix, `mixed_arc_get_agent_activity`.
+
+| agents | installed | signing-cred avg | zome calls | peak RSS | peak load | failures |
+|---|---|---|---|---|---|---|
+| 6 (300 s) | 6/6 | 10,495 ms | 28,953 | — | — | 0 |
+| 12 | 12/12 | 18,637 ms | 16,847 | 3.7 GB | 38.5 | 0 |
+| 20 | 20/20 | 28,803 ms | 16,419 | 6.5 GB | 66.0 | 0 |
+| **25** | **25/25** | 39,234 ms | 14,014 | **7.9 GB** | **93.8** | **0** |
+
+**Memory is not the constraint** — 7.9 GB of 31 GB, ~316 MB per conductor, headroom past 25.
+**CPU is** — load 93.8 on 8 cores is ~12x oversubscribed.
+
+🔴 **This splits what may and may not be claimed from a conductor-level run here.**
+
+- ✅ **Structural claims are viable.** *Does the controller engage? Do arcs move? Does redundancy
+  ever drop below the floor?* Those are discrete properties; a contended machine still answers them,
+  and they are what the TLA+ proof and the simulator sweeps are about.
+- ❌ **Performance claims are not.** *Does load fall, and by how much?* At load 93.8 that measures
+  this Codespace. Publishing a throughput or latency number from here would repeat exactly the error
+  wind-tunnel#679 section 2 documents — and that this repo retracted in §7.10.
+
+🆕 **The throttle written for the upstream issue is what makes a 25-node run viable here.**
+`WRITE_SLEEP_MS` cuts write pressure so the box keeps up; the 250 ms sweep resolved cleanly where
+0 ms did not. The fix for upstream's scenario is directly reusable to keep our own test honest.
+
+⚠️ **Two open problems the ceiling test does not solve.** These runs were 120 s, and arc convergence
+plus shrink decisions likely need far longer windows. And the measurement question is unchanged: arc
+sizes look obtainable, per-op redundancy does not.
+
 ## Rebuilding the environment
 
 Everything below is gone after a restart and takes ~15 min:
