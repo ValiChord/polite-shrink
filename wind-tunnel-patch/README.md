@@ -9,6 +9,7 @@ Artefacts from the 2026-08-03 session, kept here because the working copies live
 | `RESULTS_write_rate_sweep.txt` | Raw per-run output for all three write rates. **Quote numbers from here, not from memory.** |
 | `visibility.py` | Computes visibility = observed seq ÷ (entries + 5). The `+5` is chain overhead — see the docstring; getting this wrong produced >100% figures. |
 | `analyse_reads.py` | Which write peer each reader selected, and the arc of that peer. The `(?<!write_)` lookbehind is load-bearing: without it every reader identity is wrong. |
+| `rebuild-env.sh` | Rebuilds the whole environment from scratch — clone + patch + both builds — and **verifies each step** rather than assuming. Measured 2026-08-04: ~20 min total (holochain 13m35s, scenario 5m58s), 4.5 GB. Usage: `./rebuild-env.sh [target-dir]`, defaults to `/tmp/wt-env`. |
 
 ## What the patch changes
 
@@ -37,6 +38,16 @@ git apply /workspaces/polite-shrink/wind-tunnel-patch/mixed_arc_selection_and_th
 git clone --depth 1 --branch holochain-0.7.0 https://github.com/holochain/holochain
 cargo build --release -p holochain --features unstable-functions,unstable-countersigning
 ```
+
+⚠️ **`/workspaces` cannot hold this** — measured 2026-08-04: 3.4 GB free of 63 GB, against a
+4.5 GB environment. It has to live in `/tmp`, which is why it does not survive a Codespace
+rebuild. Freeing it would mean clearing cargo `target/` dirs under `/workspaces/ValiChord` (30 GB).
+
+🆕 **The build's own positive control.** `rebuild-env.sh` greps the binary it just built for
+`__hc__accept_countersigning_preflight_request_1` and fails loudly if absent. That matters because
+wind-tunnel#678 rests on that symbol being **absent** from the released binaries — an absence is
+weak evidence unless the same test is shown to detect the symbol when it *is* there. It does: our
+source build reports 1, both release assets report 0.
 
 Then, per run: `WT_METRICS_DIR` is **mandatory**, `WT_HOLOCHAIN_PATH` points at that binary,
 and `--reporter in-memory-with-custom-metrics` is **required** or none of the custom metrics
