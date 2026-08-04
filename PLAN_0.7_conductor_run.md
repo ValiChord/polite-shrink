@@ -701,6 +701,73 @@ number off a saturated machine — the sweep cost ~35 minutes and prevented a fa
 
 ---
 
+### 7.12 🆕 THE CONTROLLER RUNS AND DECIDES INSIDE A HOLOCHAIN CONDUCTOR — but has not yet acted (2026-08-04)
+
+**First time polite shrink has run inside a Holochain conductor.** Every prior result is the
+simulator, the TLA+ proof, or the kitsune2-level Stage-2 campaign. Four healthy runs at N=30 on
+`holochain 0.7.0` + the fork (`c724e1a`), arcs unpinned via `DYNAMIC_ARCS=1`, writes throttled 250 ms.
+
+#### ✅ What is established
+
+| | |
+|---|---|
+| It integrates | 30/30 conductors, 66,960 zome calls, no controller failures, Holochain unaffected |
+| It evaluates | 7,200 decision ticks in one 30-min run |
+| Its judgement is consistent | `shrink_cond=true` **7,200 of 7,201**; `grow_cond=false` throughout — correct for 30 full-arc nodes against R=5 |
+| All 30 agents reached the decision threshold | `shrink_acc_ms` hit **1,200,000** on every agent, monotonically, never reset |
+| The brake never fired | 0 `peer loss detected` |
+
+#### ❌ What is NOT established — read this before quoting anything
+
+- **No shrink executed. `declared_level` stayed 9 (full arc) for the whole run.**
+- **The simulations' actual finding is therefore untested here.** Stage-1/3 proved a *safety*
+  property — redundancy never drops below target **while shrinking**, 0/1248. With zero shrinks,
+  nothing in these runs corroborates it. ⚠️ **"Polite shrink works in Holochain" is NOT a supported
+  claim.** The supportable sentence is: *"proven in simulation and proof; demonstrated to run and
+  decide inside real Holochain."*
+- No performance claim of any kind — peak load hit **152** on 8 cores.
+
+#### 🔬 Why it did not act — measured, not guessed
+
+Polite shrink is **two-phase**, and the wait at *both* stages scales with measured staleness:
+
+```
+phase 1 (decide)   shrink_acc >= lag x shrink_persistence = 300s x 4.0  = 1200s = 20.0 min
+phase 2 (execute)  max(lag x intent_wait, intent_min_wait) = 300s x 2.5 =  750s = 12.5 min
+                                                              total     = 32.5 min
+```
+
+`lag_ms` sat **pinned at 300,000** — exactly `lag_ceiling_ms` — for 5,570 of the samples. This
+environment drives the staleness estimate to its ceiling, so the controller applies its *maximum*
+conservatism. The 30-minute run cleared phase 1 on every agent and ended ~2.5 min inside phase 2.
+
+⚠️ **This is an operating point the simulations likely never dwelt on.** They explored moderate
+staleness where the rule acts quickly. Pinned-at-ceiling lag is a real-network regime, and the
+30-minute latency to a single shrink step is **new information, not confirmation.**
+
+#### What a conclusive run needs
+
+1. **45 minutes** (32.5 min of continuous satisfaction + margin).
+2. **`RUST_LOG=...,kitsune2_gossip=debug`** — `announce_shrink` logs at **debug**, so phase 1
+   completing is currently invisible; only `shrink_acc` stopping dead at the threshold hints at it.
+3. Same shape otherwise: N=30, `DYNAMIC_ARCS=1`, `WRITE_SLEEP_MS=250`.
+
+#### ⚠️ Operational traps found the hard way
+
+- **N=30 startup fails if the box is still settling from a build.** Two dead runs, both launched
+  straight off a 7-min compile; the healthy ones were not. Gate on 1-min load < 2.0. ⚠️ `bc` is
+  **not installed** here — the first gate silently did nothing 60 times; use `awk`.
+- **A dead run reads exactly like a negative result.** Both dead runs reported 0 shrinks, 0
+  everything — indistinguishable from "it declined" without the health line. Always print apps
+  installed / zome calls / panics beside the result.
+- **`ps -eo comm` truncates at 15 chars**, so `holochain-shrinkdiag` never matches a `grep -x`.
+  Cost one wrong "0 conductors running" reading.
+- Three binaries exist and must not be confused: `holochain-stock` (control, `K2Sharding`=0),
+  `holochain-polite-shrink` (**quote results from this one**), `holochain-shrinkdiag`
+  (instrumented, diagnosis only). `wind-tunnel-patch/arm.sh` rebuilds either arm with a canary.
+- ✅ **The fork was instrumented for diagnosis and has been reverted** — `/workspaces/kitsune2` is
+  clean at `c724e1a`, matching `topeuph-ai/kitsune2` as pushed.
+
 ## 8. Definition of done
 
 **Shared prerequisite (blocks BOTH campaigns — see §7.1):**
