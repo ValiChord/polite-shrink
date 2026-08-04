@@ -16,7 +16,7 @@ truth. Where it conflicts with anything below, this block wins.**
 |---|---|---|
 | The scenario fix | `wind-tunnel-patch/mixed_arc_selection_and_throttle.patch` (this repo) | ✅ |
 | Sweep results + analysis scripts | `wind-tunnel-patch/` (this repo) | ✅ |
-| Draft issues for upstream | `UPSTREAM_ISSUE_DRAFT_TEMP.md` (this repo, uncommitted) | ✅ |
+| Draft issues for upstream | `UPSTREAM_ISSUE_DRAFT_TEMP.md` (this repo, committed 2026-08-04) | ✅ |
 | Rebased fork | `/workspaces/kitsune2`, branch `sharding-v3-on-v0.5.0` | ✅ local, ⚠️ **NOT pushed** |
 | wind-tunnel clone, Holochain source build, all run logs | `/tmp/…/scratchpad` | ❌ **GONE** — rebuild ~15 min |
 
@@ -34,7 +34,33 @@ truth. Where it conflicts with anything below, this block wins.**
    `write_peers_visible_at_selection` metric (§7.9, §7.11).
 4. **The fork rebases cleanly** onto kitsune2 `v0.5.0` — 6 commits, zero conflicts (§7.11).
 5. **Corrected result:** at write rates the machine can sustain, a zero-arc author is read at
-   **96–99%** vs **100%** for full-arc, 6/6 runs — a small, consistent extra-hop cost.
+   **96–99%** vs **99.8–100.0%** for full-arc, 6/6 runs — a small, consistent extra-hop cost.
+   In absolute terms the zero-arc author's chain head ends 3–36 actions behind, against 0–2
+   for full-arc.
+
+🆕 **Verification pass 2026-08-04 — two more corrections, both found by re-deriving from
+`wind-tunnel-patch/RESULTS_write_rate_sweep.txt` rather than from this file.**
+
+- ❌ **"3 of 6 runs reached complete writer coverage at 0 ms" is wrong; it is 3 of 5.** The
+  results file holds **five** 0 ms runs. The sixth is §7.9's run where the **first version of
+  my own patch** (no bounded fallback) made readers select nothing at all — my bug, not the
+  write rate's, and it must not be counted against the scenario.
+- ❌ **"~10 entries/s" at 0 ms is the top of the range, not the range.** Measured means over
+  300 s: full-arc **6.8/s** (n=10), zero-arc **10.8/s** (n=3). So the gap to the sibling's
+  ~2/s is **3–5×**, not 5×.
+- ⚠️ **§7.7's "9 runs / 27 reader draws" cannot be reconciled** with §7.9's note that
+  fresh-space 60 s runs found no peer at all (those runs contributed zero draws), and its
+  "uniform draw" null assumes independence that the adjacent "8 of 9 runs drew the same peer"
+  finding disproves. The logs are gone, so it cannot be repaired. **Do not quote it.** The
+  direct `links.len()` measurement (1618/3/0, 1916/3/0) is a mechanism and stands alone.
+- ✅ **ISSUE 2 is now proved from the release binaries' symbol tables**, not from a failed run:
+  `holochain-unstable-x86_64-unknown-linux-gnu` contains `__hc__sleep_1` (⇒ built with
+  `unstable-functions`) but **not** `__hc__accept_countersigning_preflight_request_1`
+  (⇒ built without `unstable-countersigning`). Gates at
+  `crates/holochain/src/core/ribosome/real_ribosome.rs:509-516`, tag `holochain-0.7.0`.
+- 🆕 **Anchor on #335, which is OPEN.** #214 and #416 are both closed; #335 is the issue this
+  scenario was built to satisfy and asks in terms for the authored→available delay for 0-arc
+  nodes. The selection defect is a direct answer to ThetaSinner's standing question there.
 
 ### What is RETRACTED — do not repeat
 
@@ -587,7 +613,8 @@ direction did hold.**
   for full-arc. The §7.5 write-side signal replicates under the fixed scenario.
 
 ⚠️ **Announcement propagation is itself unreliable, and this is arguably the bigger finding.**
-Only **3 of 6** runs reached full writer visibility:
+Only **3 of 6** runs reached full writer visibility (⚠️ **corrected 2026-08-04: 3 of 5** —
+the sixth failed on my own fix v1, not on the network; see the top of this file):
 
 | outcome | runs | what the reader did |
 |---|---|---|
@@ -622,9 +649,14 @@ fully-tracked writer row. **Numbers below are the corrected ones.**
 
 | write rate | zero-arc visibility | full-arc visibility | runs with complete writer coverage |
 |---|---|---|---|
-| **0 ms** — the scenario's current default, ~10/s | **0.2%, 5.4%, 69.5%** | 85.2–99.6% (n=10) | **3 of 6** |
-| **250 ms** — ~3/s | **96.4%, 98.4%, 99.1%** | 99.8–100.0% | **3 of 3** |
+| **0 ms** — the scenario's current default; 6.8/s full-arc, 10.8/s zero-arc | **0.2%, 5.4%, 69.5%** | 85.2–99.6% (n=10) | **3 of 5** ⚠️ |
+| **250 ms** — ~3.1/s | **96.4%, 98.4%, 99.1%** | 99.8–100.0% | **3 of 3** |
 | **1000 ms** — ~0.9/s | **98.6%, 98.6%, 98.9%** | 100.0% ×6 | **3 of 3** |
+
+⚠️ **Corrected 2026-08-04: the 0 ms coverage figure was "3 of 6" and is 3 of 5** — the sixth run
+failed to select because of the first version of my own patch, not because of the write rate.
+The 0 ms rate annotation was "~10/s", which was the zero-arc writer only; full-arc writers
+averaged 6.8/s. See the correction block at the top of this file.
 
 🆕 **The corrected denominator exposes something the broken one hid: a small residual gap.** Once
 the machine can keep up, zero-arc authors sit at **96–99%** against a flat **100%** for full-arc —
@@ -638,7 +670,7 @@ full-arc one.** There is no structural zero-arc read penalty in this data. ⚠�
 the §7.9 numbers anywhere.** They measure this Codespace under self-inflicted overload.
 
 🆕 **The announcement-propagation unreliability was the same cause.** Complete writer coverage
-went from 3-of-6 unthrottled to **3-of-3 at both throttled rates**. So §7.9's "only half the
+went from 3-of-5 unthrottled to **3-of-3 at both throttled rates**. So §7.9's "only half the
 runs achieve coverage" is also load, not a network property.
 
 ### 7.11 ✅ What actually survives — and it is a cleaner contribution
@@ -649,10 +681,10 @@ runs achieve coverage" is also load, not a network property.
    time. ⚠️ **Not established: whether it still bites at low load** — the throttled runs all
    had the fix active, so they cannot answer that. Say so.
 2. **🆕 The scenario's default write rate overloads a single machine badly enough to destroy
-   its own measurement.** At 0 ms it produced 0.2% visibility and half the runs without full
+   its own measurement.** At 0 ms it produced 0.2% visibility and 2 of 5 runs without full
    coverage; at 250 ms everything is near-perfect. **And the sibling scenario
    `mixed_arc_must_get_agent_activity` already throttles** — batches of 10 then a 5s sleep,
-   ~2/s — while `mixed_arc_get_agent_activity` has no throttle at all. A ~5× difference in
+   ~2/s — while `mixed_arc_get_agent_activity` has no throttle at all. A 3–5× difference in
    write pressure between two scenarios in the same family, which also means **their results
    are not comparable with each other.** That reads as an oversight rather than a decision,
    and it is the easiest thing here for upstream to accept.
