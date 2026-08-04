@@ -21,6 +21,47 @@ Artefacts from the 2026-08-03 session, kept here because the working copies live
 4. New metric `write_peers_visible_at_selection`, tagged `complete: true|false`.
 5. Optional write throttle `WRITE_SLEEP_MS`, **default 0** so unmodified behaviour is preserved.
 
+## Verification run — 2026-08-04, after the move to `/workspaces/wt-env`
+
+One 300 s run at the documented local shape, default (unthrottled) write rate, to prove the
+relocated environment works. It does, and it replicates the 08-03 results.
+
+```
+app_call_zome                     28,953 operations
+entry_created_count                7,205 data points
+write_peers_visible_at_selection   3 x  value: 3, complete: true
+panics / happ-not-found            0
+```
+
+**The fix is doing its job.** Three readers drew three *different* peers, one each, including the
+zero-arc author — against the stock behaviour where the candidate set is always exactly 1 and all
+three readers land on the same full-arc peer.
+
+| author | authored | max seq seen | visibility |
+|---|---|---|---|
+| full-arc | 2047 | 2043 | 99.6% |
+| full-arc | 2028 | 1862 | 91.6% |
+| ZERO-ARC | 3130 | 5 | **0.2%** |
+
+Replicates all three 0 ms signals: zero-arc visibility collapses (0.2%, matching one of the two
+08-03 values exactly), full-arc stays in the 85.2–99.6% band, and the zero-arc writer out-authors
+both full-arc writers.
+
+⚠️ **The 0.2% is LOAD, not a property of zero-arc nodes.** This run had no throttle. That is the
+retracted §7.9 claim and it stays retracted — see `PLAN_0.7_conductor_run.md` §7.10.
+
+⚠️ **Not posted upstream.** It adds a 4th 0 ms datapoint to a filed issue whose table already says
+what it says, and the maintainers have asked for restraint on AI-assisted contributions. Recorded
+here, not in the thread.
+
+🆕 **Moving a built tree breaks the scenario binary — rebuild in place afterwards.** `happ_path!`
+resolves via `env!("CARGO_MANIFEST_DIR")`, baked at compile time, with a nix-store fallback that
+does not match this layout. After the `/tmp` -> `/workspaces/wt-env` move, both lookups failed and
+the binary would have panicked at agent setup. ⚠️ **`--version` and `--help` both still worked**,
+so a liveness check on the binary proves nothing here. A 49 s in-place rebuild fixed it and
+re-packed the DNA/hApp, which also removes any stale-pack doubt. `rebuild-env.sh` builds in place
+and never hits this.
+
 ## Rebuilding the environment
 
 Everything below is gone after a restart and takes ~15 min:
