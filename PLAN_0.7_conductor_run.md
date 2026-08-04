@@ -17,7 +17,7 @@ truth. Where it conflicts with anything below, this block wins.**
 | The scenario fix | `wind-tunnel-patch/mixed_arc_selection_and_throttle.patch` (this repo) | ✅ |
 | Sweep results + analysis scripts | `wind-tunnel-patch/` (this repo) | ✅ |
 | Draft issues for upstream | `UPSTREAM_ISSUE_DRAFT_TEMP.md` (this repo, committed 2026-08-04) | ✅ |
-| Rebased fork | `/workspaces/kitsune2`, branch `sharding-v3-on-v0.5.0` | ✅ local, ⚠️ **NOT pushed** |
+| Rebased fork | `sharding-v3-on-v0.5.0` — ✅ **pushed to `topeuph-ai/kitsune2` @ `c724e1a`** (verified 2026-08-04; this file previously said NOT pushed, which was wrong) | ✅ |
 | wind-tunnel clone, Holochain source build, all run logs | `/tmp/…/scratchpad` | ❌ **GONE** — rebuild ~15 min |
 
 ### What is TRUE
@@ -82,8 +82,9 @@ truth. Where it conflicts with anything below, this block wins.**
 ### Next session — suggested order
 
 1. **Review the two draft issues** in `UPSTREAM_ISSUE_DRAFT_TEMP.md`; post ISSUE 2 first.
-2. Decide whether to push `sharding-v3-on-v0.5.0` to the fork remote so the rebase isn't
-   trapped on this machine.
+2. ~~Push `sharding-v3-on-v0.5.0`~~ — ✅ **already done.** Verified 2026-08-04: local `HEAD`
+   and `topeuph-ai/kitsune2` are both at `c724e1a`, all 6 commits present. The rebase is not
+   trapped on this machine and never was.
 3. Only then consider a purpose-built polite-shrink scenario (~25+ nodes, dynamic arcs) — that
    is the real conductor-level test and it is separate work.
 
