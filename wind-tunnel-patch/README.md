@@ -39,9 +39,21 @@ git clone --depth 1 --branch holochain-0.7.0 https://github.com/holochain/holoch
 cargo build --release -p holochain --features unstable-functions,unstable-countersigning
 ```
 
-⚠️ **`/workspaces` cannot hold this** — measured 2026-08-04: 3.4 GB free of 63 GB, against a
-4.5 GB environment. It has to live in `/tmp`, which is why it does not survive a Codespace
-rebuild. Freeing it would mean clearing cargo `target/` dirs under `/workspaces/ValiChord` (30 GB).
+✅ **The environment now lives at `/workspaces/wt-env/`** — `hc/` (Holochain 0.7.0 source build)
+and `wt/` (wind-tunnel @ `e4861457` + this patch). It is on the persistent volume, so it survives a
+Codespace restart; only a full rebuild loses it, and `rebuild-env.sh` handles that.
+
+Moved there 2026-08-04 after clearing ~26.8 GB of cargo `target/` dirs from `/workspaces/ValiChord`
+(which had left just 3.4 GB free of 63 GB). Verified after the move: both binaries run from the new
+path, the countersigning symbol is still present, and both are byte-identical to the originals.
+
+⚠️ **Cargo bakes absolute paths into its fingerprints**, so the first `cargo build` inside
+`/workspaces/wt-env` after the move may rebuild more than a true incremental would. The already-built
+binaries are unaffected.
+
+⚠️ **ValiChord's Rust builds are now cold** as a result of that clearing — WASM, sweettest,
+wind-tunnel and the tripwire `target-test/` all rebuild from scratch on next use. Nothing was lost:
+`valichord/workdir/*.dna` and `*.happ` live outside `target/` and were verified intact afterwards.
 
 🆕 **The build's own positive control.** `rebuild-env.sh` greps the binary it just built for
 `__hc__accept_countersigning_preflight_request_1` and fails loudly if absent. That matters because

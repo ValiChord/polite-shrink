@@ -18,7 +18,8 @@ truth. Where it conflicts with anything below, this block wins.**
 | Sweep results + analysis scripts | `wind-tunnel-patch/` (this repo) | ✅ |
 | Draft issues for upstream | `UPSTREAM_ISSUE_DRAFT_TEMP.md` (this repo, committed 2026-08-04) | ✅ |
 | Rebased fork | `sharding-v3-on-v0.5.0` — ✅ **pushed to `topeuph-ai/kitsune2` @ `c724e1a`** (verified 2026-08-04; this file previously said NOT pushed, which was wrong) | ✅ |
-| wind-tunnel clone, Holochain source build, all run logs | `/tmp/…/scratchpad` | ❌ **GONE** — rebuild ~15 min |
+| wind-tunnel clone + Holochain 0.7.0 source build | **`/workspaces/wt-env/`** — moved off `/tmp` 2026-08-04, verified running from the new path | ✅ survives a restart |
+| Run logs from the 08-03 campaign | `/tmp/…/scratchpad` | ❌ **GONE** — the numbers survive in `wind-tunnel-patch/RESULTS_write_rate_sweep.txt`, the raw logs do not |
 
 ### What is TRUE
 
