@@ -1,0 +1,44 @@
+diff --git a/crates/gossip/src/sharding/controller.rs b/crates/gossip/src/sharding/controller.rs
+index 3e67d30..b95d6d5 100644
+--- a/crates/gossip/src/sharding/controller.rs
++++ b/crates/gossip/src/sharding/controller.rs
+@@ -352,6 +352,14 @@ impl K2Sharding {
+         let grow_need = lag.mul_f64(cfg.grow_persistence);
+         let shrink_need = lag.mul_f64(cfg.shrink_persistence);
+ 
++        tracing::info!(
++            shrink_cond,
++            shrink_acc_ms = ctl.shrink_acc.as_millis() as u64,
++            shrink_need_ms = shrink_need.as_millis() as u64,
++            lag_ms = lag.as_millis() as u64,
++            declared_level = ctl.declared_level,
++            "shrinkdiag2: decision inputs"
++        );
+         if grow_cond && ctl.grow_acc >= grow_need {
+             // Safety first: growing wins over shrinking.
+             self.start_grow(agent, ctl);
+@@ -500,11 +508,23 @@ impl K2Sharding {
+         }
+         if staleness.is_empty() {
+             // No completed rounds yet: assume the worst.
++            tracing::info!(
++                peers_sampled = peers.len(),
++                staleness_len = 0,
++                "lagdiag: SHORTCUT - no completed gossip rounds, returning ceiling"
++            );
+             return ceiling;
+         }
+         staleness.sort_unstable();
+         let idx = ((staleness.len() * 9) / 10).min(staleness.len() - 1);
+-        staleness[idx].clamp(floor, ceiling)
++        let raw = staleness[idx];
++        tracing::info!(
++            peers_sampled = peers.len(),
++            staleness_len = staleness.len(),
++            raw_p90_ms = raw.as_millis() as u64,
++            "lagdiag: MEASURED p90 staleness"
++        );
++        raw.clamp(floor, ceiling)
+     }
+ 
+     /// Send a sharding message to every reachable peer.

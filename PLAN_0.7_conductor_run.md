@@ -70,6 +70,15 @@ box is slow", the other means the estimate never measured anything and the contr
 inert on any network**. One line of instrumentation settles it. See §7.12; ask this before "does it
 shrink".
 
+> 🟢 **Before you plan that run, read §7.12's two new subsections.** The instrumented binary was
+> **already built and already run** (2026-08-04, 45 min) — the Codespace restart ate the log, so
+> the *question* is open but the *work* is not. And the re-run is **short, not 45 minutes**:
+> `lag_estimate()` is called once per 5 s controller tick, so the first minute of ticks answers it.
+> Deferred to **September 2026** on the user's call — GitHub budget was at 90% on 2026-08-04.
+> The instrumentation is saved as `wind-tunnel-patch/lag_estimate_diagnostic.patch`; the binary is
+> at `/workspaces/wt-env/holochain-shrinkdiag`. **Redirect the run's stdout into
+> `/workspaces/wt-env/` — `/tmp` has now destroyed two campaigns' logs.**
+
 ### What is RETRACTED — do not repeat
 
 - ❌ **"A zero-arc author's chain is only ~5% visible."** Load on one box, not a property of
@@ -771,6 +780,62 @@ estimate and the waiting stops mattering; restructure the protocol and it still 
 
 **To settle it:** log `staleness.len()` and the pre-clamp percentile alongside `lag_ms`. One line,
 one run. If `len() == 0`, the answer is the shortcut.
+
+##### ⚠️ The settling run WAS built and WAS run — and its output was lost. Do not assume it is unanswered work.
+
+**2026-08-04, 19:56:57 → 20:41:57 UTC, 2700 s, N=30.** The instrumentation was written, compiled
+into a third named binary (`holochain-shrinkdiag`, built 19:50:12), and run to completion. **The
+Codespace then restarted at ~21:09 and took `/tmp` with it.** The run's log is gone; only
+`wt/run_summary.jsonl` (which carries no per-tick lines) survived. This is the *same* loss already
+recorded for the 08-03 campaign at the top of this file — **twice now, same cause.**
+
+**What survives, verified 2026-08-04:**
+
+| artefact | where | state |
+|---|---|---|
+| the instrumentation | `wind-tunnel-patch/lag_estimate_diagnostic.patch` | ✅ **saved from the working tree and `git apply --check`'d**; it was uncommitted in `/workspaces/kitsune2` and one rebuild from gone |
+| the built binary | `/workspaces/wt-env/holochain-shrinkdiag` | ✅ on the persistent volume; `lagdiag`=1, `shrinkdiag2`=1, `K2Sharding`=69 |
+| the run record | `wt/run_summary.jsonl`, last line | ✅ build stamp `19:50:12` distinguishes it from the five 16:05:36 runs of §7.12 |
+
+⚠️ **The two diagnostics are NOT in the same binaries — check before drawing on either.** Measured
+from the symbol tables: `holochain-polite-shrink` has **neither** (`shrinkdiag2`=0, `lagdiag`=0), so
+§7.12's tick data came from a 16:05:36 build that no longer exists as a separate file — it was
+`hc/target/release/holochain`, later overwritten by the 19:50 build. Only `holochain-shrinkdiag`
+carries both.
+
+#### 🟢 The re-run is CHEAP — it does not need 45 minutes (measured, 2026-08-04)
+
+**Do not re-book a 45-minute slot for this question.** The 2700 s duration was chosen for *"does it
+shrink"*, which needs 32.5 min of phase-1 + phase-2 waiting. **The lag question needs neither phase.**
+
+`lag_estimate()` is called at `controller.rs:191`, inside `check()` — **once per controller tick,
+before any per-agent decision**, and `check_interval_ms` defaults to **5,000**
+(`crates/gossip/src/sharding/config.rs:101`). So `lagdiag` fires **every 5 seconds per conductor**,
+and the first line settles it. Everything after the first minute of ticks is repetition.
+
+The cost floor is conductor bring-up, not run length: 25 agents took ~39 s average just for signing
+credentials. Budget a short run — the shape only has to be faithful enough that the staleness set is
+populated the same way, which is what N=30 buys.
+
+⚠️ **Two gates must BOTH be open or the run emits nothing — and both default closed.**
+
+1. **Conductor side.** `holochain_trace` is explicit: *"RUST_LOG must be set or this is a no-op"*
+   (`crates/holochain_trace/src/lib.rs:152-154` — it early-returns when `RUST_LOG` is unset). The
+   runner spawns the conductor with `Command::new(bin_path)` and never sets `RUST_LOG`
+   (`bindings/runner/src/holochain_runner.rs:213`), so it is **inherited from the launching shell**.
+2. **Runner side.** The conductor's stdout is re-emitted through the runner's own logger at target
+   `holochain_conductor::<agent_name>`, and only when `log::log_enabled!(…, Info)`
+   (`holochain_runner.rs:248-262`). The runner uses bare `env_logger::init()`
+   (`framework/runner/src/init.rs:6`), whose default filter is `error`.
+
+✅ Both gates were demonstrably open for the 16:05:36 runs — §7.12 quotes per-tick `shrink_cond` /
+`shrink_acc_ms` / `lag_ms`, which only exist if the conductor emitted **and** the runner forwarded.
+So the 19:56 run almost certainly *did* produce the answer. **It was lost to storage, not to
+configuration.**
+
+🔴 **Next time: redirect to the persistent volume, not `/tmp`.** The forwarding path means the lines
+land on the *scenario's* stdout, so a single redirect into `/workspaces/wt-env/` captures them —
+`/tmp` has now eaten two campaigns' logs.
 
 #### 🔬 Why it did not act — measured, not guessed
 

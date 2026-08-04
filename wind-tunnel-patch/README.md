@@ -9,6 +9,7 @@ Artefacts from the 2026-08-03 session, kept here because the working copies live
 | `RESULTS_write_rate_sweep.txt` | Raw per-run output for all three write rates. **Quote numbers from here, not from memory.** |
 | `visibility.py` | Computes visibility = observed seq ÷ (entries + 5). The `+5` is chain overhead — see the docstring; getting this wrong produced >100% figures. |
 | `analyse_reads.py` | Which write peer each reader selected, and the arc of that peer. The `(?<!write_)` lookbehind is load-bearing: without it every reader identity is wrong. |
+| `lag_estimate_diagnostic.patch` | **The instrumentation that settles the TOP OPEN QUESTION** (does `lag_estimate()` saturate via the `staleness.is_empty()` shortcut, or from a real p90?). Apply in `/workspaces/kitsune2` on `sharding-v3-on-v0.5.0` @ `c724e1a`. It was run on 2026-08-04 and the log was lost with `/tmp`; see `PLAN_0.7_conductor_run.md` §7.12. ⚠️ Needs `RUST_LOG` set — **two gates, both default closed**, documented there. |
 | `rebuild-env.sh` | Rebuilds the whole environment from scratch — clone + patch + both builds — and **verifies each step** rather than assuming. Measured 2026-08-04: ~20 min total (holochain 13m35s, scenario 5m58s), 4.5 GB. Usage: `./rebuild-env.sh [target-dir]`, defaults to `/tmp/wt-env`. |
 
 ## What the patch changes
