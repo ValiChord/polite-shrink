@@ -66,6 +66,28 @@ scenario was built to satisfy, asks in terms for *"the delay between data being 
 being available to the 0-arc nodes"*, and ThetaSinner's only comment on it is *"what remains to
 complete this ticket?"* Both issues below now lead with #335.
 
+🆕 **Near-duplicate found on their tracker — #431, fixed by PR #506 (merged Feb 2026).** Their
+CONTRIBUTING says to search existing issues first; this is what that search turned up, and ISSUE 1
+now cites it rather than walking into it.
+
+- **It corroborates us, in their own words.** #506's analysis says querying for the write peer
+  *"usually takes 3 minutes to complete, but it's not deterministic. Sometimes it takes seconds,
+  sometimes it takes 7 minutes."* That is the same propagation race, observed from the other side.
+  Citing it makes ISSUE 1 read as building on what they already found rather than as a discovery.
+- **It does not pre-empt us.** Their model was "the zome call times out"; the fix was a 15 s
+  `call_zome_with_options` timeout. Our runs are on `e4861457`, i.e. **after** that fix, and nothing
+  was timing out — the calls returned promptly with **0** candidates ~1600 times, then exactly 1.
+  A shorter timeout cannot help a call that succeeds and returns a degenerate set.
+- ⚠️ **Without this citation the likely reply is "we fixed that in #506"** and the issue dies.
+- 🆕 Also verified while checking: #506's timeout landed on `write_validated_must_get_agent_activity`
+  **only**; `mixed_arc_get_agent_activity`, `mixed_arc_must_get_agent_activity`,
+  `write_get_agent_activity` and `write_get_agent_activity_volatile` all still use plain `call_zome`.
+  Raised in the issue as a question, not a finding — we did not measure whether it matters.
+
+**Duplicate search, per their CONTRIBUTING** (`repo:holochain/wind-tunnel is:issue`): zero hits for
+`unstable-countersigning`, `WT_HOLOCHAIN_PATH`, `unknown import`, `write_peer`, `throttle`; one hit
+for `get_random_agent_with_write_behaviour` — #431, handled above. **Neither issue is a duplicate.**
+
 ---
 ---
 
@@ -120,6 +142,19 @@ The same selection idiom appears in five scenarios across two zomes (`write_get_
 the one, and in the non-mixed scenarios the consequence is milder — all readers watching one peer
 rather than a whole behaviour going unexercised — but the race itself isn't specific to this
 scenario.
+
+This overlaps with #431 / #506 and I should be clear about what's different. #506 fixed the same
+function timing out on the default websocket timeout, and its analysis notes that querying for the
+write peer *"usually takes 3 minutes to complete, but it's not deterministic. Sometimes it takes
+seconds, sometimes it takes 7 minutes."* That matches what I'm seeing from the other side. What
+looks still open is the case where the call **succeeds** and returns a degenerate set: my runs are
+on `e4861457`, so after that fix, and nothing was timing out — the calls returned promptly with zero
+candidates ~1600 times, then exactly one. A shorter zome-call timeout doesn't help there, because
+nothing is hanging.
+
+(Incidentally, and I haven't measured whether it matters: #506's `call_zome_with_options` timeout
+landed on `write_validated_must_get_agent_activity` only. The other four scenarios calling this
+helper still use plain `call_zome`. Deliberate?)
 
 **Caveat I should be straightforward about:** both instrumented runs were at the default write rate,
 which section 2 shows is enough to saturate a single box — announcements propagate slowly under that
