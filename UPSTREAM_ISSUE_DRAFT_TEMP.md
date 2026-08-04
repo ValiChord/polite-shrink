@@ -128,14 +128,21 @@ invocation).
 **Recommendation: file the issues, do not offer a PR yet.** Let them ask. The Nomad checklist item
 alone makes an unsolicited PR awkward, and both issues stand on their own.
 
-## 🔴 One decision still open
+## ✅ ISSUE 2 IS FILED — #678, 2026-08-04
 
-Both issues end with an offer to open a PR, which is **inconsistent with the recommendation above**.
-Either drop the line, or make it honest:
+<https://github.com/holochain/wind-tunnel/issues/678> — *"Document that WT_HOLOCHAIN_PATH requires
+a holochain built with unstable-countersigning"*. Filed by Ceri with the ask-first title and the
+PR offer kept (a one-sentence README change needs no Nomad CI run, so the objection below does not
+apply to it).
 
-> Happy to open a PR if it'd help, though I can't run the Nomad CI workflow your PR template asks for.
+**ISSUE 1 is not yet filed.** Two edits were made to it as a consequence of #678 landing:
 
-Not changed unilaterally — it is the only sentence in either issue that commits Ceri to future work.
+1. The Environment bullet now says **"(see #678)"** instead of "the companion issue" — a live
+   cross-reference rather than a dangling phrase.
+2. The closing PR offer now carries the Nomad caveat, matching the wording Ceri chose for #678:
+   *"Happy to open a PR if it'd help, though I should say up front that I can't run the Nomad CI
+   workflow your PR template asks for."* This is where the objection actually bites — ISSUE 1
+   proposes a real code change, ISSUE 1 is the one their PR template would gate.
 
 ## Repo facts, verified 2026-08-04
 

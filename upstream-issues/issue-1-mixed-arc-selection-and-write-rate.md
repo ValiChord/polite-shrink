@@ -152,7 +152,7 @@ looking fine.
 ## Environment
 
 - `holochain` 0.7.0 built from source with `--features unstable-functions,unstable-countersigning`
-  (see the companion issue about the released binaries)
+  (see #678)
 - `wind-tunnel` @ `e4861457`, scenario `mixed_arc_get_agent_activity`
 - 6 conductors on one 8-core / 32 GB machine
 - Default `ConductorConfig` bootstrap and relay URLs, i.e. the public dev bootstrap. Since the space
@@ -163,4 +163,7 @@ looking fine.
 One environment, one machine — which is where the write-rate effect will be most pronounced, and a
 distributed run may not see it at all. The selection race should be independent of that.
 
-Happy to open a PR, or to leave it if you'd rather solve it differently.
+Happy to open a PR if it'd help, though I should say up front that I can't run the Nomad CI workflow
+your PR template asks for. Equally happy to leave it if you'd rather solve it differently — you'll
+have a better sense than me of whether re-selection, a warm-up gate, or explicit assignment fits the
+harness's intent.
