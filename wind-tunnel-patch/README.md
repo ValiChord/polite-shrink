@@ -96,6 +96,50 @@ this machine could host that was unknown. It can.
 plus shrink decisions likely need far longer windows. And the measurement question is unchanged: arc
 sizes look obtainable, per-op redundancy does not.
 
+## 🆕 A Holochain conductor with polite-shrink compiled in — 2026-08-04
+
+**First time the controller has existed inside a Holochain conductor.** Every prior result is
+simulator or kitsune2-level (Stage-2). Built in 7m10s.
+
+| file | what it is |
+|---|---|
+| `holochain-fork-build.patch` | The two edits to holochain 0.7.0's manifests. Apply in `hc/`. |
+| `arm.sh` | Switches the build between arms and writes a **named** binary for each, with a canary. |
+
+**The two edits, and why each:**
+
+1. Uncomment all 9 `[patch.crates-io]` kitsune2 lines in holochain's root `Cargo.toml`, repointed
+   `../kitsune2` → `../../kitsune2`. This is **upstream's own override hook**, already present and
+   commented — not a hack. The fork's workspace version is `0.5.0`, matching holochain's pin exactly.
+2. Add `kitsune2_gossip = { version = "0.5.0", features = ["sharding"] }` to
+   `crates/holochain/Cargo.toml`. Cargo unifies features across the graph, so this switches on the
+   `#[cfg(feature = "sharding")]` controller **without touching the fork**, which stays exactly as
+   pushed at `c724e1a`.
+
+**Canary — and it discriminates in BOTH directions**, which is what makes it evidence:
+
+| binary | `K2Sharding` | countersigning (control) | size |
+|---|---|---|---|
+| `holochain-stock` | **0** | 1 | 54,785,608 |
+| `holochain-polite-shrink` | **62** | 1 | 54,911,448 |
+
+Also present in the fork build: `clamp_min_peers`, `start_grow`, `ShrinkIntent`.
+
+⚠️ **Compiled in is NOT engaged.** The controller is wired via the gossip factory, but whether it
+activates depends on `clamp_min_peers` (25) vs visible peers, and on arcs being left **dynamic** —
+which every upstream arc scenario pins with `with_target_arc_factor`. Proving engagement needs the
+purpose-built scenario and is the next step. **Do not claim a conductor-level polite-shrink result
+from the existence of this binary.**
+
+⚠️ **Mistake worth not repeating: building the second arm silently destroyed the first.** Both
+builds write to `hc/target/release/holochain`, so building the fork overwrote the stock conductor the
+verification run had used — the control arm for any comparison. Recovered by reverting and
+rebuilding (6m28s). `arm.sh` now writes a named binary per arm so it cannot recur.
+
+🆕 **`K2ShardingModConfig` registers via kitsune2's `set_module_config`**, the same mechanism behind
+`advanced: { irohTransport: … }` in conductor YAML. So `clamp_min_peers` is **probably** settable
+from config without recompiling. ⚠️ Unverified — check before relying on it.
+
 ## Rebuilding the environment
 
 Everything below is gone after a restart and takes ~15 min:
