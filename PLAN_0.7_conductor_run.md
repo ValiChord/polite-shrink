@@ -63,6 +63,13 @@ truth. Where it conflicts with anything below, this block wins.**
   scenario was built to satisfy and asks in terms for the authored→available delay for 0-arc
   nodes. The selection defect is a direct answer to ThetaSinner's standing question there.
 
+🔴 **TOP OPEN QUESTION (2026-08-04): does the sharding lag estimate saturate trivially?**
+`lag` was pinned at its 300 s ceiling for every run, which is what makes a shrink take 32.5 minutes.
+Two different code paths produce that value and the runs cannot distinguish them — one means "this
+box is slow", the other means the estimate never measured anything and the controller is **safe but
+inert on any network**. One line of instrumentation settles it. See §7.12; ask this before "does it
+shrink".
+
 ### What is RETRACTED — do not repeat
 
 - ❌ **"A zero-arc author's chain is only ~5% visible."** Load on one box, not a property of
@@ -726,6 +733,44 @@ simulator, the TLA+ proof, or the kitsune2-level Stage-2 campaign. Four healthy 
   claim.** The supportable sentence is: *"proven in simulation and proof; demonstrated to run and
   decide inside real Holochain."*
 - No performance claim of any kind — peak load hit **152** on 8 cores.
+
+#### 🔴 TOP OPEN QUESTION — does the lag estimate saturate trivially?
+
+**Ask this before anything else, including "does it shrink".** It decides whether the controller
+can *ever* engage in practice, which is prior to whether it engaged today.
+
+`lag_estimate()` (`crates/gossip/src/sharding/controller.rs:478`) returns the **90th-percentile**
+time since each live peer last completed a gossip round, clamped to `[1s, 300s]`. But it has a
+shortcut above that:
+
+```rust
+if staleness.is_empty() {
+    // No completed rounds yet: assume the worst.
+    return ceiling;
+}
+```
+
+**Both paths return exactly 300,000, and the runs cannot tell them apart.** The two readings are
+very different:
+
+| if lag came from… | meaning | consequence |
+|---|---|---|
+| a genuine 90th-percentile of ≥5 min | this box really is slow (load 93–152, `visible_peers` 25 of 29) | benign — better hardware moves much faster |
+| the `staleness.is_empty()` shortcut | the estimate **saturates without measuring anything** | 🔴 the rule applies maximum caution *on any network*, shrinks essentially never, and is **safe but inert** |
+
+The second is the worst failure mode available: nothing looks broken, no test fails, and the
+mechanism silently never fires. Same shape as the fake tests in ValiChord's `CLAUDE.md` that passed
+on "function not found".
+
+**It is also the real lever on the 32.5-minute latency.** At the floor of the range the entire
+two-phase path is ~**14 seconds**; it is 32.5 minutes here *only* because this one number is pinned.
+Restructuring the protocol (e.g. replacing the announce phase with a deterministic tie-break) would
+cut 32.5 → 20 min at best, because both waits scale off the same number — and would cost the
+"announced vacates count as already gone" signal that lets neighbours pre-cover the gap. **Fix the
+estimate and the waiting stops mattering; restructure the protocol and it still takes 20 minutes.**
+
+**To settle it:** log `staleness.len()` and the pre-clamp percentile alongside `lag_ms`. One line,
+one run. If `len() == 0`, the answer is the shortcut.
 
 #### 🔬 Why it did not act — measured, not guessed
 
