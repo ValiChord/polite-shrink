@@ -51,9 +51,19 @@ Stated plainly, because the distinction matters:
 - **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
 
+## The one lever outside the gate: how fast deaths are noticed
+
+The gate is proven, but it rests on a precondition — the wait must outlast the staleness — and pinning that down turned up the only other thing a policy author has to get right. All three are simulation-evidenced, not proven:
+
+- **Size the wait against death-detection latency, not gossip staleness.** They are independent clocks on a real transport (kitsune2's *unresponsive marking* vs peer-store propagation). Detection faster than gossip drives the residual race to zero; slower leaves a residual, and a node provably cannot *infer* its way out of it — though it can be *offset*, which is the next point.
+- **Decide which way the detector should be wrong, and cap it.** Convicting a live peer costs storage; missing a dead one costs data. Erring toward conviction takes `P(any loss)` from **40% to 2%** — then *worsens* past the optimum, because the mechanism is one error cancelling another rather than caution. Getting one global threshold roughly right is a 38-point effect; tuning it per peer adds ≤4 and is not distinguishable from noise, so a self-calibrating detector is not where the first effort goes.
+- **A spread of detection speeds is protective, not hazardous.** A uniformly slow network loses data in 40% of runs; an equal half detecting twice as fast takes that to 0 of 24. Safety tracks the *fastest* class — so homogenising node behaviour can remove a margin nobody knew was there. (The same trap as flattening the arc distribution, which is also load-bearing.)
+
+Detail: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md) and constraint 6b in [REPORT_stage3.md](REPORT_stage3.md).
+
 ## Relation to the Kitsune2 Github repository issue #160
 
-#160 asks for a **policy** (recommend a target arc for a redundancy level). The cost-optimal target is nearly trivial (`R/N` of the ring); every hard part is elsewhere — measuring N under stale/dishonest views, reaching the target without a race, and not oscillating on the way. Polite-shrink is the **safety gate** that makes any such policy safe to run, plus the constraint list for whoever writes the policy.
+#160 asks for a **policy** (recommend a target arc for a redundancy level). The cost-optimal target is nearly trivial (`R/N` of the ring); every hard part is elsewhere — measuring N under stale/dishonest views, reaching the target without a race, not oscillating on the way, and (per the section above) how fast the network notices a death. Polite-shrink is the **safety gate** that makes any such policy safe to run, plus the constraint list for whoever writes the policy.
 
 **What it would cost kitsune2 to adopt.** No new wire message: the vacate announcement can ride on the `AgentInfo` arc claim that is already gossiped and already signed. It does need one bit that claim cannot carry — whether a narrowed arc means *"intending to leave"* or *"already gone"* — and that bit cannot be inferred from the claim's age. So it is either one field on an existing struct, or the ID tie-break on a dedicated signal. `update_storage_arcs` already moves the stored arc toward a target hint; what is missing is the rule that sets the hint, and the shrink direction that `storage_arc.rs` currently leaves to "the host implementation or some sharding logic".
 
