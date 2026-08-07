@@ -88,6 +88,26 @@ trade-off analysis: [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)
 | Wind Tunnel, real iroh transport (5 runs) | All verdicts PASS both arms; 0 of 21,657 and 0 of 23,526 ops lost. Indistinguishable from the control **at this scale** — the harness runs 12–18 agents, and the sim predicts zero effect there, so this validates the simulation rather than clearing the encoding |
 | **Mass-death frequency, 100 seeds** | **The correction.** Real loss in 6–9% of V5 storm runs vs 1% for V3 — more often, though less than half the total volume. Earlier "zero loss" readings rested on ≤4 seeds |
 
+## The detection side, probed directly (2026-08-07)
+
+§11 concluded that the slow-detection residual is "irreducible by any local rule" — as an
+argument, not a measurement. These three studies test that, and amend it. Full detail:
+[REPORT_mz_decomposition.md](REPORT_mz_decomposition.md), constraint 6b in
+[REPORT_stage3.md](REPORT_stage3.md).
+
+| What was tested | Result |
+|---|---|
+| Can a node see the race coming from its **own observation history**? (Mori–Zwanzig decomposition, 72 seeds, ~166k gate decisions) | **No.** Detection latency drives the failure mode up **29×** while the memory term stays flat (+0.0145 → +0.0150). A positive control detects memory ~8× more strongly where it exists, so this is the physics, not a weak estimator |
+| Which local observables carry the information? (exact Shapley, 2^7 = 128 coalition fits) | **They are substitutes, and this narrows our own null.** Any one of six observables alone scores ≈0.89 against 0.92 for all seven — so the study above tested roughly *one* dimension of observable space sampled seven ways, not seven. Recorded as a limitation the follow-up discovered |
+| Which **direction** should a failure detector err in? (false-conviction sweep, 48 seeds) | **Toward convicting the living — up to a ceiling.** `P(any loss)` falls **40% → 2%** as `p` goes 0 → 0.10, then rises to 10% at p = 0.40 |
+| Why does the curve turn over? | **Error cancellation, not conservatism.** Slow detection makes a viewer over-count; false conviction under-counts; they annul near p ≈ 0.05 — exactly where loss is minimised. So the optimum is set by detection latency |
+| What does paranoia cost? | **Storage, not bandwidth.** Equilibrium arc up to +52%, but sync cost *falls* across most of the range — less shrinking means less re-growing. Bandwidth only degrades at p ≥ 0.4, where the view is broken rather than cautious |
+| Bug found and fixed in the existing model | `DecoupledSim` never stamped `death_lag` on agents joining mid-run, so join-bearing scenarios raised `AttributeError`. The published §11 sweep is storm-only and never reached the path; `validate_decoupled.py` still passes and prior output is byte-identical |
+
+*Not* claimed: none of this ran on real transport, the model has no heartbeat timing or
+per-peer heterogeneity, and `p` is a false-positive rate *per look* — real accrual detectors
+run orders of magnitude lower, so only the left end of that sweep is an operating regime.
+
 ## What we don't claim
 
 These are simulation and kitsune2-substrate measurements on one machine — not a

@@ -151,6 +151,23 @@ realism, and the formal proof — with the result and a link to each write-up.
   policy"** — what these runs establish that *any* target-arc policy has to
   respect (and why the textbook uniform `R/N` is probably the wrong one), kept
   separate from the proven gate.
+- **[REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)** — is §11's
+  "irreducible by any local rule" actually true? A Mori–Zwanzig decomposition
+  of the §6.1 residual into Markovian, memory and orthogonal terms, run as a
+  falsification attempt. Detection latency drives the failure mode up **29×**
+  while the part recoverable from an agent's own history stays flat — so a node
+  cannot *learn* its way out. The companion Shapley attribution
+  ([`mz_attribution.py`](mz_attribution.py)) then **narrows the repo's own
+  claim**: the seven observables are near-perfect substitutes, so the null
+  covers one dimension of observable space, not seven. Together with
+  [`detector_error_sweep.py`](detector_error_sweep.py) — which shows a
+  deliberately *biased* detector cuts `P(any loss)` 40% → 2% by cancelling the
+  over-count rather than inferring it — this amends §11 and adds constraint 6b.
+- **[METHOD.md](METHOD.md)** — how claims here are graded and how to check
+  them: machine-checked proof vs simulation evidence vs known gap, why the
+  ablation ladder is reported instead of the headline number (cf. McGreivy &
+  Hakim, *Nat. Mach. Intell.* 2024, on weak baselines), and the repo's
+  published corrections. Also states what would falsify the central claim.
 - **[spec/README.md](spec/README.md)** — the formal proof: the two-phase rule
   model-checked safe over every reachable state, the naive rule falsified.
 - **[RELATED_regularisation.md](RELATED_regularisation.md)** — *a reading aid, not a result.*
@@ -376,7 +393,17 @@ python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
 python3 check_seeds.py              # Stage 1: seed-robustness check
 ./run_stage3.sh                     # Stage 3 + follow-ups: nine studies, ~80 min on 8 cores
 java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # formal proof (needs JRE + tla2tools.jar)
+
+# The detection-side studies (REPORT_mz_decomposition.md, constraint 6b)
+python3 validate_detector_error.py  # reduction guard: p=0 is byte-identical to DecoupledSim
+python3 mz_probe.py --seeds 72      # MZ decomposition            (~50 min, 4-10 procs)
+python3 mz_attribution.py --seeds 24  # exact Shapley, 128 fits/cell (~7 min)
+python3 detector_error_sweep.py --seeds 48   # detector-error sweep (~25 min)
+python3 diag_detector_bias.py       # why the curve turns over     (~5 min)
 ```
+
+These four are numpy-only (no sklearn/scipy) and default to modest process
+counts; `--procs` is available on the sweeps.
 
 Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
 harness (`wind_tunnel/`) needs the kitsune2 fork cloned as a sibling

@@ -35,7 +35,7 @@ file, so the Stage-1 byte-determinism claims stand.
 | 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
 | 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
 | 10 | Is a *partially* upgraded network (mixed V3/V0 during rollout) safe? | **Yes, from ~10% adoption — no flag day.** Shrink-race loss is zero at every f ≥ 0.10 across 312 seeds in activation/flashcrowd/churn (a cliff, not a slope): a small polite minority forms a redundancy backbone the naive majority free-rides on. Storm keeps a ~0.3% residual — 9/11 unpreventable simultaneous mass-death, 2/11 the §6.1 race, which the storm brake closes. Cost of early rollout: a thinner margin. (`rolling_upgrade_sim.py`, `REPORT_rolling_upgrade.md`) |
-| 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 even at 2–8× the gossip lag and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. |
+| 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 even at 2–8× the gossip lag and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. **Amended 2026-08-07:** "irreducible by any local rule" holds for local *estimators* (measured: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)) but not for a deliberately *biased* detector, which cuts `P(any loss)` 40% → 2% by cancelling the over-count rather than inferring it. See the amendment in §11. |
 | 12 | Does *lossy* gossip — dropped messages, so each viewer's coverage picture is incomplete and inconsistent — break polite shrink? | **No, up to 90% per-round drop.** Replacing the complete-but-stale view with a per-viewer, per-peer lossy one (`message_loss_sim.py`, byte-identical to the mixed sim at loss=0), the data-loss rate is **flat in the loss axis** across 6,000 runs (2 scenarios × 3 fractions × 10 loss rates × 100 seeds). Activation: 0/100 at *every* loss rate and fraction. Storm: the only losses are the pre-existing correlated storm-death (every losing run orphans *at* the storm tick, and seed-level attribution shows they occur at loss=0 too and are non-monotonic in loss) — none are lossy over-counting. The two-phase re-check runs on whatever view an agent has and still never shrinks into a hole. |
 
 ## 1. Partitions (`partition_sim.py`)
@@ -586,6 +586,35 @@ i.e. the fast-detection regime where the race is closed). **Design lever for
 gossip staleness — the residual is governed by how fast unresponsive marking is,
 not by the shrink rule.**
 
+> **Amendment (2026-08-07): "irreducible by any local rule" is too strong as
+> written, and two later studies say why.** The claim survives in one sense and
+> fails in another, and the distinction turns out to be the useful part.
+>
+> - **Irreducible by any local *estimator* — confirmed, and now measured.**
+>   [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md) decomposes the
+>   residual à la Mori–Zwanzig and tries to falsify this claim. Across 72 seeds
+>   and ~166k gate decisions, detection latency drives the failure mode up 29×
+>   while the fraction recoverable from an agent's own observation history stays
+>   flat (+0.0145 → +0.0150), against a positive control that detects memory ~8×
+>   more strongly where it exists. A node cannot *learn* which peers have died
+>   before detection tells it: there is no precursor in the history.
+> - **But it is reducible by a deliberately *biased* rule.**
+>   [`detector_error_sweep.py`](detector_error_sweep.py) adds a false-conviction
+>   rate — the viewer wrongly drops live peers from its coverage — and
+>   `P(any loss)` falls from **40% to 2%** in the slow-detection stress regime.
+>   That is a local rule, and it reduces the residual.
+>
+> There is no contradiction: the biased rule recovers **no information**. Under
+> slow detection the viewer *over*-counts (undetected deaths still in coverage);
+> false conviction *under*-counts; the two annul near p ≈ 0.05, which is exactly
+> where loss is minimised (`diag_detector_bias.py`). It is error cancellation,
+> not inference.
+>
+> So the accurate statement is: **the residual cannot be estimated away locally,
+> but it can be offset locally — and the optimal offset is a function of
+> detection latency**, which is the same quantity this section already
+> identifies. See constraint 6 below.
+
 ## 12. Lossy gossip — the incomplete view (`message_loss_sim.py`)
 
 Every study so far gives each agent a view that is *complete* but stale: `_view`
@@ -700,6 +729,26 @@ rather than arbitrary fractions.
    bounds but cannot close it (§11, finding 11). The wait is therefore a function
    of unresponsive-marking speed, and a policy that tunes it against gossip
    timing is tuning against the wrong quantity.
+
+   **6b. A detector's error *direction* is a design parameter, and its optimum
+   is set by the same clock.** Detection latency is not the only thing that
+   matters — which way the detector is wrong matters too, and the two interact.
+   Convicting a live peer makes a viewer under-count (it holds more: costs
+   storage); missing a dead one makes it over-count (it shrinks wrongly: costs
+   data). Sweeping a false-conviction rate `p`
+   ([`detector_error_sweep.py`](detector_error_sweep.py), 48 seeds, storm 50%),
+   `P(any loss)` falls **40% → 2%** as `p` goes 0 → 0.10, then *rises again* to
+   10% at p = 0.40. The curve is explained by
+   [`diag_detector_bias.py`](diag_detector_bias.py): the viewer's mean coverage
+   error crosses zero near p ≈ 0.05, and that is where loss bottoms out. So the
+   optimum is **where the false-positive rate offsets the false-negative rate**,
+   which moves with detection latency. Two consequences for a policy: "err
+   toward paranoia" is right but needs a ceiling, and the cost is **storage,
+   not bandwidth** — sync cost *falls* across most of the range, for the same
+   reason as [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md) §4.3
+   (less shrinking means less re-growing). Caveat: `p` there is a
+   false-positive rate *per look*; real accrual detectors run orders of
+   magnitude lower, so only the left end of that sweep is an operating regime.
 
 7. **Do not flatten the arc distribution without replacing the reach it
    provides.** The equilibrium is extremely unequal — the top decile of agents
