@@ -441,7 +441,10 @@ def evaluate_cell(runs, n_folds=3):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--seeds", type=int, default=24)
+    # 72 is the published configuration (REPORT_mz_decomposition.md §4), so a
+    # bare `python3 mz_probe.py` reproduces the report — the same convention the
+    # other studies in run_stage3.sh follow.
+    ap.add_argument("--seeds", type=int, default=72)
     ap.add_argument("--procs", type=int, default=min(os.cpu_count() or 4, 10))
     args = ap.parse_args()
     seeds = [SEED_BASE + i for i in range(args.seeds)]

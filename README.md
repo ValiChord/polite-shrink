@@ -293,7 +293,7 @@ with live connection churn**, and measures it under Wind Tunnel. This is where
 
 Stage 3 attacks the controller along the four threats [REPORT_stage1.md](REPORT_stage1.md)
 §7 left open, then the Byzantine "liar" problem and a formal proof — nine
-studies, one command (`./run_stage3.sh`). Full report:
+studies, one command (`./run_stage3.sh`, which now also runs the detection-side group). Full report:
 [REPORT_stage3.md](REPORT_stage3.md).
 
 | Question | Answer |
@@ -391,19 +391,28 @@ it cannot.
 pip install numpy matplotlib
 python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
 python3 check_seeds.py              # Stage 1: seed-robustness check
-./run_stage3.sh                     # Stage 3 + follow-ups: nine studies, ~80 min on 8 cores
+./run_stage3.sh                     # Stage 3 + the detection-side group: ~3 h on 8 cores
 java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # formal proof (needs JRE + tla2tools.jar)
+```
 
-# The detection-side studies (REPORT_mz_decomposition.md, constraint 6b)
-python3 validate_detector_error.py  # reduction guard: p=0 is byte-identical to DecoupledSim
-python3 mz_probe.py --seeds 72      # MZ decomposition            (~50 min, 4-10 procs)
-python3 mz_attribution.py --seeds 24  # exact Shapley, 128 fits/cell (~7 min)
-python3 detector_error_sweep.py --seeds 48   # detector-error sweep (~25 min)
+`run_stage3.sh` runs the reduction guards first (each asserts an extension model
+is byte-identical to the model it extends when its new parameter is off), then
+the original nine studies, then the four detection-side ones. Bare invocation
+reproduces the published configuration throughout. To run just the latter group,
+or to trim it:
+
+```bash
+python3 validate_detector_error.py  # guard: p=0 reduces to DecoupledSim exactly
+python3 mz_probe.py                 # MZ decomposition, 72 seeds   (~50 min)
+python3 mz_attribution.py           # exact Shapley, 128 fits/cell (~7 min)
+python3 detector_error_sweep.py     # detector-error sweep         (~25 min)
 python3 diag_detector_bias.py       # why the curve turns over     (~5 min)
 ```
 
-These four are numpy-only (no sklearn/scipy) and default to modest process
-counts; `--procs` is available on the sweeps.
+These are numpy-only (no sklearn or scipy — the estimators are implemented
+directly) and take `--seeds` / `--procs`. The two sweeps write each cell as it
+completes and resume from what is already on disk, so an interrupted run can be
+restarted without losing work.
 
 Exact expected numbers and environment pins: `REPRODUCE.md`. The Wind Tunnel
 harness (`wind_tunnel/`) needs the kitsune2 fork cloned as a sibling
