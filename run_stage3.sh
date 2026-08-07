@@ -13,7 +13,7 @@ cd "$(dirname "$0")"
 # modelling bug, and every result below it is suspect -- so run them at the top
 # where the failure is visible rather than buried mid-log.
 for guard in validate_decoupled validate_message_loss validate_rolling_upgrade \
-             validate_detector_error; do
+             validate_detector_error validate_hetero_detector; do
     [ -f "$guard.py" ] || continue
     echo "=== GUARD $guard START $(date -u +%F' '%T) ==="
     if python3 "$guard.py"; then
@@ -38,7 +38,8 @@ done
 # amendment and constraint 6b). Order matters: mz_probe collects the decisions
 # mz_attribution ranks, and diag_detector_bias explains the curve
 # detector_error_sweep produces.
-for study in mz_probe mz_attribution detector_error_sweep diag_detector_bias; do
+for study in mz_probe mz_attribution detector_error_sweep diag_detector_bias \
+             hetero_detector_sweep; do
     echo "=== $study START $(date -u +%F' '%T) ==="
     if python3 "$study.py"; then
         echo "=== $study DONE $(date -u +%F' '%T) ==="

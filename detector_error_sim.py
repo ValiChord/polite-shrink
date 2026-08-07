@@ -82,13 +82,20 @@ class DetectorErrorSim(DecoupledSim):
                                    dtype=np.int64)
         return self._homes
 
+    def _p_for(self, a) -> float:
+        """This viewer's false-conviction rate. One global rate here; the
+        heterogeneous study (`hetero_detector_sim.py`) overrides this to give
+        each agent its own, which is the only hook it needs."""
+        return self.p_fc
+
     def _view(self, a):
         cov, lvl, icov, ilist = super()._view(a)
-        if self.p_fc <= 0.0:
+        p = self._p_for(a)
+        if p <= 0.0:
             return cov, lvl, icov, ilist            # exact reduction to DecoupledSim
 
         n = len(self.agents)
-        convicted = self.rng_fc.random(n) < self.p_fc
+        convicted = self.rng_fc.random(n) < p
         convicted[a.aid] = False                    # never self-convict
 
         # A viewer convicts on what it *sees*, so the coverage removed is the
