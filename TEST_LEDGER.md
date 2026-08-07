@@ -91,7 +91,8 @@ trade-off analysis: [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)
 ## The detection side, probed directly (2026-08-07)
 
 §11 concluded that the slow-detection residual is "irreducible by any local rule" — as an
-argument, not a measurement. These three studies test that, and amend it. Full detail:
+argument, not a measurement. Four studies test that claim, amend it, and then ask what a
+policy author should do about the detection clock it turns on. Full detail:
 [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md), constraint 6b in
 [REPORT_stage3.md](REPORT_stage3.md).
 
@@ -108,9 +109,13 @@ argument, not a measurement. These three studies test that, and amend it. Full d
 | Does mixing detection speeds help or hurt? | **Heterogeneity is protective.** A homogeneous slow network (dl=192) loses data in 40% of runs; mixing in an equal half at dl=96 takes it to **0/24**. Safety tracks the *fastest* class, not the slowest — the same backbone effect §10 found for a polite minority in a naive majority |
 | A grid that had to be thrown away | The first attempt set the fast class *faster than gossip*, which §11 had already shown drives its race to zero; that class then rescued the whole network, the baseline lost nothing, and all 25 cells were noise around zero. The summariser now reports the baseline first and refuses to be read as a null when there is no headroom |
 
-*Not* claimed: none of this ran on real transport, the model has no heartbeat timing or
-per-peer heterogeneity, and `p` is a false-positive rate *per look* — real accrual detectors
-run orders of magnitude lower, so only the left end of that sweep is an operating regime.
+*Not* claimed: none of this ran on real transport. Detection latency and conviction rate
+are **per-agent** (that is what the last four rows measure), but there is still no
+heartbeat timing, no arrival-time distribution and no detector memory — so this measures
+whether the optimum *moves*, not any real detector's ability to track it. Two latency
+classes at a 2:1 ratio is not a continuum. And `p` is a false-positive rate *per look*:
+real accrual detectors run orders of magnitude lower, so only the left end of those sweeps
+is an operating regime.
 
 ## What we don't claim
 
