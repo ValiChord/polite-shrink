@@ -1,0 +1,114 @@
+mz probe: 7 death_lags x 2 fractions x 24 seeds = 336 sims
+  sims 40/336
+  sims 80/336
+  sims 120/336
+  sims 160/336
+  sims 200/336
+  sims 240/336
+  sims 280/336
+  sims 320/336
+  sims 336/336
+  fitted f=1.0 death_lag=coupled
+  fitted f=1.0 death_lag=4
+  fitted f=1.0 death_lag=8
+  fitted f=1.0 death_lag=16
+  fitted f=1.0 death_lag=24
+  fitted f=1.0 death_lag=48
+  fitted f=1.0 death_lag=96
+  fitted f=0.1 death_lag=coupled
+  fitted f=0.1 death_lag=4
+  fitted f=0.1 death_lag=8
+  fitted f=0.1 death_lag=16
+  fitted f=0.1 death_lag=24
+  fitted f=0.1 death_lag=48
+  fitted f=0.1 death_lag=96
+# Mori-Zwanzig decomposition of the §6.1 residual
+
+Is the shrink-race residual reducible by a *local* rule? Split the over-count an agent makes at its execute-intent into a Markovian term (current view), a memory term (its own past views) and an irreducible noise term, and sweep death-detection latency.
+
+Storm scenario, N=200, R=5, gossip lag [8,24], 24 seeds/cell. R2 is out-of-sample under 3-fold cross-validation **grouped by seed**. Each arm is fitted with ridge (quadratic features) and gradient-boosted trees; the better score is reported, so a small memory gain means the signal is absent rather than the model too weak.
+
+Environment: Python 3.14.6, numpy 2.3.5 — NOT the repo pins (3.12.1 / 2.5.1), so treat exact digits as indicative and re-run before publishing.
+
+## pure V3 (f=1.0) — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 56270 | 6.88 | 0.898 | 0.915 | +0.0167 | 2.19 | 2.00 | 23 |
+| 4 | 56427 | 6.87 | 0.899 | 0.916 | +0.0165 | 2.18 | 1.99 | 9 |
+| 8 | 56567 | 6.86 | 0.898 | 0.915 | +0.0167 | 2.19 | 2.01 | 13 |
+| 16 | 57064 | 6.84 | 0.898 | 0.914 | +0.0166 | 2.19 | 2.00 | 21 |
+| 24 | 56600 | 6.85 | 0.899 | 0.915 | +0.0166 | 2.18 | 1.99 | 28 |
+| 48 | 56092 | 6.88 | 0.897 | 0.914 | +0.0165 | 2.20 | 2.02 | 86 |
+| 96 | 55766 | 6.89 | 0.896 | 0.912 | +0.0158 | 2.22 | 2.04 | 217 |
+
+### pure V3 (f=1.0) — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.993 | 0.996 | +0.0028 | 2.94 | 2.29 |
+| 4 | 0.993 | 0.996 | +0.0028 | 2.93 | 2.28 |
+| 8 | 0.993 | 0.996 | +0.0028 | 2.93 | 2.28 |
+| 16 | 0.993 | 0.996 | +0.0028 | 2.93 | 2.28 |
+| 24 | 0.993 | 0.996 | +0.0028 | 2.93 | 2.28 |
+| 48 | 0.993 | 0.996 | +0.0029 | 2.95 | 2.29 |
+| 96 | 0.993 | 0.996 | +0.0029 | 2.96 | 2.29 |
+
+### pure V3 (f=1.0) — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.639 | 0.761 | +0.1228 |
+| 4 | 0.639 | 0.764 | +0.1256 |
+| 8 | 0.640 | 0.765 | +0.1241 |
+| 16 | 0.644 | 0.764 | +0.1206 |
+| 24 | 0.640 | 0.765 | +0.1258 |
+| 48 | 0.633 | 0.759 | +0.1257 |
+| 96 | 0.634 | 0.761 | +0.1266 |
+
+## f=0.1 — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 4480 | 1.38 | 0.316 | 0.396 | +0.0802 | 1.14 | 1.07 | 8 |
+| 4 | 4583 | 1.35 | 0.330 | 0.401 | +0.0709 | 1.10 | 1.04 | 2 |
+| 8 | 4390 | 1.37 | 0.332 | 0.401 | +0.0687 | 1.12 | 1.06 | 4 |
+| 16 | 4439 | 1.37 | 0.319 | 0.387 | +0.0682 | 1.13 | 1.07 | 7 |
+| 24 | 4451 | 1.39 | 0.312 | 0.386 | +0.0735 | 1.15 | 1.08 | 10 |
+| 48 | 4368 | 1.45 | 0.300 | 0.373 | +0.0733 | 1.21 | 1.14 | 17 |
+| 96 | 4345 | 1.45 | 0.297 | 0.367 | +0.0702 | 1.21 | 1.15 | 36 |
+
+### f=0.1 — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.739 | 0.767 | +0.0282 | 1.19 | 1.12 |
+| 4 | 0.744 | 0.770 | +0.0258 | 1.17 | 1.10 |
+| 8 | 0.745 | 0.771 | +0.0258 | 1.18 | 1.12 |
+| 16 | 0.741 | 0.770 | +0.0293 | 1.19 | 1.12 |
+| 24 | 0.745 | 0.769 | +0.0240 | 1.18 | 1.13 |
+| 48 | 0.728 | 0.760 | +0.0319 | 1.24 | 1.16 |
+| 96 | 0.730 | 0.762 | +0.0320 | 1.25 | 1.17 |
+
+### f=0.1 — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.743 | 0.752 | +0.0099 |
+| 4 | 0.734 | 0.743 | +0.0097 |
+| 8 | 0.751 | 0.764 | +0.0138 |
+| 16 | 0.735 | 0.751 | +0.0152 |
+| 24 | 0.724 | 0.737 | +0.0130 |
+| 48 | 0.736 | 0.749 | +0.0130 |
+| 96 | 0.743 | 0.759 | +0.0165 |
+
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\mz_summary.md

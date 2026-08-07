@@ -1,0 +1,56 @@
+# Which local signals drive an unsafe shrink gate?
+
+Exact Shapley values over the seven observables an agent can compute from gossip it has already received. Value function = out-of-sample R2 predicting the gate over-count `y`, seeds held out from the fit; 2^7 = 128 coalition fits per condition, so these are exact rather than sampled. Method after Vinuesa et al. (Nat. Commun., Nov 2025), whose equivalent analysis overturned which flow structures were thought to matter.
+
+**This ranks information, not safety.** `spec/AgentInfoAgeGated.tla` already shows an imperfect estimate inside the gate loses a copy whatever it is built from. The use of this table is to tell a sizing policy which quantities are worth measuring.
+
+Environment: Python 3.14.6, numpy 2.5.1 — not the repo pins (3.12.1 / 2.5.1).
+
+## f=1.0, fast detection (death_lag=4)
+
+56,427 gate decisions. Full-model R2 = 0.920.
+
+| observable | Shapley value | share | **alone** v({g}) |
+|---|---|---|---|
+| vacate-half mean | +0.1583 | 17.2% | **0.894** |
+| visible intenders | +0.1572 | 17.1% | **0.868** |
+| global view mean | +0.1566 | 17.0% | **0.894** |
+| vacate-half floor | +0.1563 | 17.0% | **0.890** |
+| global view floor | +0.1532 | 16.7% | **0.884** |
+| own arc level | +0.1329 | 14.4% | **0.718** |
+| visible peers | +0.0055 |  0.6% | **0.028** |
+
+**Read the last column first.** *vacate-half mean* alone scores 0.894 against 0.920 for all seven together — 97% of the full model from a single observable. The near-equal Shapley values are therefore **not** seven separate contributions; they are what Shapley does with near-perfect substitutes, splitting the credit evenly among players that can each stand in for the others.
+
+## f=1.0, slow detection (death_lag=96)
+
+55,766 gate decisions. Full-model R2 = 0.915.
+
+| observable | Shapley value | share | **alone** v({g}) |
+|---|---|---|---|
+| vacate-half mean | +0.1574 | 17.2% | **0.887** |
+| visible intenders | +0.1566 | 17.1% | **0.864** |
+| global view mean | +0.1565 | 17.1% | **0.889** |
+| vacate-half floor | +0.1555 | 17.0% | **0.884** |
+| global view floor | +0.1522 | 16.6% | **0.877** |
+| own arc level | +0.1302 | 14.2% | **0.697** |
+| visible peers | +0.0067 |  0.7% | **0.031** |
+
+**Read the last column first.** *global view mean* alone scores 0.889 against 0.915 for all seven together — 97% of the full model from a single observable. The near-equal Shapley values are therefore **not** seven separate contributions; they are what Shapley does with near-perfect substitutes, splitting the credit evenly among players that can each stand in for the others.
+
+## Does the ranking move with detection latency?
+
+Fast-detection order: vacate-half mean > visible intenders > global view mean
+
+Slow-detection order: vacate-half mean > visible intenders > global view mean
+
+**Identical top-3 ordering.** The signals that carry information about the over-count do not change as detection latency grows — the companion result to mz_probe's flat memory gain.
+
+## Caveat: the visible-peer count is confounded in this model
+
+`visible peers` scores near zero, and that result **must not be reported as a finding**. In `DecoupledSim._view` only the coverage array `cov` receives the death-clock adjustment; the declaration vector `lvl` — which is what the peer count is computed from — is passed through on the *gossip* clock. So in this model the peer count cannot respond to detection latency even in principle, and the over-count it is being asked to predict is driven precisely by detection latency.
+
+In kitsune2 both would share a clock: a dead peer's `AgentInfo` lingers in the peer store until unresponsive marking removes it, and that same removal is what takes it out of coverage. Deciding whether peer count carries real signal needs `lvl` decoupled too — a change to `decoupled_sim.py`, not to this study.
+
+The other six observables are unaffected: they are all computed from `cov`, which is correctly on the detection clock.
+

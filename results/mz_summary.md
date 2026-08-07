@@ -1,0 +1,88 @@
+# Mori-Zwanzig decomposition of the §6.1 residual
+
+Is the shrink-race residual reducible by a *local* rule? Split the over-count an agent makes at its execute-intent into a Markovian term (current view), a memory term (its own past views) and an irreducible noise term, and sweep death-detection latency.
+
+Storm scenario, N=200, R=5, gossip lag [8,24], 72 seeds/cell. R2 is out-of-sample under 3-fold cross-validation **grouped by seed**. Each arm is fitted with ridge (quadratic features) and gradient-boosted trees; the better score is reported, so a small memory gain means the signal is absent rather than the model too weak.
+
+Environment: Python 3.14.6, numpy 2.5.1 — NOT the repo pins (3.12.1 / 2.5.1), so treat exact digits as indicative and re-run before publishing.
+
+## pure V3 (f=1.0) — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 165291 | 6.83 | 0.899 | 0.914 | +0.0149 | 2.17 | 2.00 | 65 |
+| 4 | 165967 | 6.82 | 0.900 | 0.915 | +0.0145 | 2.15 | 1.99 | 22 |
+| 8 | 165279 | 6.84 | 0.900 | 0.915 | +0.0150 | 2.17 | 2.00 | 45 |
+| 16 | 166930 | 6.81 | 0.899 | 0.914 | +0.0150 | 2.16 | 1.99 | 71 |
+| 24 | 167076 | 6.80 | 0.899 | 0.913 | +0.0146 | 2.17 | 2.00 | 98 |
+| 48 | 166155 | 6.82 | 0.898 | 0.913 | +0.0151 | 2.18 | 2.01 | 249 |
+| 96 | 163950 | 6.85 | 0.896 | 0.911 | +0.0150 | 2.20 | 2.04 | 635 |
+
+### pure V3 (f=1.0) — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.993 | 0.996 | +0.0026 | 2.89 | 2.27 |
+| 4 | 0.993 | 0.996 | +0.0026 | 2.88 | 2.26 |
+| 8 | 0.993 | 0.996 | +0.0026 | 2.89 | 2.27 |
+| 16 | 0.993 | 0.996 | +0.0026 | 2.88 | 2.27 |
+| 24 | 0.993 | 0.996 | +0.0026 | 2.87 | 2.26 |
+| 48 | 0.993 | 0.996 | +0.0027 | 2.89 | 2.27 |
+| 96 | 0.993 | 0.996 | +0.0027 | 2.91 | 2.28 |
+
+### pure V3 (f=1.0) — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.644 | 0.768 | +0.1235 |
+| 4 | 0.644 | 0.766 | +0.1218 |
+| 8 | 0.645 | 0.769 | +0.1242 |
+| 16 | 0.646 | 0.770 | +0.1240 |
+| 24 | 0.647 | 0.769 | +0.1214 |
+| 48 | 0.644 | 0.767 | +0.1237 |
+| 96 | 0.640 | 0.766 | +0.1258 |
+
+## f=0.1 — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 14407 | 1.38 | 0.338 | 0.430 | +0.0913 | 1.12 | 1.04 | 13 |
+| 4 | 14808 | 1.37 | 0.337 | 0.427 | +0.0894 | 1.11 | 1.04 | 4 |
+| 8 | 14713 | 1.38 | 0.338 | 0.429 | +0.0916 | 1.13 | 1.04 | 6 |
+| 16 | 14509 | 1.38 | 0.340 | 0.430 | +0.0897 | 1.12 | 1.04 | 12 |
+| 24 | 14704 | 1.38 | 0.345 | 0.430 | +0.0847 | 1.12 | 1.04 | 17 |
+| 48 | 14784 | 1.41 | 0.331 | 0.412 | +0.0802 | 1.15 | 1.08 | 47 |
+| 96 | 14777 | 1.47 | 0.319 | 0.403 | +0.0837 | 1.21 | 1.13 | 116 |
+
+### f=0.1 — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.723 | 0.772 | +0.0491 | 1.17 | 1.06 |
+| 4 | 0.720 | 0.767 | +0.0470 | 1.17 | 1.06 |
+| 8 | 0.718 | 0.767 | +0.0484 | 1.18 | 1.07 |
+| 16 | 0.724 | 0.771 | +0.0477 | 1.16 | 1.06 |
+| 24 | 0.726 | 0.774 | +0.0481 | 1.16 | 1.05 |
+| 48 | 0.717 | 0.764 | +0.0469 | 1.18 | 1.08 |
+| 96 | 0.708 | 0.753 | +0.0447 | 1.22 | 1.12 |
+
+### f=0.1 — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.762 | 0.785 | +0.0232 |
+| 4 | 0.768 | 0.786 | +0.0178 |
+| 8 | 0.766 | 0.785 | +0.0194 |
+| 16 | 0.758 | 0.780 | +0.0223 |
+| 24 | 0.767 | 0.787 | +0.0205 |
+| 48 | 0.766 | 0.783 | +0.0174 |
+| 96 | 0.765 | 0.783 | +0.0176 |
+

@@ -73,7 +73,16 @@ class DecoupledSim(MixedSim):
 
     def step(self):
         self._record_deaths()                 # before super() applies the deaths
+        n_before = len(self.agents)
         super().step()
+        # Agents that JOIN mid-run are created inside MixedSim.step and so miss
+        # the death_lag stamping done in __init__; without this they raise
+        # AttributeError the first time they are viewed. The published §11 sweep
+        # is storm-only (deaths, no joins) so it never reached this path, but
+        # join-bearing scenarios (churn, flashcrowd) did not run at all.
+        # Stamping only the new agents leaves join-free runs byte-identical.
+        for a in self.agents[n_before:]:
+            a.death_lag = a.lag if self._coupled else self._uniform_death_lag
 
     # -- coverage on the decoupled clock ---------------------------------------
     def _view(self, a):

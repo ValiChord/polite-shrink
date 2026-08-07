@@ -1,0 +1,81 @@
+detector-error sweep: 1152 runs (0 done, 1152 to run) on 4 procs
+  50/1152
+  100/1152
+  150/1152
+  200/1152
+  250/1152
+  300/1152
+  350/1152
+  400/1152
+  450/1152
+  500/1152
+  550/1152
+  600/1152
+  650/1152
+  700/1152
+  750/1152
+  800/1152
+  850/1152
+  900/1152
+  950/1152
+  1000/1152
+  1050/1152
+  1100/1152
+  1150/1152
+  1152/1152
+# Should a failure detector err toward paranoia?
+
+Constraint 6 says the shrink wait must be sized against death-detection latency. This asks the question it leaves open: which *direction* should a detector be wrong in?
+
+`p` = per-(viewer, peer) probability that a **live** peer is wrongly convicted and dropped from the viewer's coverage. Storm 50%, N=200, R=5, gossip lag [8,24], 48 seeds/cell.
+
+**This is a deliberate stress regime.** Loss only occurs at slow detection (§11's 2-8x band); milder settings lose nothing at any `p` and cannot discriminate. Absolute rates here are not operating figures.
+
+Environment: Python 3.14.6, numpy 2.5.1 — numpy matches the repo pin, Python does not (3.12.1). Re-run under the pins before publishing digits.
+
+## pure V3 (f=1.0), death_lag = 96
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 4/48 (8%) | 28,760 | 108 | 1.32 | 19,523 |
+| 0.02 | 3/48 (6%) | 28,223 | 115 | 1.14 (-14%) | 15,041 |
+| 0.05 | 3/48 (6%) | 44,275 | 108 | 1.29 (-3%) | 11,359 |
+| 0.1 | 1/48 (2%) | 2,689 | 92 | 1.36 (+3%) | 8,751 |
+| 0.2 | 0/48 (0%) | 0 | 62 | 1.51 (+14%) | 9,302 |
+| 0.4 | 0/48 (0%) | 0 | 19 | 1.97 (+48%) | 31,249 |
+
+## pure V3 (f=1.0), death_lag = 192
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 19/48 (40%) | 148,240 | 199 | 1.39 | 20,401 |
+| 0.02 | 12/48 (25%) | 91,677 | 204 | 1.17 (-16%) | 15,731 |
+| 0.05 | 4/48 (8%) | 87,904 | 190 | 1.27 (-8%) | 11,642 |
+| 0.1 | 1/48 (2%) | 5,693 | 164 | 1.32 (-5%) | 9,165 |
+| 0.2 | 1/48 (2%) | 8,468 | 117 | 1.44 (+4%) | 9,906 |
+| 0.4 | 5/48 (10%) | 23,146 | 83 | 2.11 (+52%) | 34,569 |
+
+## f=0.1, death_lag = 96
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 6/48 (12%) | 64,070 | 115 | 0.71 | 31,232 |
+| 0.02 | 4/48 (8%) | 93,752 | 126 | 0.73 (+3%) | 35,187 |
+| 0.05 | 1/48 (2%) | 10,972 | 124 | 0.72 (+1%) | 36,276 |
+| 0.1 | 1/48 (2%) | 25,098 | 116 | 0.87 (+23%) | 38,724 |
+| 0.2 | 0/48 (0%) | 0 | 81 | 1.02 (+44%) | 42,479 |
+| 0.4 | 0/48 (0%) | 0 | 40 | 1.48 (+110%) | 69,382 |
+
+## f=0.1, death_lag = 192
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 7/48 (15%) | 170,819 | 201 | 0.71 | 31,703 |
+| 0.02 | 7/48 (15%) | 203,137 | 209 | 0.75 (+6%) | 36,314 |
+| 0.05 | 3/48 (6%) | 38,628 | 201 | 0.74 (+4%) | 35,845 |
+| 0.1 | 7/48 (15%) | 97,212 | 196 | 0.86 (+22%) | 39,699 |
+| 0.2 | 6/48 (12%) | 52,139 | 156 | 1.05 (+48%) | 46,203 |
+| 0.4 | 10/48 (21%) | 73,892 | 109 | 1.47 (+107%) | 79,714 |
+
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\detector_error_summary.md
