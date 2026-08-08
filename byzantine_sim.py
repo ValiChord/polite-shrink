@@ -312,7 +312,7 @@ def main():
         m = liars[k]
         rows.append(f"| liar K={k} | {m.floor[-1]} | {m.true_floor[-1]} | "
                     f"{m.true_zero[-1]} | {m.true_zero[-1]/cfg.sectors:.1%} |")
-    with open("results/byz_summary.md", "w") as f:
+    with open("results/byz_summary.md", "w", encoding="utf-8") as f:
         f.write(
             "# Byzantine study summary\n\n"
             "## Forged intents (worst case: whole-ring claims, 10 lowest ids)\n\n"

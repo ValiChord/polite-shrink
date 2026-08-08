@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# repair_sim intermediate stage files (regenerated on every run)
+results/repair_stage_*.json

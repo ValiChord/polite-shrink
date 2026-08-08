@@ -300,7 +300,7 @@ def main():
         json.dump({"safety": safety, "overhead": overhead,
                    "R": R, "seeds": seeds, "ticks": ticks}, f, indent=1)
 
-    with open("results/verified_summary.md", "w") as f:
+    with open("results/verified_summary.md", "w", encoding="utf-8") as f:
         f.write("# Verified coverage — proof-gated shrink sensor\n\n"
                 "A declared peer counts toward coverage only while a fresh "
                 "proof-of-serve (successful audit within `proof_ttl`) backs "

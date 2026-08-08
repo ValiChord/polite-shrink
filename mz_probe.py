@@ -396,6 +396,13 @@ def evaluate_cell(runs, n_folds=3):
     Rows inside one run share a world and are heavily correlated, so a random
     row split would leak the answer across the split and inflate every R2.
     """
+    # Sort by seed before stacking. The pool returns runs in *completion* order,
+    # so without this the feature matrix is assembled in a different row order
+    # on every run; the fold assignment is unaffected (it keys on seed) but the
+    # floating-point reductions inside the learners are, and the fitted numbers
+    # wobble in the fourth decimal. The simulation itself is byte-reproducible —
+    # this makes the analysis reproducible too.
+    runs = sorted(runs, key=lambda r: r["seed"])
     seeds = sorted({r["seed"] for r in runs})
     if len(seeds) < n_folds:
         return None

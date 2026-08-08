@@ -122,7 +122,10 @@ def main():
 
 
 def _agg(rows, pf, ps):
-    c = [r for r in rows if r["p_fast"] == pf and r["p_slow"] == ps]
+    # sorted by seed: the pool returns cells in completion order, and the means
+    # below are float reductions whose result depends on summation order.
+    c = sorted((r for r in rows if r["p_fast"] == pf and r["p_slow"] == ps),
+               key=lambda r: r["seed"])
     if not c:
         return None
     n = len(c)

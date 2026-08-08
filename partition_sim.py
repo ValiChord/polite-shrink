@@ -276,7 +276,7 @@ def main():
         lines.append("| " + " | ".join(
             str(r[h]) if r[h] is not None else "never" for h in hdr) + " |")
     table = "\n".join(lines)
-    with open("results/partition_summary.md", "w") as f:
+    with open("results/partition_summary.md", "w", encoding="utf-8") as f:
         f.write(
             "# Partition study summary\n\n"
             "dur_* = durability (live copies anywhere; zero = data gone). "

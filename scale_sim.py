@@ -172,7 +172,7 @@ def main():
             (f"{r[h]:.1f}" if isinstance(r[h], float) else str(r[h]))
             if r[h] is not None else "never" for h in hdr) + " |")
     table = "\n".join(lines)
-    with open("results/scale_summary.md", "w") as f:
+    with open("results/scale_summary.md", "w", encoding="utf-8") as f:
         f.write("# Scale study summary\n\n"
                 "settle criterion scaled to population (rate < N/200 per "
                 "tick for 300 ticks). loss/exposure = sector-ticks after "

@@ -132,7 +132,7 @@ def summarise(rows, fractions, n_seeds):
                          f"{100*nloss/n:.1f}% | {mean_lst:.0f} | {mean_exp:.0f} | "
                          f"{worst_floor} |")
     out = os.path.join(RESULTS_DIR, "rolling_upgrade_summary.md")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print("\n".join(lines))
     print(f"\nwrote {out}\nwrote {CELLS}")

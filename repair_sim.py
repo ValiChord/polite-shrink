@@ -402,7 +402,7 @@ def main():
         json.dump({"deadlock": dead, "overshoot": over, "battery": batt,
                    "stagger_k": REPAIR_STAGGER_K}, f, indent=1)
 
-    with open("results/repair_summary.md", "w") as f:
+    with open("results/repair_summary.md", "w", encoding="utf-8") as f:
         f.write("# §6.2 repair-rule study\n\n"
                 "V4 = V3 + expanding-ring repair (react to a hole in the "
                 "level+g ancestor block after grow_need + (g-1)*2*lag).\n\n"

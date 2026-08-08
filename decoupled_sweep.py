@@ -104,7 +104,7 @@ def summarise(rows, n_seeds):
             lines.append(f"| {dl} | {races}/{n} | {deaths}/{n} | "
                          f"{100*anyl/n:.1f}% |")
     out = os.path.join(RESULTS_DIR, "decoupled_summary.md")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print("\n".join(lines)); print(f"\nwrote {out}")
 

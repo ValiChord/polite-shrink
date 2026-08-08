@@ -1,6 +1,6 @@
 # §6.1 residual-race quantification
 
-V3 only, N=200, warmup 1500+35*lag_max, observe 1500 ticks, 40 seeds/point. Hole = declared coverage of a sector hits 0. shrink = a shrink executed over the sector that tick (§6.1 race proper); churn = deaths alone. Zero holes at a point = upper bound only, not a rate.
+V3 full (polite shrink), N=200, warmup 1500+35*lag_max, observe 1500 ticks, 40 seeds/point. Hole = declared coverage of a sector hits 0. shrink = a shrink executed over the sector that tick (§6.1 race proper); churn = deaths alone; phantom = declared-zero while the data is still held locally (only reachable under the AgentInfo-only encoding, and excluded from the real-hole classes). Zero holes at a point = upper bound only, not a rate.
 
 | R | lag_max | p | runs | runs_with_hole | holes_shrink | holes_churn | zero_sector_ticks | rate_per_kticks |
 |---|---|---|---|---|---|---|---|---|

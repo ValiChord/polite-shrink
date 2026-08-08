@@ -142,7 +142,7 @@ def aggregate_and_write(seeds_target):
             s = result["per_scenario"].get(f"{key}|{v.name}")
             cells.append(f"{s['loss_runs']}/{s['n']}" if s else "-")
         lines.append(f"| {key} | " + " | ".join(cells) + " |")
-    with open("results/sweep_summary.md", "w") as f:
+    with open("results/sweep_summary.md", "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     return result
 

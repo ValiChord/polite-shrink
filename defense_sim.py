@@ -252,7 +252,7 @@ def main():
                       for k, runs in audit.items()},
         }, f)
 
-    with open("results/defense_summary.md", "w") as f:
+    with open("results/defense_summary.md", "w", encoding="utf-8") as f:
         f.write("# Byzantine defenses\n\n"
                 "## Intent range-validation (V3, 10 forged names, attack "
                 "from t=1500)\n\n"

@@ -288,7 +288,7 @@ def main():
         json.dump({"static": static, "stringency": stringency,
                    "R": R, "K": k, "seeds": seeds}, f, indent=1)
 
-    with open("results/partial_summary.md", "w") as f:
+    with open("results/partial_summary.md", "w", encoding="utf-8") as f:
         f.write("# Partial liars vs verified coverage\n\n"
                 f"K = {k} liars (= 2R) declare a full arc but truly store a "
                 "fraction p of the ring. Audit = c-sample range-check; a liar "

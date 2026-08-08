@@ -376,7 +376,7 @@ def main():
                       [cell[p]["rate_per_kticks"] for p in sorted(cell)])
         if s is not None:
             slopes.append(f"R={r} lag={lag}: fitted log-log slope {s:.2f}")
-    with open(f"results/race_summary{_SUF}.md", "w") as f:
+    with open(f"results/race_summary{_SUF}.md", "w", encoding="utf-8") as f:
         f.write("# §6.1 residual-race quantification\n\n"
                 f"{V3.name}, N=200, warmup 1500+35*lag_max, observe "
                 f"{OBSERVE} ticks, "

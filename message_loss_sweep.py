@@ -97,7 +97,7 @@ def summarise(rows, n_seeds):
                 lvl = np.mean([r["mean_final_level"] for r in c])
                 lines.append(f"| {l:.1f} | {nl}/{n} | {100*nl/n:.1f}% | {lvl:.2f} |")
     out = os.path.join(RESULTS_DIR, "message_loss_summary.md")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print("\n".join(lines)); print(f"\nwrote {out}")
 

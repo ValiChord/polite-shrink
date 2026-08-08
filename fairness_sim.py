@@ -256,7 +256,7 @@ def main():
                    "note": "V3F key = (aid*2654435761 + (t//P)*40503 "
                            "+ 12582917) & 0xFFFFFFFF"}, f)
 
-    with open("results/fairness_summary.md", "w") as f:
+    with open("results/fairness_summary.md", "w", encoding="utf-8") as f:
         f.write("# Rotating tie-break (V3F) — safety and fairness\n\n"
                 "## Safety sweep\n\n"
                 "| variant | scenario | runs with loss | loss sector-ticks "

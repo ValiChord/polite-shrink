@@ -93,7 +93,7 @@ def summarise(rows):
                      f"{min(r['min_floor'] for r in cells)} | "
                      f"{np.mean([r['brake_fires'] for r in cells]):.1f} |")
     out = os.path.join(RESULTS_DIR, "rolling_upgrade_brake_storm_summary.md")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print("\n".join(lines)); print(f"\nwrote {out}")
 

@@ -185,7 +185,7 @@ def main():
         lines.append("| " + " | ".join(
             str(r[h]) if r[h] is not None else "never" for h in hdr) + " |")
     table = "\n".join(lines)
-    with open("results/summary.md", "w") as f:
+    with open("results/summary.md", "w", encoding="utf-8") as f:
         f.write("# Arc-controller simulation summary\n\n"
                 "settle = ticks after disruption until resize rate stays "
                 "< 1/tick for 300 ticks; floor_min = worst redundancy floor "
