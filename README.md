@@ -408,6 +408,21 @@ python3 check_seeds.py              # Stage 1: seed-robustness check
 java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # formal proof (needs JRE + tla2tools.jar)
 ```
 
+The script resolves its own interpreter — it *executes* each candidate rather
+than just looking for it on PATH, because on Windows `python3` is usually the
+Microsoft Store shim, which is on PATH, is not Python, and makes every study
+die instantly. Point it at a specific one with `PYTHON=...`:
+
+```bash
+PYTHON=/path/to/venv/bin/python ./run_stage3.sh
+```
+
+Before running anything it prints the interpreter and the numpy/matplotlib
+versions, aborts if a dependency is missing, and says plainly whether the
+environment matches the pins in `REPRODUCE.md` — an off-pin run still produces
+useful results, but not byte-reproducible ones, and the log now records which
+it was.
+
 `run_stage3.sh` runs the reduction guards first (each asserts an extension model
 is byte-identical to the model it extends when its new parameter is off), then
 the original nine studies, then the four detection-side ones. Bare invocation
