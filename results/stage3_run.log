@@ -1,33 +1,108 @@
-=== partition_sim START 2026-07-13 10:57:03 ===
+interpreter: C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\mzvenv\Scripts\python.exe
+python 3.14.6  numpy 2.5.1  matplotlib 3.11.0
+WARNING: environment is OFF-PIN -- python 3.14.6 != pinned 3.12.1
+         Results will be indicative, not byte-reproducible.
+
+=== GUARD validate_decoupled START 2026-08-08 04:57:58 ===
+REDUCTION GUARD  (DecoupledSim coupled == MixedSim, byte-identical)
+  [OK ] activation  f=0.5
+  [OK ] activation  f=1.0
+  [OK ] storm       f=0.5
+  [OK ] storm       f=1.0
+  [OK ] flashcrowd  f=0.5
+  [OK ] flashcrowd  f=1.0
+  [OK ] churn       f=0.5
+  [OK ] churn       f=1.0
+
+ALL GUARDS PASS
+=== GUARD validate_decoupled PASS 2026-08-08 04:58:39 ===
+=== GUARD validate_message_loss START 2026-08-08 04:58:39 ===
+REDUCTION GUARD  (MessageLossSim loss=0 == MixedSim, byte-identical)
+  [OK ] activation  f=0.5
+  [OK ] activation  f=1.0
+  [OK ] storm       f=0.5
+  [OK ] storm       f=1.0
+
+SANITY  (loss>0 must change behaviour)
+  [OK ] activation f=1.0: loss=0 vs loss=0.3 differ = True
+
+ALL GUARDS PASS
+=== GUARD validate_message_loss PASS 2026-08-08 04:59:18 ===
+=== GUARD validate_rolling_upgrade START 2026-08-08 04:59:18 ===
+REDUCTION GUARD  (MixedSim extremes must equal pure Sim, byte-identical)
+  [OK ] activation  f=0.0 == Sim(V0)     [OK ] f=1.0 == Sim(V3)
+  [OK ] storm       f=0.0 == Sim(V0)     [OK ] f=1.0 == Sim(V3)
+  [OK ] flashcrowd  f=0.0 == Sim(V0)     [OK ] f=1.0 == Sim(V3)
+  [OK ] churn       f=0.0 == Sim(V0)     [OK ] f=1.0 == Sim(V3)
+
+FALSIFIABILITY GUARD  (f=0 must lose data; f=1 must not)
+  [OK ] activation  f=0 loses=True  f=1 loses=False
+  [OK ] storm       f=0 loses=True  f=1 loses=False
+  [OK ] flashcrowd  f=0 loses=True  f=1 loses=False
+  [OK ] churn       f=0 loses=True  f=1 loses=False
+
+ALL GUARDS PASS
+=== GUARD validate_rolling_upgrade PASS 2026-08-08 05:00:15 ===
+=== GUARD validate_detector_error START 2026-08-08 05:00:16 ===
+  activation  coupled         reduction OK
+  activation  death_lag=24    reduction OK
+  storm       coupled         reduction OK
+  storm       death_lag=24    reduction OK
+  churn       coupled         reduction OK
+  churn       death_lag=24    reduction OK
+  monotonicity  p=0.10           coverage never raised OK
+
+All reduction and monotonicity checks passed.
+=== GUARD validate_detector_error PASS 2026-08-08 05:00:52 ===
+=== GUARD validate_hetero_detector START 2026-08-08 05:00:53 ===
+  homogeneous dl=96   p=0.0   reduction OK
+  homogeneous dl=96   p=0.05  reduction OK
+  homogeneous dl=96   p=0.2   reduction OK
+  homogeneous dl=192  p=0.0   reduction OK
+  homogeneous dl=192  p=0.05  reduction OK
+  homogeneous dl=192  p=0.2   reduction OK
+  class split      100/200 slow as requested       OK
+  class vs home    r=+0.093 (uncorrelated)            OK
+  per-agent latency fast=24, slow=192                    OK
+
+All reduction and assignment checks passed.
+=== GUARD validate_hetero_detector PASS 2026-08-08 05:01:47 ===
+=== partition_sim START 2026-08-08 05:01:47 ===
 scenario: split5050
   split5050  V1 damped                durability floor_min(post)=2 avail floor_min(post)=1 durability zero-ticks=0
   split5050  V2 damped+jitter         durability floor_min(post)=2 avail floor_min(post)=2 durability zero-ticks=0
   split5050  V3 full (polite shrink)  durability floor_min(post)=5 avail floor_min(post)=2 durability zero-ticks=0
+  split5050  V5 polite (AgentInfo-only) durability floor_min(post)=4 avail floor_min(post)=0 durability zero-ticks=0
   wrote results/partition_split5050.png
 scenario: split9010
   split9010  V1 damped                durability floor_min(post)=2 avail floor_min(post)=1 durability zero-ticks=0
   split9010  V2 damped+jitter         durability floor_min(post)=2 avail floor_min(post)=1 durability zero-ticks=0
   split9010  V3 full (polite shrink)  durability floor_min(post)=5 avail floor_min(post)=1 durability zero-ticks=0
+  split9010  V5 polite (AgentInfo-only) durability floor_min(post)=4 avail floor_min(post)=0 durability zero-ticks=0
   wrote results/partition_split9010.png
 scenario: flapping
   flapping   V1 damped                durability floor_min(post)=2 avail floor_min(post)=0 durability zero-ticks=0
   flapping   V2 damped+jitter         durability floor_min(post)=4 avail floor_min(post)=2 durability zero-ticks=0
   flapping   V3 full (polite shrink)  durability floor_min(post)=5 avail floor_min(post)=2 durability zero-ticks=0
+  flapping   V5 polite (AgentInfo-only) durability floor_min(post)=3 avail floor_min(post)=0 durability zero-ticks=0
   wrote results/partition_flapping.png
 
-| scenario | variant | dur_floor_min | dur_loss_ticks | avail_floor_min_split | avail_zero_ticks_split | avail_zero_ticks_postheal | heal_settle | resizes | sync_cost |
-|---|---|---|---|---|---|---|---|---|---|
-| split5050 | V1 damped | 2 | 0 | 1 | 0 | 0 | never | 5142 | 63089 |
-| split5050 | V2 damped+jitter | 2 | 0 | 2 | 0 | 0 | 0 | 5284 | 39225 |
-| split5050 | V3 full (polite shrink) | 5 | 0 | 2 | 0 | 0 | 0 | 3793 | 28476 |
-| split9010 | V1 damped | 2 | 0 | 1 | 0 | 0 | never | 4890 | 60064 |
-| split9010 | V2 damped+jitter | 2 | 0 | 1 | 0 | 0 | never | 4827 | 41098 |
-| split9010 | V3 full (polite shrink) | 5 | 0 | 1 | 0 | 0 | 0 | 3894 | 41836 |
-| flapping | V1 damped | 2 | 0 | 0 | 1007 | 0 | 190 | 5020 | 37507 |
-| flapping | V2 damped+jitter | 4 | 0 | 2 | 0 | 0 | 142 | 5185 | 30150 |
-| flapping | V3 full (polite shrink) | 5 | 0 | 2 | 0 | 0 | 354 | 4366 | 32530 |
-=== partition_sim DONE 2026-07-13 10:57:50 ===
-=== byzantine_sim START 2026-07-13 10:57:50 ===
+| scenario | variant | dur_floor_min | dur_loss_ticks | dur_floor_min_held | dur_loss_ticks_held | avail_floor_min_split | avail_zero_ticks_split | avail_zero_ticks_postheal | heal_settle | resizes | sync_cost |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| split5050 | V1 damped | 2 | 0 | 2 | 0 | 1 | 0 | 0 | never | 5142 | 63089 |
+| split5050 | V2 damped+jitter | 2 | 0 | 2 | 0 | 2 | 0 | 0 | 0 | 5284 | 39225 |
+| split5050 | V3 full (polite shrink) | 5 | 0 | 5 | 0 | 2 | 0 | 0 | 0 | 3793 | 28476 |
+| split5050 | V5 polite (AgentInfo-only) | 4 | 0 | 5 | 0 | 0 | 240 | 0 | 236 | 2774 | 17295 |
+| split9010 | V1 damped | 2 | 0 | 2 | 0 | 1 | 0 | 0 | never | 4890 | 60064 |
+| split9010 | V2 damped+jitter | 2 | 0 | 2 | 0 | 1 | 0 | 0 | never | 4827 | 41098 |
+| split9010 | V3 full (polite shrink) | 5 | 0 | 5 | 0 | 1 | 0 | 0 | 0 | 3894 | 41836 |
+| split9010 | V5 polite (AgentInfo-only) | 4 | 0 | 5 | 0 | 0 | 5627 | 0 | 0 | 2355 | 17386 |
+| flapping | V1 damped | 2 | 0 | 2 | 0 | 0 | 1007 | 0 | 190 | 5020 | 37507 |
+| flapping | V2 damped+jitter | 4 | 0 | 4 | 0 | 2 | 0 | 0 | 142 | 5185 | 30150 |
+| flapping | V3 full (polite shrink) | 5 | 0 | 5 | 0 | 2 | 0 | 0 | 354 | 4366 | 32530 |
+| flapping | V5 polite (AgentInfo-only) | 3 | 0 | 5 | 0 | 0 | 401 | 0 | 255 | 3344 | 26808 |
+=== partition_sim DONE 2026-08-08 05:02:49 ===
+=== byzantine_sim START 2026-08-08 05:02:49 ===
 study: forged intents
   forge/clean           floor_min(post)=5 true_floor_min=5 mean_level_end=0.85 sync=32891
   forge/forged intents  floor_min(post)=6 true_floor_min=6 mean_level_end=2.34 sync=77204
@@ -43,141 +118,177 @@ study: trojan exit
   exit/honest storm  true_floor_min(post)=5 true_zero_ticks=0
   wrote results/byz_liar.png
 wrote results/byz_summary.md
-=== byzantine_sim DONE 2026-07-13 10:58:26 ===
-=== scale_sim START 2026-07-13 10:58:26 ===
-36 runs on 6 workers
-  N=  200 fixed   storm      V1 damped                settle=None floor_min=0 loss=249 (5s)
-  N=  200 fixed   activation V1 damped                settle=1258 floor_min=2 loss=0 (5s)
-  N=  500 fixed   storm      V1 damped                settle=702 floor_min=1 loss=0 (9s)
-  N=  500 density storm      V1 damped                settle=0 floor_min=4 loss=0 (10s)
-  N=  200 fixed   activation V3 full (polite shrink)  settle=1557 floor_min=5 loss=0 (6s)
-  N=  200 fixed   storm      V3 full (polite shrink)  settle=403 floor_min=4 loss=0 (6s)
-  N=  500 fixed   activation V1 damped                settle=1174 floor_min=0 loss=13 (12s)
-  N=  500 density activation V1 damped                settle=868 floor_min=1 loss=0 (13s)
-  N=  500 fixed   storm      V3 full (polite shrink)  settle=126 floor_min=4 loss=0 (12s)
-  N=  500 density storm      V3 full (polite shrink)  settle=494 floor_min=3 loss=0 (13s)
-  N=  500 fixed   activation V3 full (polite shrink)  settle=1687 floor_min=5 loss=0 (14s)
-  N=  500 density activation V3 full (polite shrink)  settle=1465 floor_min=5 loss=0 (14s)
-  N= 1000 fixed   storm      V1 damped                settle=0 floor_min=2 loss=0 (21s)
-  N= 1000 fixed   activation V1 damped                settle=682 floor_min=1 loss=0 (24s)
-  N= 1000 density activation V1 damped                settle=1096 floor_min=1 loss=0 (21s)
-  N= 1000 density storm      V1 damped                settle=120 floor_min=2 loss=0 (23s)
-  N= 1000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=3 loss=0 (25s)
-  N= 2000 fixed   storm      V1 damped                settle=0 floor_min=1 loss=0 (33s)
-  N= 1000 fixed   activation V3 full (polite shrink)  settle=1371 floor_min=5 loss=0 (30s)
-  N= 2000 fixed   activation V1 damped                settle=766 floor_min=0 loss=19 (43s)
-  N= 1000 density activation V3 full (polite shrink)  settle=1460 floor_min=5 loss=0 (28s)
-  N= 1000 density storm      V3 full (polite shrink)  settle=119 floor_min=4 loss=0 (29s)
-  N= 2000 density activation V1 damped                settle=2404 floor_min=0 loss=1071 (45s)
-  N= 2000 density storm      V1 damped                settle=126 floor_min=2 loss=0 (37s)
-  N= 2000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=4 loss=0 (54s)
-  N= 2000 fixed   activation V3 full (polite shrink)  settle=1107 floor_min=5 loss=0 (58s)
-  N= 2000 density storm      V3 full (polite shrink)  settle=451 floor_min=4 loss=0 (55s)
-  N= 5000 fixed   activation V1 damped                settle=766 floor_min=3 loss=0 (94s)
-  N= 2000 density activation V3 full (polite shrink)  settle=1479 floor_min=5 loss=0 (63s)
-  N= 5000 fixed   storm      V1 damped                settle=0 floor_min=1 loss=0 (96s)
-  N= 5000 density storm      V1 damped                settle=0 floor_min=5 loss=0 (71s)
-  N= 5000 density activation V1 damped                settle=1420 floor_min=0 loss=1474 (87s)
-  N= 5000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=1 loss=0 (113s)
-  N= 5000 fixed   activation V3 full (polite shrink)  settle=1104 floor_min=5 loss=0 (124s)
-  N= 5000 density storm      V3 full (polite shrink)  settle=29 floor_min=4 loss=0 (129s)
-  N= 5000 density activation V3 full (polite shrink)  settle=1694 floor_min=5 loss=0 (142s)
+=== byzantine_sim DONE 2026-08-08 05:03:25 ===
+=== scale_sim START 2026-08-08 05:03:25 ===
+  N=  200 fixed   storm      V1 damped                settle=None floor_min=0 loss=249 (7s)
+  N=  200 fixed   activation V1 damped                settle=1258 floor_min=2 loss=0 (8s)
+  N=  200 fixed   storm      V3 full (polite shrink)  settle=403 floor_min=4 loss=0 (9s)
+  N=  500 density activation V1 damped                settle=868 floor_min=1 loss=0 (15s)
+  N=  500 fixed   storm      V1 damped                settle=702 floor_min=1 loss=0 (16s)
+  N=  500 density storm      V1 damped                settle=0 floor_min=4 loss=0 (16s)
+  N=  200 fixed   activation V3 full (polite shrink)  settle=1557 floor_min=5 loss=0 (9s)
+  N=  500 fixed   activation V1 damped                settle=1174 floor_min=0 loss=13 (22s)
+  N=  200 fixed   storm      V5 polite (AgentInfo-only) settle=384 floor_min=2 loss=0 (12s)
+  N=  200 fixed   activation V5 polite (AgentInfo-only) settle=758 floor_min=0 loss=44 (14s)
+  N=  500 fixed   activation V3 full (polite shrink)  settle=1687 floor_min=5 loss=0 (11s)
+  N=  500 fixed   storm      V3 full (polite shrink)  settle=126 floor_min=4 loss=0 (24s)
+  N=  500 density storm      V3 full (polite shrink)  settle=494 floor_min=3 loss=0 (25s)
+  N=  500 density activation V3 full (polite shrink)  settle=1465 floor_min=5 loss=0 (28s)
+  N=  500 fixed   activation V5 polite (AgentInfo-only) settle=907 floor_min=1 loss=0 (13s)
+  N= 1000 density activation V1 damped                settle=1096 floor_min=1 loss=0 (14s)
+  N= 1000 fixed   storm      V1 damped                settle=0 floor_min=2 loss=0 (36s)
+  N= 1000 fixed   activation V1 damped                settle=682 floor_min=1 loss=0 (41s)
+  N=  500 fixed   storm      V5 polite (AgentInfo-only) settle=0 floor_min=5 loss=0 (33s)
+  N=  500 density storm      V5 polite (AgentInfo-only) settle=127 floor_min=1 loss=0 (32s)
+  N= 1000 density activation V3 full (polite shrink)  settle=1460 floor_min=5 loss=0 (21s)
+  N=  500 density activation V5 polite (AgentInfo-only) settle=938 floor_min=0 loss=48 (39s)
+  N= 1000 density activation V5 polite (AgentInfo-only) settle=1547 floor_min=0 loss=108 (27s)
+  N= 1000 density storm      V1 damped                settle=120 floor_min=2 loss=0 (37s)
+  N= 1000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=3 loss=0 (52s)
+  N= 1000 fixed   activation V3 full (polite shrink)  settle=1371 floor_min=5 loss=0 (58s)
+  N= 2000 density activation V1 damped                settle=2404 floor_min=0 loss=1071 (31s)
+  N= 2000 fixed   activation V1 damped                settle=766 floor_min=0 loss=19 (82s)
+  N= 1000 density storm      V3 full (polite shrink)  settle=119 floor_min=4 loss=0 (51s)
+  N= 2000 fixed   storm      V1 damped                settle=0 floor_min=1 loss=0 (80s)
+  N= 1000 fixed   storm      V5 polite (AgentInfo-only) settle=236 floor_min=0 loss=30 (59s)
+  N= 1000 fixed   activation V5 polite (AgentInfo-only) settle=963 floor_min=0 loss=59 (61s)
+  N= 1000 density storm      V5 polite (AgentInfo-only) settle=118 floor_min=1 loss=0 (53s)
+  N= 2000 density activation V3 full (polite shrink)  settle=1479 floor_min=5 loss=0 (92s)
+  N= 2000 density storm      V1 damped                settle=126 floor_min=2 loss=0 (61s)
+  N= 2000 fixed   activation V3 full (polite shrink)  settle=1107 floor_min=5 loss=0 (99s)
+  N= 2000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=4 loss=0 (92s)
+  N= 5000 fixed   activation V1 damped                settle=766 floor_min=3 loss=0 (133s)
+  N= 2000 density storm      V3 full (polite shrink)  settle=451 floor_min=4 loss=0 (99s)
+  N= 2000 density activation V5 polite (AgentInfo-only) settle=1404 floor_min=1 loss=0 (130s)
+  N= 5000 fixed   storm      V1 damped                settle=0 floor_min=1 loss=0 (150s)
+  N= 2000 fixed   storm      V5 polite (AgentInfo-only) settle=0 floor_min=4 loss=0 (136s)
+  N= 2000 fixed   activation V5 polite (AgentInfo-only) settle=1061 floor_min=0 loss=6 (142s)
+  N= 2000 density storm      V5 polite (AgentInfo-only) settle=147 floor_min=3 loss=0 (115s)
+  N= 5000 density activation V1 damped                settle=1420 floor_min=0 loss=1474 (120s)
+  N= 5000 fixed   activation V3 full (polite shrink)  settle=1104 floor_min=5 loss=0 (201s)
+  N= 5000 density storm      V1 damped                settle=0 floor_min=5 loss=0 (148s)
+  N= 5000 fixed   storm      V3 full (polite shrink)  settle=0 floor_min=1 loss=0 (208s)
+  N= 5000 density activation V3 full (polite shrink)  settle=1694 floor_min=5 loss=0 (226s)
+  N= 5000 fixed   activation V5 polite (AgentInfo-only) settle=1104 floor_min=3 loss=0 (226s)
+  N= 5000 density storm      V3 full (polite shrink)  settle=29 floor_min=4 loss=0 (219s)
+  N= 5000 fixed   storm      V5 polite (AgentInfo-only) settle=0 floor_min=1 loss=0 (192s)
+  N= 5000 density activation V5 polite (AgentInfo-only) settle=1526 floor_min=0 loss=14718 (182s)
+  N= 5000 density storm      V5 polite (AgentInfo-only) settle=287 floor_min=0 loss=36256 (173s)
+54 runs on 6 workers
 wrote results/scale.png
 
 | n | sectors | series | scenario | variant | settle | floor_min | exposure | loss | resizes_per_agent | sync_per_agent | mean_level_end |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 500 | 1024 | density | activation | V1 damped | 868 | 1 | 9791 | 0 | 10.8 | 21.2 | 0.5 |
 | 500 | 1024 | density | activation | V3 full (polite shrink) | 1465 | 5 | 0 | 0 | 18.4 | 135.2 | 0.6 |
+| 500 | 1024 | density | activation | V5 polite (AgentInfo-only) | 938 | 0 | 31754 | 48 | 11.1 | 25.2 | 1.5 |
 | 1000 | 2048 | density | activation | V1 damped | 1096 | 1 | 60252 | 0 | 15.4 | 222.5 | 0.6 |
 | 1000 | 2048 | density | activation | V3 full (polite shrink) | 1460 | 5 | 0 | 0 | 14.9 | 64.1 | 0.2 |
+| 1000 | 2048 | density | activation | V5 polite (AgentInfo-only) | 1547 | 0 | 148376 | 108 | 17.1 | 66.1 | 0.8 |
 | 2000 | 4096 | density | activation | V1 damped | 2404 | 0 | 407594 | 1071 | 22.8 | 254.6 | 0.4 |
 | 2000 | 4096 | density | activation | V3 full (polite shrink) | 1479 | 5 | 0 | 0 | 21.6 | 129.3 | 0.2 |
+| 2000 | 4096 | density | activation | V5 polite (AgentInfo-only) | 1404 | 1 | 20619 | 0 | 12.3 | 23.5 | 0.3 |
 | 5000 | 16384 | density | activation | V1 damped | 1420 | 0 | 256840 | 1474 | 16.2 | 94.6 | 0.0 |
 | 5000 | 16384 | density | activation | V3 full (polite shrink) | 1694 | 5 | 0 | 0 | 21.2 | 139.7 | 0.3 |
+| 5000 | 16384 | density | activation | V5 polite (AgentInfo-only) | 1526 | 0 | 690307 | 14718 | 17.9 | 104.3 | 0.3 |
 | 200 | 512 | fixed | activation | V1 damped | 1258 | 2 | 19296 | 0 | 19.4 | 243.4 | 1.1 |
 | 200 | 512 | fixed | activation | V3 full (polite shrink) | 1557 | 5 | 0 | 0 | 22.9 | 248.0 | 0.9 |
+| 200 | 512 | fixed | activation | V5 polite (AgentInfo-only) | 758 | 0 | 13762 | 44 | 7.9 | 8.4 | 3.0 |
 | 500 | 512 | fixed | activation | V1 damped | 1174 | 0 | 32547 | 13 | 18.5 | 110.5 | 0.5 |
 | 500 | 512 | fixed | activation | V3 full (polite shrink) | 1687 | 5 | 0 | 0 | 18.2 | 88.8 | 0.3 |
+| 500 | 512 | fixed | activation | V5 polite (AgentInfo-only) | 907 | 1 | 9184 | 0 | 9.9 | 8.9 | 0.3 |
 | 1000 | 512 | fixed | activation | V1 damped | 682 | 1 | 3536 | 0 | 10.0 | 12.7 | 0.1 |
 | 1000 | 512 | fixed | activation | V3 full (polite shrink) | 1371 | 5 | 0 | 0 | 12.0 | 18.3 | 0.1 |
+| 1000 | 512 | fixed | activation | V5 polite (AgentInfo-only) | 963 | 0 | 5132 | 59 | 8.9 | 1.7 | 0.9 |
 | 2000 | 512 | fixed | activation | V1 damped | 766 | 0 | 13945 | 19 | 12.3 | 34.8 | 0.2 |
 | 2000 | 512 | fixed | activation | V3 full (polite shrink) | 1107 | 5 | 0 | 0 | 9.4 | 2.0 | 0.0 |
+| 2000 | 512 | fixed | activation | V5 polite (AgentInfo-only) | 1061 | 0 | 5625 | 6 | 9.6 | 2.3 | 0.0 |
 | 5000 | 512 | fixed | activation | V1 damped | 766 | 3 | 57 | 0 | 9.0 | 0.0 | 0.0 |
 | 5000 | 512 | fixed | activation | V3 full (polite shrink) | 1104 | 5 | 0 | 0 | 9.7 | 0.3 | 0.0 |
+| 5000 | 512 | fixed | activation | V5 polite (AgentInfo-only) | 1104 | 3 | 71 | 0 | 9.0 | 0.0 | 0.0 |
 | 500 | 1024 | density | storm | V1 damped | 0 | 4 | 285 | 0 | 11.0 | 22.9 | 0.3 |
 | 500 | 1024 | density | storm | V3 full (polite shrink) | 494 | 3 | 15279 | 0 | 19.9 | 157.7 | 0.7 |
+| 500 | 1024 | density | storm | V5 polite (AgentInfo-only) | 127 | 1 | 23962 | 0 | 13.1 | 40.5 | 0.9 |
 | 1000 | 2048 | density | storm | V1 damped | 120 | 2 | 34812 | 0 | 15.3 | 143.5 | 0.2 |
 | 1000 | 2048 | density | storm | V3 full (polite shrink) | 119 | 4 | 19063 | 0 | 16.9 | 92.6 | 0.5 |
+| 1000 | 2048 | density | storm | V5 polite (AgentInfo-only) | 118 | 1 | 105165 | 0 | 16.4 | 71.1 | 1.4 |
 | 2000 | 4096 | density | storm | V1 damped | 126 | 2 | 192671 | 0 | 22.2 | 235.1 | 0.3 |
 | 2000 | 4096 | density | storm | V3 full (polite shrink) | 451 | 4 | 80804 | 0 | 21.0 | 103.3 | 0.7 |
+| 2000 | 4096 | density | storm | V5 polite (AgentInfo-only) | 147 | 3 | 162450 | 0 | 15.1 | 34.8 | 0.4 |
 | 5000 | 16384 | density | storm | V1 damped | 0 | 5 | 0 | 0 | 16.2 | 94.6 | 0.0 |
 | 5000 | 16384 | density | storm | V3 full (polite shrink) | 29 | 4 | 13292 | 0 | 20.2 | 117.2 | 0.7 |
+| 5000 | 16384 | density | storm | V5 polite (AgentInfo-only) | 287 | 0 | 1066004 | 36256 | 19.9 | 111.7 | 0.3 |
 | 200 | 512 | fixed | storm | V1 damped | never | 0 | 65909 | 249 | 26.4 | 340.3 | 1.4 |
 | 200 | 512 | fixed | storm | V3 full (polite shrink) | 403 | 4 | 7552 | 0 | 22.2 | 200.8 | 0.7 |
+| 200 | 512 | fixed | storm | V5 polite (AgentInfo-only) | 384 | 2 | 11433 | 0 | 10.7 | 37.1 | 1.0 |
 | 500 | 512 | fixed | storm | V1 damped | 702 | 1 | 39540 | 0 | 21.6 | 141.9 | 0.6 |
 | 500 | 512 | fixed | storm | V3 full (polite shrink) | 126 | 4 | 6293 | 0 | 17.6 | 75.1 | 0.5 |
+| 500 | 512 | fixed | storm | V5 polite (AgentInfo-only) | 0 | 5 | 0 | 0 | 9.9 | 8.9 | 0.4 |
 | 1000 | 512 | fixed | storm | V1 damped | 0 | 2 | 10457 | 0 | 11.4 | 30.6 | 0.2 |
 | 1000 | 512 | fixed | storm | V3 full (polite shrink) | 0 | 3 | 1971 | 0 | 13.4 | 30.8 | 0.2 |
+| 1000 | 512 | fixed | storm | V5 polite (AgentInfo-only) | 236 | 0 | 10215 | 30 | 10.8 | 6.8 | 0.5 |
 | 2000 | 512 | fixed | storm | V1 damped | 0 | 1 | 8857 | 0 | 12.2 | 32.7 | 0.2 |
 | 2000 | 512 | fixed | storm | V3 full (polite shrink) | 0 | 4 | 4325 | 0 | 9.6 | 2.1 | 0.1 |
+| 2000 | 512 | fixed | storm | V5 polite (AgentInfo-only) | 0 | 4 | 625 | 0 | 9.7 | 2.4 | 0.1 |
 | 5000 | 512 | fixed | storm | V1 damped | 0 | 1 | 11251 | 0 | 9.8 | 0.5 | 0.1 |
 | 5000 | 512 | fixed | storm | V3 full (polite shrink) | 0 | 1 | 2274 | 0 | 10.1 | 0.7 | 0.1 |
-=== scale_sim DONE 2026-07-13 11:04:11 ===
-=== race_quantify START 2026-07-13 11:04:11 ===
+| 5000 | 512 | fixed | storm | V5 polite (AgentInfo-only) | 0 | 1 | 8967 | 0 | 9.3 | 0.2 | 0.1 |
+=== scale_sim DONE 2026-08-08 05:18:58 ===
+=== race_quantify START 2026-08-08 05:18:58 ===
 cell R=3 lag_max=24
-  R=3 lag=24 p=5e-04: holes=10 (shrink 0 / churn 10) in 40 runs; runs_with_hole=1
-  R=3 lag=24 p=1e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=3 lag=24 p=2e-03: holes=264 (shrink 0 / churn 264) in 40 runs; runs_with_hole=6
-  R=3 lag=24 p=4e-03: holes=1779 (shrink 0 / churn 1779) in 40 runs; runs_with_hole=15
-  R=3 lag=24 p=8e-03: holes=7229 (shrink 2 / churn 7227) in 40 runs; runs_with_hole=36
-  R=3 lag=24 p=2e-02: holes=48082 (shrink 13 / churn 48069) in 40 runs; runs_with_hole=40
-  R=3 lag=24 p=3e-02: holes=226537 (shrink 0 / churn 226537) in 40 runs; runs_with_hole=40
-  cell R=3 lag=24 done in 147s (equilibrium floor at snapshot: 3)
+  R=3 lag=24 p=5e-04: holes=10 (shrink 0 / churn 10 / phantom 0) in 40 runs; runs_with_hole=1
+  R=3 lag=24 p=1e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=3 lag=24 p=2e-03: holes=264 (shrink 0 / churn 264 / phantom 0) in 40 runs; runs_with_hole=6
+  R=3 lag=24 p=4e-03: holes=1779 (shrink 0 / churn 1779 / phantom 0) in 40 runs; runs_with_hole=15
+  R=3 lag=24 p=8e-03: holes=7229 (shrink 2 / churn 7227 / phantom 0) in 40 runs; runs_with_hole=36
+  R=3 lag=24 p=2e-02: holes=48082 (shrink 13 / churn 48069 / phantom 0) in 40 runs; runs_with_hole=40
+  R=3 lag=24 p=3e-02: holes=226537 (shrink 0 / churn 226537 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=3 lag=24 done in 203s (equilibrium floor at snapshot: 3)
 cell R=3 lag_max=48
-  R=3 lag=48 p=5e-04: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=3 lag=48 p=1e-03: holes=100 (shrink 0 / churn 100) in 40 runs; runs_with_hole=1
-  R=3 lag=48 p=2e-03: holes=466 (shrink 0 / churn 466) in 40 runs; runs_with_hole=5
-  R=3 lag=48 p=4e-03: holes=2146 (shrink 0 / churn 2146) in 40 runs; runs_with_hole=19
-  R=3 lag=48 p=8e-03: holes=19348 (shrink 5 / churn 19343) in 40 runs; runs_with_hole=38
-  R=3 lag=48 p=2e-02: holes=103759 (shrink 16 / churn 103743) in 40 runs; runs_with_hole=40
-  R=3 lag=48 p=3e-02: holes=348542 (shrink 4 / churn 348538) in 40 runs; runs_with_hole=40
-  cell R=3 lag=48 done in 144s (equilibrium floor at snapshot: 4)
+  R=3 lag=48 p=5e-04: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=3 lag=48 p=1e-03: holes=100 (shrink 0 / churn 100 / phantom 0) in 40 runs; runs_with_hole=1
+  R=3 lag=48 p=2e-03: holes=466 (shrink 0 / churn 466 / phantom 0) in 40 runs; runs_with_hole=5
+  R=3 lag=48 p=4e-03: holes=2146 (shrink 0 / churn 2146 / phantom 0) in 40 runs; runs_with_hole=19
+  R=3 lag=48 p=8e-03: holes=19348 (shrink 5 / churn 19343 / phantom 0) in 40 runs; runs_with_hole=38
+  R=3 lag=48 p=2e-02: holes=103759 (shrink 16 / churn 103743 / phantom 0) in 40 runs; runs_with_hole=40
+  R=3 lag=48 p=3e-02: holes=348542 (shrink 4 / churn 348538 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=3 lag=48 done in 204s (equilibrium floor at snapshot: 4)
 cell R=3 lag_max=96
-  R=3 lag=96 p=5e-04: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=3 lag=96 p=1e-03: holes=347 (shrink 0 / churn 347) in 40 runs; runs_with_hole=4
-  R=3 lag=96 p=2e-03: holes=2273 (shrink 21 / churn 2252) in 40 runs; runs_with_hole=15
-  R=3 lag=96 p=4e-03: holes=8311 (shrink 3 / churn 8308) in 40 runs; runs_with_hole=34
-  R=3 lag=96 p=8e-03: holes=49542 (shrink 102 / churn 49440) in 40 runs; runs_with_hole=40
-  R=3 lag=96 p=2e-02: holes=175063 (shrink 642 / churn 174421) in 40 runs; runs_with_hole=40
-  R=3 lag=96 p=3e-02: holes=290853 (shrink 905 / churn 289948) in 40 runs; runs_with_hole=40
-  cell R=3 lag=96 done in 146s (equilibrium floor at snapshot: 4)
+  R=3 lag=96 p=5e-04: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=3 lag=96 p=1e-03: holes=347 (shrink 0 / churn 347 / phantom 0) in 40 runs; runs_with_hole=4
+  R=3 lag=96 p=2e-03: holes=2273 (shrink 21 / churn 2252 / phantom 0) in 40 runs; runs_with_hole=15
+  R=3 lag=96 p=4e-03: holes=8311 (shrink 3 / churn 8308 / phantom 0) in 40 runs; runs_with_hole=34
+  R=3 lag=96 p=8e-03: holes=49542 (shrink 102 / churn 49440 / phantom 0) in 40 runs; runs_with_hole=40
+  R=3 lag=96 p=2e-02: holes=175063 (shrink 642 / churn 174421 / phantom 0) in 40 runs; runs_with_hole=40
+  R=3 lag=96 p=3e-02: holes=290853 (shrink 905 / churn 289948 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=3 lag=96 done in 207s (equilibrium floor at snapshot: 4)
 cell R=5 lag_max=24
-  R=5 lag=24 p=5e-04: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=24 p=1e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=24 p=2e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=24 p=4e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=24 p=8e-03: holes=460 (shrink 0 / churn 460) in 40 runs; runs_with_hole=7
-  R=5 lag=24 p=2e-02: holes=8371 (shrink 0 / churn 8371) in 40 runs; runs_with_hole=36
-  R=5 lag=24 p=3e-02: holes=112709 (shrink 0 / churn 112709) in 40 runs; runs_with_hole=40
-  cell R=5 lag=24 done in 145s (equilibrium floor at snapshot: 6)
+  R=5 lag=24 p=5e-04: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=24 p=1e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=24 p=2e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=24 p=4e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=24 p=8e-03: holes=460 (shrink 0 / churn 460 / phantom 0) in 40 runs; runs_with_hole=7
+  R=5 lag=24 p=2e-02: holes=8371 (shrink 0 / churn 8371 / phantom 0) in 40 runs; runs_with_hole=36
+  R=5 lag=24 p=3e-02: holes=112709 (shrink 0 / churn 112709 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=5 lag=24 done in 210s (equilibrium floor at snapshot: 6)
 cell R=5 lag_max=48
-  R=5 lag=48 p=5e-04: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=48 p=1e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=48 p=2e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=48 p=4e-03: holes=164 (shrink 0 / churn 164) in 40 runs; runs_with_hole=3
-  R=5 lag=48 p=8e-03: holes=2512 (shrink 0 / churn 2512) in 40 runs; runs_with_hole=23
-  R=5 lag=48 p=2e-02: holes=50392 (shrink 0 / churn 50392) in 40 runs; runs_with_hole=40
-  R=5 lag=48 p=3e-02: holes=342774 (shrink 1 / churn 342773) in 40 runs; runs_with_hole=40
-  cell R=5 lag=48 done in 145s (equilibrium floor at snapshot: 5)
+  R=5 lag=48 p=5e-04: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=48 p=1e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=48 p=2e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=48 p=4e-03: holes=164 (shrink 0 / churn 164 / phantom 0) in 40 runs; runs_with_hole=3
+  R=5 lag=48 p=8e-03: holes=2512 (shrink 0 / churn 2512 / phantom 0) in 40 runs; runs_with_hole=23
+  R=5 lag=48 p=2e-02: holes=50392 (shrink 0 / churn 50392 / phantom 0) in 40 runs; runs_with_hole=40
+  R=5 lag=48 p=3e-02: holes=342774 (shrink 1 / churn 342773 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=5 lag=48 done in 205s (equilibrium floor at snapshot: 5)
 cell R=5 lag_max=96
-  R=5 lag=96 p=5e-04: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=96 p=1e-03: holes=0 (shrink 0 / churn 0) in 40 runs; runs_with_hole=0
-  R=5 lag=96 p=2e-03: holes=163 (shrink 0 / churn 163) in 40 runs; runs_with_hole=3
-  R=5 lag=96 p=4e-03: holes=639 (shrink 0 / churn 639) in 40 runs; runs_with_hole=8
-  R=5 lag=96 p=8e-03: holes=21517 (shrink 2 / churn 21515) in 40 runs; runs_with_hole=39
-  R=5 lag=96 p=2e-02: holes=170610 (shrink 13 / churn 170597) in 40 runs; runs_with_hole=40
-  R=5 lag=96 p=3e-02: holes=287843 (shrink 3 / churn 287840) in 40 runs; runs_with_hole=40
-  cell R=5 lag=96 done in 144s (equilibrium floor at snapshot: 5)
+  R=5 lag=96 p=5e-04: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=96 p=1e-03: holes=0 (shrink 0 / churn 0 / phantom 0) in 40 runs; runs_with_hole=0
+  R=5 lag=96 p=2e-03: holes=163 (shrink 0 / churn 163 / phantom 0) in 40 runs; runs_with_hole=3
+  R=5 lag=96 p=4e-03: holes=639 (shrink 0 / churn 639 / phantom 0) in 40 runs; runs_with_hole=8
+  R=5 lag=96 p=8e-03: holes=21517 (shrink 2 / churn 21515 / phantom 0) in 40 runs; runs_with_hole=39
+  R=5 lag=96 p=2e-02: holes=170610 (shrink 13 / churn 170597 / phantom 0) in 40 runs; runs_with_hole=40
+  R=5 lag=96 p=3e-02: holes=287843 (shrink 3 / churn 287840 / phantom 0) in 40 runs; runs_with_hole=40
+  cell R=5 lag=96 done in 210s (equilibrium floor at snapshot: 5)
 wrote results/race.png
 R=3 lag=24: fitted log-log slope 2.42
 R=3 lag=48: fitted log-log slope 2.44
@@ -185,5 +296,604 @@ R=3 lag=96: fitted log-log slope 2.00
 R=5 lag=24: fitted log-log slope 3.97
 R=5 lag=48: fitted log-log slope 3.74
 R=5 lag=96: fitted log-log slope 2.96
-=== race_quantify DONE 2026-07-13 11:18:49 ===
-=== STAGE3 ALL DONE 2026-07-13 11:18:49 ===
+=== race_quantify DONE 2026-08-08 05:39:39 ===
+=== repair_sim START 2026-08-08 05:39:39 ===
+study: sparse deadlock
+  random-5      clamp= 0 V3 full (polite shrink) recovered 30/30 stuck=0 median_rec=244.5 sync=2444
+  random-5      clamp= 0 V4 polite+repair   recovered 30/30 stuck=0 median_rec=245.0 sync=2419
+  random-5      clamp=25 V3 full (polite shrink) recovered 30/30 stuck=0 median_rec=83.5 sync=2444
+  random-5      clamp=25 V4 polite+repair   recovered 30/30 stuck=0 median_rec=86.0 sync=2419
+  random-15     clamp= 0 V3 full (polite shrink) recovered 30/30 stuck=0 median_rec=128.0 sync=8155
+  random-15     clamp= 0 V4 polite+repair   recovered 30/30 stuck=0 median_rec=128.5 sync=7252
+  random-15     clamp=25 V3 full (polite shrink) recovered 30/30 stuck=0 median_rec=63.0 sync=7338
+  random-15     clamp=25 V4 polite+repair   recovered 30/30 stuck=0 median_rec=66.5 sync=7408
+  clustered-15  clamp= 0 V3 full (polite shrink) recovered 29/30 stuck=1 median_rec=129.0 sync=3825
+  clustered-15  clamp= 0 V4 polite+repair   recovered 30/30 stuck=0 median_rec=130.0 sync=3704
+  clustered-15  clamp=25 V3 full (polite shrink) recovered 30/30 stuck=0 median_rec=72.0 sync=7326
+  clustered-15  clamp=25 V4 polite+repair   recovered 30/30 stuck=0 median_rec=72.0 sync=7219
+  sparse-8@R2   clamp= 0 V3 full (polite shrink) recovered 85/90 stuck=5 median_rec=39.0 sync=1191
+  sparse-8@R2   clamp= 0 V4 polite+repair   recovered 90/90 stuck=0 median_rec=36.5 sync=1246
+  sparse-8@R2   clamp=25 V3 full (polite shrink) recovered 90/90 stuck=0 median_rec=20.0 sync=0
+  sparse-8@R2   clamp=25 V4 polite+repair   recovered 90/90 stuck=0 median_rec=20.0 sync=0
+study: dense overshoot probe
+  overshoot V3 full (polite shrink) growers-over-baseline mean=113.9 max=195 rec_median=62.0 sync=14680
+  overshoot V4 polite+repair   growers-over-baseline mean=100.4 max=195 rec_median=53.0 sync=13420
+study: regression battery
+  activation seed=   42 V3 full (polite shrink) R=5 loss=0 floor=5 resizes=2893 sync=23011 repair_grows=0
+  activation seed=   42 V4 polite+repair   R=5 loss=0 floor=5 resizes=2090 sync=8191 repair_grows=25
+  storm      seed=   42 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3265 sync=27782 repair_grows=0
+  storm      seed=   42 V4 polite+repair   R=5 loss=0 floor=2 resizes=2770 sync=11674 repair_grows=35
+  storm      seed=   42 V4 polite+repair   R=6 loss=0 floor=4 resizes=2997 sync=16757 repair_grows=39
+  storm      seed=    7 V3 full (polite shrink) R=5 loss=0 floor=2 resizes=2968 sync=20692 repair_grows=0
+  storm      seed=    7 V4 polite+repair   R=5 loss=0 floor=5 resizes=3280 sync=23576 repair_grows=98
+  storm      seed=    7 V4 polite+repair   R=6 loss=0 floor=5 resizes=3632 sync=33584 repair_grows=57
+  storm      seed=   99 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=2564 sync=9796 repair_grows=0
+  storm      seed=   99 V4 polite+repair   R=5 loss=0 floor=5 resizes=3244 sync=26374 repair_grows=28
+  storm      seed=   99 V4 polite+repair   R=6 loss=0 floor=6 resizes=2577 sync=15065 repair_grows=49
+  storm      seed= 1234 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3238 sync=22963 repair_grows=0
+  storm      seed= 1234 V4 polite+repair   R=5 loss=0 floor=3 resizes=3307 sync=19701 repair_grows=102
+  storm      seed= 1234 V4 polite+repair   R=6 loss=0 floor=6 resizes=2402 sync=9993 repair_grows=43
+  flashcrowd seed=   42 V3 full (polite shrink) R=5 loss=0 floor=5 resizes=3709 sync=34013 repair_grows=0
+  flashcrowd seed=   42 V4 polite+repair   R=5 loss=0 floor=5 resizes=2093 sync=8191 repair_grows=25
+  churn      seed=   42 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3990 sync=34429 repair_grows=0
+  churn      seed=   42 V4 polite+repair   R=5 loss=0 floor=3 resizes=3700 sync=24380 repair_grows=91
+  churn      seed=   42 V4 polite+repair   R=6 loss=0 floor=4 resizes=4229 sync=37244 repair_grows=79
+  churn      seed=    7 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3918 sync=35664 repair_grows=0
+  churn      seed=    7 V4 polite+repair   R=5 loss=0 floor=4 resizes=3182 sync=18909 repair_grows=116
+  churn      seed=    7 V4 polite+repair   R=6 loss=0 floor=4 resizes=4692 sync=39819 repair_grows=125
+  churn      seed=   99 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3662 sync=22060 repair_grows=0
+  churn      seed=   99 V4 polite+repair   R=5 loss=0 floor=5 resizes=3515 sync=27988 repair_grows=33
+  churn      seed=   99 V4 polite+repair   R=6 loss=0 floor=5 resizes=3460 sync=22156 repair_grows=68
+  churn      seed= 1234 V3 full (polite shrink) R=5 loss=0 floor=4 resizes=3785 sync=22990 repair_grows=0
+  churn      seed= 1234 V4 polite+repair   R=5 loss=0 floor=4 resizes=3930 sync=25390 repair_grows=74
+  churn      seed= 1234 V4 polite+repair   R=6 loss=0 floor=5 resizes=3531 sync=17341 repair_grows=147
+wrote results/repair_summary.md
+wrote results/repair_deadlock.png
+=== repair_sim DONE 2026-08-08 05:46:52 ===
+=== defense_sim START 2026-08-08 05:46:52 ===
+study: forge with range-validation
+  forge/clean                      true_floor_min(post)=5 mean_level_end=0.85 resizes=3619 sync=32891
+  forge/forged (no validation)     true_floor_min(post)=6 mean_level_end=2.34 resizes=5822 sync=77204
+  forge/forged (range-validated)   true_floor_min(post)=5 mean_level_end=1.01 resizes=3623 sync=34326
+study: serve-audit recovery
+  audit/no audit             seed=  42 true_zero_end=357 true_floor_end=0 recovered_at=None
+  audit/no audit             seed=   7 true_zero_end=352 true_floor_end=0 recovered_at=None
+  audit/no audit             seed=  99 true_zero_end=348 true_floor_end=0 recovered_at=None
+  audit/audit from t=1500    seed=  42 true_zero_end=0 true_floor_end=5 recovered_at=1769
+  audit/audit from t=1500    seed=   7 true_zero_end=0 true_floor_end=5 recovered_at=1798
+  audit/audit from t=1500    seed=  99 true_zero_end=0 true_floor_end=5 recovered_at=1828
+wrote results/defense_summary.md
+wrote results/defense.png
+=== defense_sim DONE 2026-08-08 05:47:46 ===
+=== fairness_sim START 2026-08-08 05:47:46 ===
+study: safety sweep
+  V3         storm  loss in 0/48 runs (total 0 sector-ticks) worst_floor=1 exposure_mean=7310
+  V3         churn  loss in 0/48 runs (total 0 sector-ticks) worst_floor=3 exposure_mean=11269
+  V3F P=200  storm  loss in 0/48 runs (total 0 sector-ticks) worst_floor=2 exposure_mean=8006
+  V3F P=200  churn  loss in 0/48 runs (total 0 sector-ticks) worst_floor=2 exposure_mean=10865
+  V3F P=50   storm  loss in 0/48 runs (total 0 sector-ticks) worst_floor=1 exposure_mean=7678
+  V3F P=50   churn  loss in 0/48 runs (total 0 sector-ticks) worst_floor=2 exposure_mean=10623
+study: fairness at equilibrium
+  V3         corr(aid,level)=+0.077 level_std=1.97 top-10% storage share=91.1%
+  V3F P=200  corr(aid,level)=+0.011 level_std=1.89 top-10% storage share=93.1%
+  V3F P=50   corr(aid,level)=+0.014 level_std=1.89 top-10% storage share=93.0%
+wrote results/fairness_summary.md
+wrote results/fairness.png
+=== fairness_sim DONE 2026-08-08 05:53:21 ===
+=== verified_coverage_sim START 2026-08-08 05:53:21 ===
+study: safety vs K liars
+  safety declared             K=  0  true_floor=5.7 true_zero=0 (0.0%) level_end=0.89 sync=24628
+  safety declared             K=  4  true_floor=1.0 true_zero=0 (0.0%) level_end=1.24 sync=660
+  safety declared             K=  5  true_floor=0.0 true_zero=130 (25.4%) level_end=0.90 sync=0
+  safety declared             K= 10  true_floor=0.0 true_zero=352 (68.8%) level_end=0.45 sync=0
+  safety declared             K= 15  true_floor=0.0 true_zero=356 (69.5%) level_end=0.68 sync=0
+  safety reactive-exclusion   K=  0  true_floor=5.7 true_zero=0 (0.0%) level_end=0.89 sync=24628
+  safety reactive-exclusion   K=  4  true_floor=5.0 true_zero=0 (0.0%) level_end=1.16 sync=17030
+  safety reactive-exclusion   K=  5  true_floor=5.3 true_zero=0 (0.0%) level_end=1.16 sync=14760
+  safety reactive-exclusion   K= 10  true_floor=5.3 true_zero=0 (0.0%) level_end=1.14 sync=13286
+  safety reactive-exclusion   K= 15  true_floor=5.0 true_zero=0 (0.0%) level_end=1.59 sync=18778
+  safety verified             K=  0  true_floor=6.5 true_zero=0 (0.0%) level_end=0.94 sync=28067
+  safety verified             K=  4  true_floor=6.5 true_zero=0 (0.0%) level_end=1.22 sync=31271
+  safety verified             K=  5  true_floor=6.4 true_zero=0 (0.0%) level_end=1.11 sync=30313
+  safety verified             K= 10  true_floor=6.4 true_zero=0 (0.0%) level_end=1.34 sync=27014
+  safety verified             K= 15  true_floor=6.6 true_zero=0 (0.0%) level_end=1.58 sync=27229
+study: cost of pessimism (honest network)
+  overhead declared (baseline)      level_end=0.94 sync=27362
+  overhead verified ape=2 ttl= 300   level_end=3.78 sync=205691 proven_end=78.5
+  overhead verified ape=2 ttl= 600   level_end=1.86 sync=90470 proven_end=126.0
+  overhead verified ape=4 ttl= 300   level_end=1.79 sync=81456 proven_end=125.6
+  overhead verified ape=4 ttl= 600   level_end=1.34 sync=39292 proven_end=171.9
+  overhead verified ape=6 ttl= 300   level_end=1.41 sync=50494 proven_end=155.6
+  overhead verified ape=6 ttl= 600   level_end=0.96 sync=31699 proven_end=189.4
+  overhead verified ape=10 ttl= 300   level_end=1.51 sync=24358 proven_end=182.8
+  overhead verified ape=10 ttl= 600   level_end=0.93 sync=30971 proven_end=197.6
+wrote results/verified_summary.md
+wrote results/verified_coverage.png
+=== verified_coverage_sim DONE 2026-08-08 06:10:09 ===
+=== partial_liar_sim START 2026-08-08 06:10:09 ===
+study A: static partial liars, declared vs verified (c=2)
+  static declared  p=0.00  true_floor=0.0 true_zero=352 (68.8%)
+  static declared  p=0.25  true_floor=0.0 true_zero=21 (4.2%)
+  static declared  p=0.50  true_floor=1.0 true_zero=0 (0.0%)
+  static declared  p=0.75  true_floor=3.3 true_zero=0 (0.0%)
+  static declared  p=0.90  true_floor=5.3 true_zero=0 (0.0%)
+  static declared  p=1.00  true_floor=10.0 true_zero=0 (0.0%)
+  static verified  p=0.00  true_floor=6.7 true_zero=0 (0.0%)
+  static verified  p=0.25  true_floor=5.3 true_zero=0 (0.0%)
+  static verified  p=0.50  true_floor=3.7 true_zero=0 (0.0%)
+  static verified  p=0.75  true_floor=3.8 true_zero=0 (0.0%)
+  static verified  p=0.90  true_floor=5.3 true_zero=0 (0.0%)
+  static verified  p=1.00  true_floor=10.0 true_zero=0 (0.0%)
+study B: stringency — sample count c at evasion-prone p
+  stringency c=1 (evade~0.50)  true_floor=1.8 true_zero=0 (0.0%)
+  stringency c=2 (evade~0.25)  true_floor=3.7 true_zero=0 (0.0%)
+  stringency c=3 (evade~0.12)  true_floor=5.6 true_zero=0 (0.0%)
+  stringency c=4 (evade~0.06)  true_floor=6.4 true_zero=0 (0.0%)
+  stringency c=6 (evade~0.02)  true_floor=7.4 true_zero=0 (0.0%)
+wrote results/partial_summary.md
+wrote results/partial_liar.png
+=== partial_liar_sim DONE 2026-08-08 06:30:23 ===
+=== mz_probe START 2026-08-08 06:30:23 ===
+mz probe: 7 death_lags x 2 fractions x 72 seeds = 1008 sims
+  sims 40/1008
+  sims 80/1008
+  sims 120/1008
+  sims 160/1008
+  sims 200/1008
+  sims 240/1008
+  sims 280/1008
+  sims 320/1008
+  sims 360/1008
+  sims 400/1008
+  sims 440/1008
+  sims 480/1008
+  sims 520/1008
+  sims 560/1008
+  sims 600/1008
+  sims 640/1008
+  sims 680/1008
+  sims 720/1008
+  sims 760/1008
+  sims 800/1008
+  sims 840/1008
+  sims 880/1008
+  sims 920/1008
+  sims 960/1008
+  sims 1000/1008
+  sims 1008/1008
+  fitted f=1.0 death_lag=coupled
+  fitted f=1.0 death_lag=4
+  fitted f=1.0 death_lag=8
+  fitted f=1.0 death_lag=16
+  fitted f=1.0 death_lag=24
+  fitted f=1.0 death_lag=48
+  fitted f=1.0 death_lag=96
+  fitted f=0.1 death_lag=coupled
+  fitted f=0.1 death_lag=4
+  fitted f=0.1 death_lag=8
+  fitted f=0.1 death_lag=16
+  fitted f=0.1 death_lag=24
+  fitted f=0.1 death_lag=48
+  fitted f=0.1 death_lag=96
+# Mori-Zwanzig decomposition of the §6.1 residual
+
+Is the shrink-race residual reducible by a *local* rule? Split the over-count an agent makes at its execute-intent into a Markovian term (current view), a memory term (its own past views) and an irreducible noise term, and sweep death-detection latency.
+
+Storm scenario, N=200, R=5, gossip lag [8,24], 72 seeds/cell. R2 is out-of-sample under 3-fold cross-validation **grouped by seed**. Each arm is fitted with ridge (quadratic features) and gradient-boosted trees; the better score is reported, so a small memory gain means the signal is absent rather than the model too weak.
+
+Environment: Python 3.14.6, numpy 2.5.1 — NOT the repo pins (3.12.1 / 2.5.1), so treat exact digits as indicative and re-run before publishing.
+
+## pure V3 (f=1.0) — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 165291 | 6.83 | 0.899 | 0.914 | +0.0149 | 2.17 | 2.00 | 65 |
+| 4 | 165967 | 6.82 | 0.900 | 0.915 | +0.0145 | 2.15 | 1.99 | 22 |
+| 8 | 165279 | 6.84 | 0.900 | 0.915 | +0.0150 | 2.17 | 2.00 | 45 |
+| 16 | 166930 | 6.81 | 0.899 | 0.914 | +0.0150 | 2.16 | 1.99 | 71 |
+| 24 | 167076 | 6.80 | 0.899 | 0.913 | +0.0146 | 2.17 | 2.00 | 98 |
+| 48 | 166155 | 6.82 | 0.898 | 0.913 | +0.0151 | 2.18 | 2.01 | 249 |
+| 96 | 163950 | 6.85 | 0.896 | 0.911 | +0.0150 | 2.20 | 2.04 | 635 |
+
+### pure V3 (f=1.0) — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.993 | 0.996 | +0.0026 | 2.89 | 2.27 |
+| 4 | 0.993 | 0.996 | +0.0026 | 2.88 | 2.26 |
+| 8 | 0.993 | 0.996 | +0.0026 | 2.89 | 2.27 |
+| 16 | 0.993 | 0.996 | +0.0026 | 2.88 | 2.27 |
+| 24 | 0.993 | 0.996 | +0.0026 | 2.87 | 2.26 |
+| 48 | 0.993 | 0.996 | +0.0027 | 2.89 | 2.27 |
+| 96 | 0.993 | 0.996 | +0.0027 | 2.91 | 2.28 |
+
+### pure V3 (f=1.0) — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.644 | 0.768 | +0.1235 |
+| 4 | 0.644 | 0.766 | +0.1218 |
+| 8 | 0.645 | 0.769 | +0.1242 |
+| 16 | 0.646 | 0.770 | +0.1240 |
+| 24 | 0.647 | 0.769 | +0.1214 |
+| 48 | 0.644 | 0.767 | +0.1237 |
+| 96 | 0.640 | 0.766 | +0.1258 |
+
+## f=0.1 — target y = view over-count at the gate
+
+`residual` columns are RMSE in **copies** — the units the redundancy target R is measured in, and the number that decides whether a corrected estimate could be trusted.
+
+| death_lag | n | y std | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem | unsafe gates |
+|---|---|---|---|---|---|---|---|---|
+| coupled | 14407 | 1.38 | 0.338 | 0.430 | +0.0913 | 1.12 | 1.04 | 13 |
+| 4 | 14808 | 1.37 | 0.337 | 0.427 | +0.0894 | 1.11 | 1.04 | 4 |
+| 8 | 14713 | 1.38 | 0.338 | 0.429 | +0.0916 | 1.13 | 1.04 | 6 |
+| 16 | 14509 | 1.38 | 0.340 | 0.430 | +0.0897 | 1.12 | 1.04 | 12 |
+| 24 | 14704 | 1.38 | 0.345 | 0.430 | +0.0847 | 1.12 | 1.04 | 17 |
+| 48 | 14784 | 1.41 | 0.331 | 0.412 | +0.0802 | 1.15 | 1.08 | 47 |
+| 96 | 14777 | 1.47 | 0.319 | 0.403 | +0.0837 | 1.21 | 1.13 | 116 |
+
+### f=0.1 — target y_true = TRUE floor of the vacated half (what the gate actually needs)
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain | residual Markov | residual +mem |
+|---|---|---|---|---|---|
+| coupled | 0.723 | 0.772 | +0.0491 | 1.17 | 1.06 |
+| 4 | 0.720 | 0.767 | +0.0470 | 1.17 | 1.06 |
+| 8 | 0.718 | 0.767 | +0.0484 | 1.18 | 1.07 |
+| 16 | 0.724 | 0.771 | +0.0477 | 1.16 | 1.06 |
+| 24 | 0.726 | 0.774 | +0.0481 | 1.16 | 1.05 |
+| 48 | 0.717 | 0.764 | +0.0469 | 1.18 | 1.08 |
+| 96 | 0.708 | 0.753 | +0.0447 | 1.22 | 1.12 |
+
+### f=0.1 — POSITIVE CONTROL (forward change in view floor)
+
+Memory *must* help here — a forward difference cannot be read off the current state. This is what makes a null result on y interpretable.
+
+| death_lag | R2 Markov | R2 Markov+mem | memory gain |
+|---|---|---|---|
+| coupled | 0.762 | 0.785 | +0.0232 |
+| 4 | 0.768 | 0.786 | +0.0178 |
+| 8 | 0.766 | 0.785 | +0.0194 |
+| 16 | 0.758 | 0.780 | +0.0223 |
+| 24 | 0.767 | 0.787 | +0.0205 |
+| 48 | 0.766 | 0.783 | +0.0174 |
+| 96 | 0.765 | 0.783 | +0.0176 |
+
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\mz_summary.md
+=== mz_probe DONE 2026-08-08 08:51:53 ===
+=== mz_attribution START 2026-08-08 08:51:53 ===
+[f=1.0, fast detection (death_lag=4)] simulating 24 seeds
+[f=1.0, fast detection (death_lag=4)] 56427 gate decisions, 42 features; 128 coalition fits
+    coalitions 32/128
+    coalitions 64/128
+    coalitions 96/128
+    coalitions 128/128
+[f=1.0, fast detection (death_lag=4)] full-model R2 = 0.9201 (saved)
+[f=1.0, slow detection (death_lag=96)] simulating 24 seeds
+[f=1.0, slow detection (death_lag=96)] 55766 gate decisions, 42 features; 128 coalition fits
+    coalitions 32/128
+    coalitions 64/128
+    coalitions 96/128
+    coalitions 128/128
+[f=1.0, slow detection (death_lag=96)] full-model R2 = 0.9151 (saved)
+# Which local signals drive an unsafe shrink gate?
+
+Exact Shapley values over the seven observables an agent can compute from gossip it has already received. Value function = out-of-sample R2 predicting the gate over-count `y`, seeds held out from the fit; 2^7 = 128 coalition fits per condition, so these are exact rather than sampled. Method after Vinuesa et al. (Nat. Commun., Nov 2025), whose equivalent analysis overturned which flow structures were thought to matter.
+
+**This ranks information, not safety.** `spec/AgentInfoAgeGated.tla` already shows an imperfect estimate inside the gate loses a copy whatever it is built from. The use of this table is to tell a sizing policy which quantities are worth measuring.
+
+Environment: Python 3.14.6, numpy 2.5.1 — not the repo pins (3.12.1 / 2.5.1).
+
+## f=1.0, fast detection (death_lag=4)
+
+56,427 gate decisions. Full-model R2 = 0.920.
+
+| observable | Shapley value | share | **alone** v({g}) |
+|---|---|---|---|
+| vacate-half mean | +0.1583 | 17.2% | **0.894** |
+| visible intenders | +0.1572 | 17.1% | **0.868** |
+| global view mean | +0.1566 | 17.0% | **0.894** |
+| vacate-half floor | +0.1563 | 17.0% | **0.890** |
+| global view floor | +0.1532 | 16.7% | **0.884** |
+| own arc level | +0.1329 | 14.4% | **0.718** |
+| visible peers | +0.0055 |  0.6% | **0.028** |
+
+**Read the last column first.** *vacate-half mean* alone scores 0.894 against 0.920 for all seven together — 97% of the full model from a single observable. The near-equal Shapley values are therefore **not** seven separate contributions; they are what Shapley does with near-perfect substitutes, splitting the credit evenly among players that can each stand in for the others.
+
+## f=1.0, slow detection (death_lag=96)
+
+55,766 gate decisions. Full-model R2 = 0.915.
+
+| observable | Shapley value | share | **alone** v({g}) |
+|---|---|---|---|
+| vacate-half mean | +0.1574 | 17.2% | **0.887** |
+| visible intenders | +0.1566 | 17.1% | **0.864** |
+| global view mean | +0.1565 | 17.1% | **0.889** |
+| vacate-half floor | +0.1555 | 17.0% | **0.884** |
+| global view floor | +0.1522 | 16.6% | **0.877** |
+| own arc level | +0.1302 | 14.2% | **0.697** |
+| visible peers | +0.0067 |  0.7% | **0.031** |
+
+**Read the last column first.** *global view mean* alone scores 0.889 against 0.915 for all seven together — 97% of the full model from a single observable. The near-equal Shapley values are therefore **not** seven separate contributions; they are what Shapley does with near-perfect substitutes, splitting the credit evenly among players that can each stand in for the others.
+
+## Does the ranking move with detection latency?
+
+Fast-detection order: vacate-half mean > visible intenders > global view mean
+
+Slow-detection order: vacate-half mean > visible intenders > global view mean
+
+**Identical top-3 ordering.** The signals that carry information about the over-count do not change as detection latency grows — the companion result to mz_probe's flat memory gain.
+
+## Caveat: the visible-peer count is confounded in this model
+
+`visible peers` scores near zero, and that result **must not be reported as a finding**. In `DecoupledSim._view` only the coverage array `cov` receives the death-clock adjustment; the declaration vector `lvl` — which is what the peer count is computed from — is passed through on the *gossip* clock. So in this model the peer count cannot respond to detection latency even in principle, and the over-count it is being asked to predict is driven precisely by detection latency.
+
+In kitsune2 both would share a clock: a dead peer's `AgentInfo` lingers in the peer store until unresponsive marking removes it, and that same removal is what takes it out of coverage. Deciding whether peer count carries real signal needs `lvl` decoupled too — a change to `decoupled_sim.py`, not to this study.
+
+The other six observables are unaffected: they are all computed from `cov`, which is correctly on the detection clock.
+
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\mz_attribution_summary.md
+=== mz_attribution DONE 2026-08-08 09:41:58 ===
+=== detector_error_sweep START 2026-08-08 09:41:58 ===
+detector-error sweep: 1152 runs (0 done, 1152 to run) on 4 procs
+  50/1152
+  100/1152
+  150/1152
+  200/1152
+  250/1152
+  300/1152
+  350/1152
+  400/1152
+  450/1152
+  500/1152
+  550/1152
+  600/1152
+  650/1152
+  700/1152
+  750/1152
+  800/1152
+  850/1152
+  900/1152
+  950/1152
+  1000/1152
+  1050/1152
+  1100/1152
+  1150/1152
+  1152/1152
+# Should a failure detector err toward paranoia?
+
+Constraint 6 says the shrink wait must be sized against death-detection latency. This asks the question it leaves open: which *direction* should a detector be wrong in?
+
+`p` = per-(viewer, peer) probability that a **live** peer is wrongly convicted and dropped from the viewer's coverage. Storm 50%, N=200, R=5, gossip lag [8,24], 48 seeds/cell.
+
+**This is a deliberate stress regime.** Loss only occurs at slow detection (§11's 2-8x band); milder settings lose nothing at any `p` and cannot discriminate. Absolute rates here are not operating figures.
+
+Environment: Python 3.14.6, numpy 2.5.1 — numpy matches the repo pin, Python does not (3.12.1). Re-run under the pins before publishing digits.
+
+## pure V3 (f=1.0), death_lag = 96
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 4/48 (8%) | 28,760 | 108 | 1.32 | 19,523 |
+| 0.02 | 3/48 (6%) | 28,223 | 115 | 1.14 (-14%) | 15,041 |
+| 0.05 | 3/48 (6%) | 44,275 | 108 | 1.29 (-3%) | 11,359 |
+| 0.1 | 1/48 (2%) | 2,689 | 92 | 1.36 (+3%) | 8,751 |
+| 0.2 | 0/48 (0%) | 0 | 62 | 1.51 (+14%) | 9,302 |
+| 0.4 | 0/48 (0%) | 0 | 19 | 1.97 (+48%) | 31,249 |
+
+## pure V3 (f=1.0), death_lag = 192
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 19/48 (40%) | 148,240 | 199 | 1.39 | 20,401 |
+| 0.02 | 12/48 (25%) | 91,677 | 204 | 1.17 (-16%) | 15,731 |
+| 0.05 | 4/48 (8%) | 87,904 | 190 | 1.27 (-8%) | 11,642 |
+| 0.1 | 1/48 (2%) | 5,693 | 164 | 1.32 (-5%) | 9,165 |
+| 0.2 | 1/48 (2%) | 8,468 | 117 | 1.44 (+4%) | 9,906 |
+| 0.4 | 5/48 (10%) | 23,146 | 83 | 2.11 (+52%) | 34,569 |
+
+## f=0.1, death_lag = 96
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 6/48 (12%) | 64,070 | 115 | 0.71 | 31,232 |
+| 0.02 | 4/48 (8%) | 93,752 | 126 | 0.73 (+3%) | 35,187 |
+| 0.05 | 1/48 (2%) | 10,972 | 124 | 0.72 (+1%) | 36,276 |
+| 0.1 | 1/48 (2%) | 25,098 | 116 | 0.87 (+23%) | 38,724 |
+| 0.2 | 0/48 (0%) | 0 | 81 | 1.02 (+44%) | 42,479 |
+| 0.4 | 0/48 (0%) | 0 | 40 | 1.48 (+110%) | 69,382 |
+
+## f=0.1, death_lag = 192
+
+| p | P(any loss) | E[loss] (sector-ticks) | exposure | eq. arc level | sync cost |
+|---|---|---|---|---|---|
+| 0.0 | 7/48 (15%) | 170,819 | 201 | 0.71 | 31,703 |
+| 0.02 | 7/48 (15%) | 203,137 | 209 | 0.75 (+6%) | 36,314 |
+| 0.05 | 3/48 (6%) | 38,628 | 201 | 0.74 (+4%) | 35,845 |
+| 0.1 | 7/48 (15%) | 97,212 | 196 | 0.86 (+22%) | 39,699 |
+| 0.2 | 6/48 (12%) | 52,139 | 156 | 1.05 (+48%) | 46,203 |
+| 0.4 | 10/48 (21%) | 73,892 | 109 | 1.47 (+107%) | 79,714 |
+
+
+## Findings
+
+**1. The asymmetry holds in the realistic range — the direction was right.**
+In the strongest-signal cell (f=1.0, death_lag=192) `P(any loss)` falls from
+**40% to 2%** as `p` goes 0 -> 0.10, with E[loss] falling 148,240 -> 5,693. The
+f=1.0/death_lag=96 cell agrees (8% -> 0%), as does f=0.1/death_lag=96
+(12% -> 0%). Convicting the living really is cheaper than missing the dead.
+
+**2. But it is NOT monotonic, and the reason is error cancellation — not
+conservatism.** Past `p` ~ 0.2 the benefit reverses: f=1.0/death_lag=192 goes
+back up to **10% at p=0.40**, five times its own optimum.
+
+`diag_detector_bias.py` measures the viewer's mean signed coverage error against
+ground truth and explains the whole curve (storm 50%, death_lag=192, 8 seeds):
+
+| p | view bias (post-storm) | held loss |
+|---|---|---|
+| 0.00 | **+0.50** (over-counts) | 3,996 |
+| 0.02 | +0.25 | 243 |
+| 0.05 | **+0.10** (~balanced) | **0** |
+| 0.10 | -0.24 | 3,119 |
+| 0.20 | -1.14 | 0 |
+| 0.40 | **-3.67** (under-counts) | 0 |
+
+Under slow detection a viewer **over-counts**, because dead peers are still in
+its coverage. A false conviction **under-counts**. The two annul near p ~ 0.05,
+and that is exactly where loss is minimised. So the mechanism is not "paranoia
+makes you conservative" — it is **one error source cancelling another**. Past the
+crossing the viewer is simply wrong in the other direction, and at p=0.40 it is
+under-counting by nearly four copies, which is a broken view rather than a
+cautious one.
+
+The practical consequence is sharper than "tune it paranoid": **the optimum sits
+where the detector's false-positive rate offsets its false-negative rate, so it
+is a function of detection latency and must be tuned against it** — the same
+quantity constraint 6 already identifies.
+
+**2b. This also explains the storage anomaly, which is real.** The equilibrium
+arc dips at p=0.02 (1.387 -> 1.168 at death_lag=192) and the dip survives
+testing: z = +3.01 across 48 seeds (z = +2.33 at death_lag=96). Holding *less*
+while losing *less* looked contradictory, and it is not. At p=0 the viewer
+over-counts, so it over-shrinks, opens holes, and then has to repair-grow; that
+churn settles the network at a higher and much noisier level (seed std 0.40).
+Cancel the bias and the controller shrinks correctly the first time, so it needs
+no repair growth — less storage and less loss together. Seed variance collapses
+monotonically with `p` (std 0.43 -> 0.14 at death_lag=96), which is the same
+story: a less biased view produces a more repeatable equilibrium.
+
+**3. Calibrate what `p` means before reading the right-hand rows.** `p` here is
+a false-positive rate *per look*. A real accrual detector runs orders of
+magnitude below this — Akka's default threshold of phi=8 corresponds to roughly
+1e-8. Even a deliberately twitchy setting is p ~ 0.1. So the operating range is
+the **left end** of these tables; p=0.40 is not a detector setting, it is a
+broken view, and it is included only to locate the turn-over.
+
+**4. The cost is storage, not bandwidth — the opposite of what was assumed.**
+Equilibrium arc level rises (up to +52%), but sync cost *falls* across most of
+the range (20,401 -> 9,165 at f=1.0/death_lag=192). Same mechanism as
+REPORT_agentinfo_encoding.md 4.3: less shrinking means less re-growing, and
+re-growing is what sync cost measures. Bandwidth only turns bad at p >= 0.4,
+where thrash dominates. For phone-hosted nodes this is a *better* trade than
+expected.
+
+## Caveats
+
+- **f=0.1 / death_lag=192 is non-monotonic throughout and should not be
+  read as a curve.** 7/48 -> 7/48 -> 3/48 -> 7/48 -> 6/48 -> 10/48 is consistent
+  with binomial noise at these counts. It neither supports nor contradicts;
+  it is underpowered.
+- **The storage dip was flagged as unexplained in the first version of this
+  report and is now explained** (finding 2b). It was neither an averaging
+  artefact nor noise. Recorded here because the first reading was wrong.
+- **Stress regime.** Storm 50% at 4-8x the gossip lag. Chosen because nothing
+  loses data at milder settings, which makes them useless for discriminating.
+  These are not operating rates.
+- **The detector is memoryless.** Convictions are redrawn per view, so this
+  measures the cost of a false positive in isolation, not any real detector's
+  dynamics. Heterogeneous per-peer responsiveness and detector memory are steps
+  2 and 3 of this line of work, and are what a phi accrual detector would need
+  in order to be more than a fixed timeout.
+- 48 seeds per cell; single-digit counts carry the usual uncertainty.
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\detector_error_summary.md
+=== detector_error_sweep DONE 2026-08-08 10:23:59 ===
+=== diag_detector_bias START 2026-08-08 10:23:59 ===
+storm 50%, death_lag=192, f=1.0, 8 seeds
+
+    p  view bias  bias post  lvl(-300)  lvl(-1000)  lvl pre  held loss
+  0.0    +1.4456    +0.4954      1.312       1.567    1.460       3996
+ 0.01    +1.1661    +0.3640      1.306       1.473    1.211       1404
+ 0.02    +0.8852    +0.2456      1.285       1.536    1.283        243
+ 0.05    +0.1095    +0.0982      1.332       1.579    1.265          0
+  0.1    -1.2149    -0.2402      1.420       1.770    1.418       3119
+  0.2    -4.1176    -1.1389      1.483       1.804    1.338          0
+  0.4   -11.0787    -3.6661      1.955       2.368    1.712          0
+
+Post-storm view bias crosses zero between p=0.1 and the previous step; arc-level minimum at p=0.02.
+Zero-crossing and level minimum do not coincide — partial support only.
+=== diag_detector_bias DONE 2026-08-08 10:33:53 ===
+=== hetero_detector_sweep START 2026-08-08 10:33:53 ===
+hetero sweep: 5x5 grid x 24 seeds = 600 runs (0 done, 600 to run)
+  50/600
+  100/600
+  150/600
+  200/600
+  250/600
+  300/600
+  350/600
+  400/600
+  450/600
+  500/600
+  550/600
+  600/600
+# Is one detector threshold good enough for a mixed network?
+
+The question that decides whether adaptive, self-calibrating failure detection is worth building. Half the agents detect deaths fast (latency 192), half slowly (384); the two classes' false-conviction rates are swept independently.
+
+Storm 50%, N=200, R=5, 24 seeds/cell. Stress regime — milder settings lose nothing at any setting and cannot discriminate; these are not operating rates.
+
+Environment: Python 3.14.6, numpy 2.5.1 — numpy matches the repo pin, Python does not (3.12.1).
+
+## Baseline check — is there anything here to measure?
+
+At p = 0 for both classes the network loses data in **42%** of runs. That is the headroom every cell below is competing against.
+
+## P(any loss), by class setting
+
+Rows = `p_slow` (the slow-detecting half), columns = `p_fast`. The **diagonal** is what a single global threshold can reach; everything off it needs per-peer calibration.
+
+| p_slow \ p_fast | 0.0 | 0.02 | 0.05 | 0.1 | 0.2 |
+|---|---|---|---|---|---|
+| **0.0** | *42%* | 33% | 21% | 4% | 8% |
+| **0.02** | 38% | *29%* | 12% | 12% | 4% |
+| **0.05** | 25% | 8% | *8%* | **0%** | 4% |
+| **0.1** | 8% | 4% | 12% | *4%* | 8% |
+| **0.2** | 12% | 17% | 12% | 8% | *4%* |
+
+*italic* = diagonal (uniform threshold); **bold** = grid optimum.
+
+## What per-peer calibration buys
+
+| | setting | P(any loss) | E[loss] |
+|---|---|---|---|
+| best **uniform** | p = 0.1 for both | 4% (1/24 runs) | 5,925 |
+| best **per-class** | fast 0.1, slow 0.05 | 0% (0/24 runs) | 0 |
+| apparent gap | | +4 pp | -5,925 |
+
+**Selection-bias check.** If every cell in the grid had the *same* true rate (4%), simply taking the best of 25 cells rather than the best of 5 would produce a gap this large or larger in **11%** of grids (20,000 simulated).
+
+**No evidence that per-peer calibration helps.** The apparent 4 pp advantage is what the search procedure manufactures on its own — it is 1 losing run(s) versus 0 out of 24, and vanishes under the null. Read as **'no effect detectable at this sample size'**, not 'no effect'.
+
+**What the grid does show, and it is the larger number.** Going from no paranoia at all to the best single global threshold takes `P(any loss)` from **42% to 4%** — a 38 pp first-order effect. Whatever per-peer calibration is worth on top, it is bounded above by roughly 4 pp and is not resolvable here. **Getting the threshold roughly right matters enormously; getting it right *per peer* does not measurably.**
+
+For phi accrual and relatives that is the answer: their value is self-calibration, and self-calibration is second-order against an effect this size. Justifying that machinery needs a regime where the first-order effect is already captured and the residual per-peer term is resolvable — which would take on the order of 10x the 24 seeds used here.
+
+## Storage, split by who pays it
+
+| p_fast | p_slow | arc (fast class) | arc (slow class) | sync |
+|---|---|---|---|---|
+| 0.0 | 0.0 | 2.32 | 0.54 | 21,869 |
+| 0.02 | 0.02 | 1.79 | 0.48 | 17,126 |
+| 0.05 | 0.05 | 1.99 | 0.56 | 12,171 |
+| 0.1 | 0.1 | 2.04 | 0.43 | 9,763 |
+| 0.2 | 0.2 | 2.26 | 0.51 | 12,595 |
+
+## Caveats
+
+- Two latency classes at a 4:1 ratio and a 50/50 split. A real network has a continuum, and the answer could differ for a long-tailed distribution.
+- `p` is a false-positive rate *per look*; real accrual detectors run orders of magnitude lower, so the interesting region is the top-left of the grid.
+- No heartbeat timing, no detector memory. This measures whether the *optimum moves*, which is the precondition for adaptivity being useful — not any detector's ability to track it.
+- 24 seeds per cell; grid minima of noisy quantities are biased low, so treat the gap as an upper bound on what adaptivity could buy.
+
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\hetero_detector_summary.md
+=== hetero_detector_sweep DONE 2026-08-08 10:51:53 ===
+=== STAGE3 ALL DONE 2026-08-08 10:51:53 ===
