@@ -34,6 +34,22 @@ reproduction of the simulation results has also occurred (see repository history
 Append newest entry first. Each entry: date · source (commit/PR/issue) · observation ·
 which polite-shrink pattern it relates to · verbatim quote where useful.
 
+### 2026-10-20 (later) — the fork is rebased onto kitsune2 `main`; V6 is on it
+
+The sharding work was rebased from the `0.5.0-dev.4` base onto `holochain/kitsune2`
+`main` @ `1e44c65` (2026-10-16, `kitsune2_gossip` `0.6.0-dev.2`) as branch
+[`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6).
+The rebase applied without conflicts, and all 15 existing sharding unit tests and the
+storm test passed before any change. V6 was then added as
+`K2ShardingConfig::patient_lowest` (default true on that branch), with 8 new unit
+tests and the storm test run under both V6 and V3. The module docs there no longer
+claim the TLA+ model proves concurrent shrinks safe.
+
+This changes what a conductor run would take (see the 2026-08-03 entry): the branch is
+now on the **0.6.0-dev** line, which the Holochain 0.8.0-dev series pins (0.6.0-dev.1),
+not the 0.5.x line Holochain 0.7.1 pins. A conductor run would patch it into a
+Holochain 0.8.0-dev build. None has been done.
+
 ### 2026-10-20 — still no shrink upstream; PR #572 closed; 0.7.1 pins kitsune2 0.5.1
 
 Checked against `holochain/kitsune2` @ `1e44c65` (2026-10-16):

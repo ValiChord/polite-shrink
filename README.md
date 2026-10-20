@@ -16,6 +16,14 @@
 >
 > *Scope, stated plainly: the safety property is that no shrink takes a sector below its redundancy target R (deaths can). The original TLC runs covered five configurations (N = 6–8; R ∈ {1, 2, 3, 4, 7}) under atomic fresh reads; the stale-view checks cover every announce schedule and per-node lag for N ≤ 5, and the V5/V6 safety result has a proof that holds for any N. Honest nodes and prompt death detection are assumed. What is checked is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
+> ### 🧪 Want to test it? Use V6 on branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6)
+> The Rust implementation to try is **V6 "patient lowest"** on the kitsune2 fork, branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6) — rebased onto kitsune2 `main` (October 2026), behind the existing `sharding` feature flag. V6 is the default there; `patient_lowest: false` switches back to the original V3 tie-break for comparison.
+> ```
+> cargo test -p kitsune2_gossip --features sharding --lib sharding        # 23 unit tests, 8 of them V6
+> cargo test -p kitsune2_gossip --features sharding --test sharding_storm # 8-node storm, V6 and V3
+> ```
+> Older branches (`feat/sharding-module-v3`, `feat/sharding-agentinfo-encoding`) are kept only because the earlier reports measured them. In the Python simulator the same rule is `polite_shrink.V6`.
+
 > ### 👉 The contribution is two files
 > - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The idea is a few dozen lines: `_decide` (announce an intent to vacate instead of dropping; don't announce while a lower ID is racing you) and `_execute_intent` (wait out gossip staleness, re-check counting every rival announcer as gone; if that fails only because of higher-ID rivals, wait instead of cancelling). The recommended rule is the `V6` variant; `V3` is the original tie-break, kept because every earlier study measures it.
 > - **[`repair_sim.py`](repair_sim.py)** — the V4 expanding-ring repair extension (Stage 3), a subclass that adds recovery for sparse networks.
@@ -79,7 +87,7 @@ AgentInfo encoding (V5) each turned out to have a gap the other did not.
 |---|---|
 | **1,248-run robustness sweep** (312 seeds × 4 scenarios, paired against 3 weaker controllers) | **0 sectors lost** (95% UB < 0.24%); weakest controller lost data in 95.9% of runs ([REPORT_stage1.md](REPORT_stage1.md)) |
 | **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; did not find an attack on polite shrink. *Weak as a null:* one world, one seed, 320 evaluations — and a 60-kill budget could simply kill every holder of one sector, which no controller survives, so this tests the search more than the rule |
-| **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
+| **Reference implementation** on a kitsune2 fork — **V6 on [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6)** (current, rebased onto kitsune2 `main`, Oct 2026); V3 on [`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3) (the branch the Stage 1–3 and Wind Tunnel results measured). Behind the existing `sharding` feature flag | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned, under V3 and under V6. *Limit:* in these 8-node runs two nodes rarely race for the same sectors, so V6's wait step is covered by unit tests but has not yet been seen firing between real nodes |
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously: **zero orphaned sectors** (that run's intents had already resolved, so the brake was not exercised). In the separate *timed* storm, deaths landed while intents were pending: the brake cancelled all 9, and op-level reachability found **0 of 23,673 ops lost** |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget); and **partial liars** (store a strategic fraction, serve some challenges) still cause **zero data loss**, with a mid-fraction margin dip that a higher audit sample-count restores |
 | **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs. **Scope:** drops are per tick, so 90% adds roughly ten ticks of staleness against a fifty-tick wait; one seed loses only at intermediate drop rates; and the intent-announcement channel is kept reliable here, so robustness to lost *intents* is future work |
@@ -225,16 +233,21 @@ realism, and the formal proof — with the result and a link to each write-up.
 
 Two places, by design:
 
-- **The rule, as proven** (Python, this repo): the entire polite-shrink
-  mechanism is ~30 lines — [`polite_shrink.py`](polite_shrink.py), `_decide` (phase 1:
-  announce the vacate intent instead of dropping) and `_execute_intent`
-  (phase 2: after the wait, re-check the vacated half counting every
-  lower-id (higher-priority) intender as already gone; proceed only if still ≥ R).
+- **The rule, as simulated** (Python, this repo): the entire polite-shrink
+  mechanism is a few dozen lines — [`polite_shrink.py`](polite_shrink.py), `_decide` (phase 1:
+  announce the vacate intent instead of dropping; under V6, not while a
+  lower ID is racing you) and `_execute_intent` (phase 2: after the wait,
+  re-check the vacated half counting every racing intender as already gone;
+  proceed only if still ≥ R, and under V6 the lowest racer waits rather
+  than cancelling). The recommended rule is the `V6` variant.
   The V4 expanding-ring repair extension is [`repair_sim.py`](repair_sim.py).
   Everything else here is the machinery for attacking those lines.
 - **The rule, as deployable** (Rust, kitsune2 fork):
-  [`crates/gossip/src/sharding/`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3/crates/gossip/src/sharding)
-  on branch `feat/sharding-module-v3` — ~1,300 lines behind kitsune2's
+  [`crates/gossip/src/sharding/`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6/crates/gossip/src/sharding)
+  on branch **`feat/sharding-v6`** — V6 is the default there, and
+  `patient_lowest: false` gives the original V3 tie-break. (The earlier
+  reports measured branch `feat/sharding-module-v3`, which has V3 only.)
+  ~1,800 lines (tests included) behind kitsune2's
   existing `sharding` feature flag, with `ShrinkIntent` as a wire message
   on the `k2sharding` module channel, plus the storm brake, the
   small-network clamp, and receiver-side range-validation of intents

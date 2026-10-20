@@ -90,8 +90,8 @@ Sensor networks met this exact race twenty years ago ("blind points" when neighb
 
 ## Where to look next
 
-- **The mechanism, proven:** [`polite_shrink.py`](polite_shrink.py) + [`spec/`](spec/) (TLA+).
-- **The mechanism, deployable:** Rust module on a [kitsune2 fork](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3/crates/gossip/src/sharding), behind the existing `sharding` flag.
+- **The mechanism, simulated and model-checked:** [`polite_shrink.py`](polite_shrink.py) (`V6`) + [`spec/`](spec/) + [REPORT_stale_views.md](REPORT_stale_views.md).
+- **The mechanism, deployable — and the one to test:** V6 as a Rust module on the kitsune2 fork, branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6/crates/gossip/src/sharding), behind the existing `sharding` flag. V6 is the default there; `patient_lowest: false` gives V3 for comparison.
 - **Everything it was tested against:** [TEST_LEDGER.md](TEST_LEDGER.md).
 
 *Research directed by Ceri John; design, implementation, and analysis with AI assistance (Claude, Anthropic); all results human-reviewed.*

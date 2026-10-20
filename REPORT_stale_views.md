@@ -287,7 +287,20 @@ explicit "intending to leave" bit on `AgentInfo`. A narrowed arc claim alone
 (V5) cannot tell an announcer from a node that has already left, and the
 waiting and yielding need exactly that distinction. So the August conclusion of
 [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md) — carry one bit —
-stands, for a different reason. V6 is not yet implemented on the Rust fork.
+stands, for a different reason.
+
+**On the Rust fork.** V6 is implemented on branch
+[`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6) (rebased onto kitsune2 `main`, October 2026) as
+`K2ShardingConfig::patient_lowest`, and it is the default there. It uses the
+existing `ShrinkIntent` channel, which already carries the "intending to leave"
+signal. Eight unit tests mirror the model-checked cases (lowest waits, middle
+and higher racers stand down, all racers proceed when the margin is wide, no
+waiting without a racer), and the 8-node storm test passes under V6 and V3.
+One addition the model did not need: a waiting node re-broadcasts its intent
+before it expires, so peers keep counting it gone for as long as it may still
+act. Not yet shown: the wait step firing between real nodes. Two nodes rarely
+race for the same sectors in 8-node runs, so that needs a test built to force
+the race.
 
 ## 8. Limitations
 
