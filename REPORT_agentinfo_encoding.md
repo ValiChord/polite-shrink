@@ -7,7 +7,7 @@ gossiped and could carry the same signal, and that a new message type is
 plumbing the idea does not need. This study tests the substitution — first as a
 proof, then as a measurement.
 
-**Answer, in one line:** the message can go, durability is untouched, and the
+**Answer, in one line:** the message can go, durability is untouched at small seed counts but not at 100 (§4.9), and the
 bill arrives somewhere else — as a transient *reachability* dip and a more
 conservative equilibrium arc.
 
@@ -206,7 +206,7 @@ race-quantification grid (R ∈ {3,5}, lag_max ∈ {24,48,96}, seven hazard rate
 | churn-caused holes | 2,281,073 | 2,283,704 |
 | shrink holes as a share of real holes | 0.0759% | **0.0002%** |
 
-A 346× reduction, with churn holes unchanged to within 0.1%. This is the
+A 346× reduction, with churn holes unchanged to within 0.12%. This is the
 conservative gate doing exactly what it should: it is strictly stricter than
 the tie-break, so it almost never fires a shrink that opens a hole. Only two
 cells in the whole grid produced any shrink hole at all (R=3/lag=24/p=0.016,
@@ -412,6 +412,16 @@ the same direction as §4.9's finding, and worth naming rather than rounding
 away.
 
 ## 5. Verdict
+
+> **October 2026 — the safety half of this verdict has reversed.** Below, the
+> explicit bit is preferred so the ID tie-break can be kept. A stale-view check
+> ([REPORT_stale_views.md](REPORT_stale_views.md)) shows the tie-break is the
+> *weaker* rule: it fails a staggered cascade and one-death schedules that
+> encoding A survives, and encoding A has a proof of safety for any N given
+> prompt death detection. The case for the explicit bit now rests only on
+> encoding A's costs — the reachability dip at scale and the storm-loss
+> frequency in §4.9 — not on V3 being safer. The 346× fewer shrink holes in §4.6
+> are consistent with that.
 
 **The new wire message is not needed. One bit is.**
 

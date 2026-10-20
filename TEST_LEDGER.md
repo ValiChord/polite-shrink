@@ -30,7 +30,7 @@ whole battery was re-run against it.
 | **Robustness sweep** | 4 disruption scenarios × 312 seeds × 4 controllers = 4,992 paired runs | polite shrink lost **0 sectors in 1,248 runs**; the naive controller lost data in **95.9%** ([REPORT_stage1](REPORT_stage1.md)) |
 | **Ablation** | add one ingredient at a time — hysteresis, jitter, two-phase shrink | hysteresis alone: 95.9% → 24%. Jitter: no help (24.3%). The **two-phase handshake** is what reaches zero ([REPORT_stage1](REPORT_stage1.md)) |
 | **Scale** | grow the network to 5,000 agents on rings up to 16,384 sectors | polite shrink held the floor at R with **zero loss at every N**; the damped controller starts losing data at N ≥ 2,000 ([REPORT_stage3 §3](REPORT_stage3.md)) |
-| **Partitions** | split the network, heal it, absorb the reconnection shrink storm | **no durability loss in 9 runs**; the floor never left R. Flapping partitions defeat the damped controller, not this one ([REPORT_stage3 §1](REPORT_stage3.md)) |
+| **Partitions** | split the network, heal it, absorb the reconnection shrink storm | **no durability loss** in any of 3 geometries × 3 controllers (single seed; V1 and V2 also lose nothing, so this does not discriminate); V3's floor never left R. Flapping partitions defeat the damped controller, not this one ([REPORT_stage3 §1](REPORT_stage3.md)) |
 
 ## Adversarial — can something *trying* to break it succeed?
 
@@ -47,7 +47,7 @@ whole battery was re-run against it.
 | Test | What it does | Result |
 |---|---|---|
 | **8-node storm** (kitsune2 fork, in-memory transport) | shard down, kill 3 of 8 at once, recover to target | **no sector ever orphaned** ([REPORT_stage1 §5](REPORT_stage1.md)) |
-| **Wind Tunnel** (real iroh transport, live churn) | 33% of the network killed simultaneously at the worst moment | **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection ([Wind Tunnel report](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) |
+| **Wind Tunnel** (real iroh transport, live churn) | 33% of the network killed simultaneously; and a timed storm landing on pending intents | **zero orphaned sectors** in both. The brake cancelled all 9 pending intents in the timed storm (the simultaneous one had none pending), where op-level reachability found 0 of 23,673 ops lost ([Wind Tunnel report](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) |
 | **Liveness under real transport** | (found by doing the above) | a broadcast head-of-line bug only a real transport could surface — found and fixed on the fork; plus an upstream mem-transport contract bug, fix offered ([PR #572](https://github.com/holochain/kitsune2/pull/572), open) |
 
 ## Deployment realism — does it survive a *messy* rollout?
@@ -55,7 +55,7 @@ whole battery was re-run against it.
 | Test | What it does | Result |
 |---|---|---|
 | **Rolling upgrade** | a network that's only *partly* upgraded — mixed new and old nodes | **safe from ~10% adoption — no flag day.** A small polite minority forms a backbone the old majority free-rides on ([rolling-upgrade report](REPORT_rolling_upgrade.md)) |
-| **Decoupled clocks** | death-detection running on a *separate, slower* clock than gossip | the residual race is **bounded and small** — governed by detection latency, and it says to size the shrink wait against unresponsive-marking speed, not gossip ([REPORT_stage3 §11](REPORT_stage3.md)) |
+| **Decoupled clocks** | death-detection running on a *separate, slower* clock than gossip | at storm 30% the residual race is **≤ 2/312 runs** up to a detection latency of 2.7× the maximum gossip lag — governed by detection latency (at storm 50% and 4–8× the lag it is not small: 15–35% of V3 runs lose data), and it says to size the shrink wait against unresponsive-marking speed, not gossip ([REPORT_stage3 §11](REPORT_stage3.md)) |
 | **Lossy gossip** | drop up to 90% of messages, so each node's view is incomplete *and* inconsistent | **data-loss rate stays flat** across 6,000 runs — no loss attributable to the drops. The re-check never needs a complete view ([REPORT_stage3 §12](REPORT_stage3.md)) |
 | **Sparse-network deadlock** | (found by pushing V3 to its limit) | a real deadlock exists in sparse networks; the V4 expanding-ring repair rule fixes it — **120/120 recovery** while still sharding ([REPORT_stage3 §4](REPORT_stage3.md)) |
 
@@ -63,7 +63,8 @@ whole battery was re-run against it.
 
 | | | |
 |---|---|---|
-| **TLA+ / TLC model check** | "a sector never drops below R", checked over **every reachable state** (N ≤ 8, R from 1 to 7) | **no violation.** The naive rule fails the same check with a counterexample — which isolates the two-phase tie-break as the thing that buys safety ([spec/](spec/), [REPORT_stage3 §9](REPORT_stage3.md)) |
+| **TLA+ / TLC model check** | "a sector never drops below R", every reachable state, five configurations (N = 6–8) | **no violation — but every node reads the true holder set instantly**, so the tie-break is never exercised (delete it and it still passes) and the naive rule's failure isolates nothing ([spec/](spec/)) |
+| **Stale-view check** (Oct 2026) | every announce schedule × per-node lag, N ≤ 5, with and without deaths | bare re-check: **fails everywhere**. ID tie-break (V3): safe for small N with a wait > 2× lag, **fails** a staggered cascade (R = 1) and one-death schedules (R = 2). Discount-every-announcer (V5): **safe in all**, at a 1× wait, with a proof for any N ([REPORT_stale_views.md](REPORT_stale_views.md)) |
 
 ---
 
@@ -74,10 +75,10 @@ trade-off analysis: [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)
 
 | What was tested | Result |
 |---|---|
-| Formal safety of the encoding (TLA+/TLC, N ≤ 8, R 1–7) | **Safe** without a tie-break; the optimistic reading is **falsified** by a sequential drain, and the age-gated guess is **falsified** by a single misclassification |
+| Formal safety of the encoding (TLA+/TLC, five configurations, N = 6–8) | **Safe** without a tie-break; the optimistic reading is **falsified** by a sequential drain, and the age-gated guess is **falsified** by a single misclassification |
 | Stage-1 four scenarios | Durability held at the tested seeds; declared-coverage dips appear (phantom holes — bytes on disk, unreachable) |
 | Partitions (netsplit + heal, 3 geometries) | Held floor stays at exactly R; zero data loss; availability recovers fully post-heal |
-| Scale to N = 5,000 | Zero data loss; the reachability cost grows sharply with N (44 sector-ticks at N=200 → 38,394 at N=5,000) |
+| Scale to N = 5,000 | Zero data loss; the reachability cost grows sharply with N (activation: 44 sector-ticks at N=200 → 14,718 at N=5,000; storm at N=5,000: 38,394) |
 | §6.1 shrink-race grid (1,680 runs) | **5 shrink-caused holes vs V3's 1,732** — 0.0002% of real holes against 0.0759% |
 | Lossy gossip to 90% drop | Zero data loss — and this closes §12's own caveat, since here the dropped channel *is* the announcement channel |
 | V4 expanding-ring repair, clamp = 0 | 12/12 recovery, nothing stuck, ~4× fewer repair grows |
@@ -100,13 +101,13 @@ policy author should do about the detection clock it turns on. Full detail:
 |---|---|
 | Can a node see the race coming from its **own observation history**? (Mori–Zwanzig decomposition, 72 seeds, ~166k gate decisions) | **No.** Detection latency drives the failure mode up **29×** while the memory term stays flat (+0.0145 → +0.0150). A positive control detects memory ~8× more strongly where it exists, so this is the physics, not a weak estimator |
 | Which local observables carry the information? (exact Shapley, 2^7 = 128 coalition fits) | **They are substitutes, and this narrows our own null.** Any one of six observables alone scores ≈0.89 against 0.92 for all seven — so the study above tested roughly *one* dimension of observable space sampled seven ways, not seven. Recorded as a limitation the follow-up discovered |
-| Which **direction** should a failure detector err in? (false-conviction sweep, 48 seeds) | **Toward convicting the living — up to a ceiling.** `P(any loss)` falls **40% → 2%** as `p` goes 0 → 0.10, then rises to 10% at p = 0.40 |
-| Why does the curve turn over? | **Error cancellation, not conservatism.** Slow detection makes a viewer over-count; false conviction under-counts; they annul near p ≈ 0.05 — exactly where loss is minimised. So the optimum is set by detection latency |
+| Which **direction** should a failure detector err in? (false-conviction sweep, 48 seeds) | **Toward convicting the living — up to a ceiling.** `P(any loss)` falls **40% → 2%** as `p` goes 0 → 0.10, then rises to 10% at p = 0.40. **Replicated on fresh seeds** (150/point): 36% → 2.7% at p = 0.10 → 15.3% at p = 0.40, non-overlapping 95% intervals ([RELATED_WORK.md §5](RELATED_WORK.md)) |
+| Why does the curve turn over? | **Open.** The first reading was error cancellation (over-count from slow detection annulled by false conviction, the bias crossing zero near p ≈ 0.05). The replication puts the loss minimum nearer p ≈ 0.10, and at p = 0.40 nodes hold *more* data yet lose more — consistent with thrashing as much as with cancellation |
 | What does paranoia cost? | **Storage, not bandwidth.** Equilibrium arc up to +52%, but sync cost *falls* across most of the range — less shrinking means less re-growing. Bandwidth only degrades at p ≥ 0.4, where the view is broken rather than cautious |
 | Bug found and fixed in the existing model | `DecoupledSim` never stamped `death_lag` on agents joining mid-run, so join-bearing scenarios raised `AttributeError`. The published §11 sweep is storm-only and never reached the path; `validate_decoupled.py` still passes and prior output is byte-identical |
 | Is a **single** detector threshold good enough for a network whose peers detect at different speeds? (5×5 grid over the two classes' rates) | **No effect detectable.** The best per-class setting beats the best uniform one by 4 pp — but a selection-bias null test (all cells given the same true rate) reproduces a gap that large in 11% of grids, so it is what taking the best of 25 cells manufactures. Read as "not resolvable at 24 seeds", not "no effect" |
 | What *is* worth having, then? | **Getting the threshold roughly right: 42% → 4%**, a 38 pp first-order effect. Per-peer calibration is bounded above by ~4 pp on top of that. Self-calibration (phi accrual and relatives) is therefore second-order here, and justifying it needs ~10× the seeds |
-| Does mixing detection speeds help or hurt? | **Heterogeneity is protective.** A homogeneous slow network (dl=192) loses data in 40% of runs; mixing in an equal half at dl=96 takes it to **0/24**. Safety tracks the *fastest* class, not the slowest — the same backbone effect §10 found for a polite minority in a naive majority |
+| Does mixing detection speeds help or hurt? | **Heterogeneity helps.** Replicated on fresh seeds (72 each): homogeneous dl=192 loses data in 35% of runs, homogeneous dl=96 in 15%, a 50/50 mix in **18%**. (The earlier "0/24" came from an uncommitted probe and did not replicate.) Safety tracks the *fastest* class, not the slowest — the same backbone effect §10 found for a polite minority in a naive majority |
 | A grid that had to be thrown away | The first attempt set the fast class *faster than gossip*, which §11 had already shown drives its race to zero; that class then rescued the whole network, the baseline lost nothing, and all 25 cells were noise around zero. The summariser now reports the baseline first and refuses to be read as a null when there is no headroom |
 
 *Not* claimed: none of this ran on real transport. Detection latency and conviction rate

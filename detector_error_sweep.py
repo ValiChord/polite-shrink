@@ -105,6 +105,12 @@ def main():
 
 
 FINDINGS = """
+> **October 2026:** the direction and the ceiling replicate on fresh seeds
+> (36% -> 2.7% at p = 0.10 -> 15.3% at p = 0.40, 150 seeds/point; RELATED_WORK.md
+> section 5), but the optimum sits nearer p = 0.10 than 0.05, and finding 2's
+> error-cancellation mechanism is not established - at p = 0.40 nodes hold more
+> data yet lose more, which fits thrashing as well.
+
 ## Findings
 
 **1. The asymmetry holds in the realistic range — the direction was right.**

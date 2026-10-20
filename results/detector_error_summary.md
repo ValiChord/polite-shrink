@@ -6,7 +6,7 @@ Constraint 6 says the shrink wait must be sized against death-detection latency.
 
 **This is a deliberate stress regime.** Loss only occurs at slow detection (§11's 2-8x band); milder settings lose nothing at any `p` and cannot discriminate. Absolute rates here are not operating figures.
 
-Environment: Python 3.14.6, numpy 2.5.1 — numpy matches the repo pin, Python does not (3.12.1). Re-run under the pins before publishing digits.
+Environment: Python 3.14.8, numpy 2.5.1 — numpy matches the repo pin, Python does not (3.12.1). Re-run under the pins before publishing digits.
 
 ## pure V3 (f=1.0), death_lag = 96
 
@@ -52,6 +52,12 @@ Environment: Python 3.14.6, numpy 2.5.1 — numpy matches the repo pin, Python d
 | 0.2 | 6/48 (12%) | 52,139 | 156 | 1.05 (+48%) | 46,203 |
 | 0.4 | 10/48 (21%) | 73,892 | 109 | 1.47 (+107%) | 79,714 |
 
+
+> **October 2026:** the direction and the ceiling replicate on fresh seeds
+> (36% -> 2.7% at p = 0.10 -> 15.3% at p = 0.40, 150 seeds/point; RELATED_WORK.md
+> section 5), but the optimum sits nearer p = 0.10 than 0.05, and finding 2's
+> error-cancellation mechanism is not established - at p = 0.40 nodes hold more
+> data yet lose more, which fits thrashing as well.
 
 ## Findings
 

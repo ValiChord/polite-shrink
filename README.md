@@ -2,9 +2,11 @@
 
 > **New here?** Start with **[CORE_IDEA.md](CORE_IDEA.md)** — the one-page version of everything below.
 
-> ## Using the polite-shrink pattern, the stale-view arc-shrink race — the one that damping the 2021 "hallway dance" leaves wide open — can no longer cause data loss. Proven by exhaustive model checking, not just tested.
+> ## Damping the 2021 "hallway dance" leaves a stale-view shrink race wide open. Polite shrink closes it: announce, wait out the staleness, re-check discounting announced rivals — checked exhaustively against every schedule, not just tested.
+
+> **⚠️ Corrected October 2026 — read [REPORT_stale_views.md](REPORT_stale_views.md).** The original TLA+ proof gave every node a perfectly fresh view, under which the tie-break is never exercised (delete it and the spec still passes). Re-checked with real stale views: a bare re-check fails everywhere; the **ID tie-break (V3) is necessary but not sufficient** — a staggered cascade of announcers, or one death plus staggered announcements, defeats it; **discounting *every* visible announcer (V5, the AgentInfo encoding) is proven safe for any number of nodes**, provided deaths are noticed before anyone acts on a view still counting them.
 >
-> *Scope, stated plainly: this is the honest-node control-loop safety property — a sector never drops below its redundancy target R — machine-checked over **every reachable state** for networks up to N = 8 (R from 1 to 7), then argued to generalise per-sector. The naive rule (no wait, no tie-break) fails the same check with a counterexample. What is proven is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
+> *Scope, stated plainly: the safety property is that no shrink takes a sector below its redundancy target R (deaths can). The original TLC runs covered five configurations (N = 6–8; R ∈ {1, 2, 3, 4, 7}) under atomic fresh reads; the stale-view check covers every announce schedule and per-node lag for N ≤ 5, and the V5 result has a proof that holds for any N. Honest nodes and prompt death detection are assumed. What is checked is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
 > ### 👉 The contribution is two files
 > - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The whole idea is ~30 lines: `_decide` (announce an intent to vacate instead of dropping) and `_execute_intent` (wait out gossip staleness, re-check, then a lowest-id-proceeds tie-break).
@@ -43,34 +45,39 @@ TCAS-style tie-break, and only then drop — plus an expanding-ring repair rule
 for sparse networks. Designed by ablation, then attacked from every direction
 we could think of.
 
-> **The empirical record: not one sector lost.** Across every test where nodes
-> behave honestly — a 1,248-run sweep (0 lost vs 95.9% for the naive
-> controller), an evolutionary adversary that couldn't break it, network
-> partitions, scale to 5,000 agents, coverage gossip so lossy that 9 in 10 declarations are dropped,
-> and 33% of the network killed at once on
-> real iroh transport (0 of 23k+ ops lost) — polite-shrink has never dropped a
-> sector below the redundancy target R, and the core safety property is
-> formally proven. The *only* failure mode is nodes that **lie** about what
-> they store — a sensor problem no controller can out-think — and the
-> proof-gated **verified-coverage** extension drives even that to zero data
-> loss.
+> **The empirical record.** In the designed scenarios — a 1,248-run sweep
+> (0 runs losing data vs 95.9% for the naive controller), network partitions,
+> scale to 5,000 agents, coverage gossip dropping 90% of per-tick deliveries,
+> and 33% of the network killed at once on real iroh transport (0 orphaned
+> sectors) — no polite-shrink run lost data. Coverage *does* dip below R during
+> deaths and churn (the sweep's worst floor is 1); what the gate aims at is that
+> no *shrink* is what takes it there.
+>
+> Data **is** lost in three regimes, each characterised rather than hidden:
+> nodes that **lie** about what they store (a sensor problem; the proof-gated
+> **verified-coverage** extension removes it in simulation); **slow death
+> detection under heavy storms** (at 50% simultaneous death with detection 4–8×
+> slower than gossip, V3 loses data in 15–35% of runs — the residual that
+> constraint 6 and [RELATED_WORK.md §5](RELATED_WORK.md) quantify); and the
+> **V3 tie-break's structural gap** found in October 2026, possible in principle
+> but not yet measured in practice ([REPORT_stale_views.md](REPORT_stale_views.md)).
 
 ## Evidence at a glance
 
 | Evidence class | Result |
 |---|---|
 | **1,248-run robustness sweep** (312 seeds × 4 scenarios, paired against 3 weaker controllers) | **0 sectors lost** (95% UB < 0.24%); weakest controller lost data in 95.9% of runs ([REPORT_stage1.md](REPORT_stage1.md)) |
-| **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; **could not make polite shrink lose a single sector** |
+| **Evolutionary adversarial search** (same kill budget, free choice of who/when, 20 generations) | broke the damped and jittered controllers; did not find an attack on polite shrink. *Weak as a null:* one world, one seed, 320 evaluations — and a 60-kill budget could simply kill every holder of one sector, which no controller survives, so this tests the search more than the rule |
 | **Reference implementation** on a kitsune2 fork ([`feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3), behind the existing `sharding` feature flag) | 8-node storm test on the in-memory transport: shard down, kill 3 of 8, recover to target — no sector ever orphaned |
-| **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously at the worst moment: **zero orphaned sectors, zero of 23k+ published ops lost**; the storm brake cancelled all 9 stale-view shrink intents at detection |
+| **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously: **zero orphaned sectors** (that run's intents had already resolved, so the brake was not exercised). In the separate *timed* storm, deaths landed while intents were pending: the brake cancelled all 9, and op-level reachability found **0 of 23,673 ops lost** |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget); and **partial liars** (store a strategic fraction, serve some challenges) still cause **zero data loss**, with a mid-fraction margin dip that a higher audit sample-count restores |
-| **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs; the across 6,000 runs; the two-phase re-check never needs a complete view. **Scope:** coverage/arc declarations are dropped; the intent-announcement channel the handshake relies on is kept reliable here, so robustness to lost *intents* is future work | |
-| **Formal safety proof** ([spec/](spec/), TLA+/TLC) | "a sector never drops below R" **model-checked exhaustively** — every reachable state, no violation, for N up to 8 (R from 1 to 7); the naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. Scope: the proof covers the **gate** (the pre-drop re-check), not the policy around it — see [REPORT_stage1.md §2.2](REPORT_stage1.md) |
+| **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs. **Scope:** drops are per tick, so 90% adds roughly ten ticks of staleness against a fifty-tick wait; one seed loses only at intermediate drop rates; and the intent-announcement channel is kept reliable here, so robustness to lost *intents* is future work |
+| **Formal safety checks** ([spec/](spec/), [REPORT_stale_views.md](REPORT_stale_views.md)) | *Original TLA+:* "a sector never drops below R" holds in five configurations — but every node reads the true holder set instantly, so the tie-break is never used and the naive rule's failure isolates nothing. *Stale-view check (Oct 2026):* exhaustive over announce schedules and per-node lags, N ≤ 5. A bare re-check fails everywhere; the ID tie-break (V3) needs a wait > 2× lag for small N and still fails a staggered cascade (R = 1) and one-death schedules (R = 2); **V5 — discount every visible announcer — is safe in all of them at a 1× wait, with a proof for any N** |
 | **Is the residual really irreducible by a local rule?** ([REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)) | §11 asserted it; this measures it. A Mori–Zwanzig decomposition over 72 seeds and ~166k gate decisions: detection latency drives the failure mode up **29×** while the part recoverable from an agent's own history stays flat, against a control that detects memory ~8× more strongly where it exists. So a node cannot **learn** its way out — but it *can* be **biased** out, which is the amendment §11 now carries |
-| **Which way should a failure detector be wrong?** ([`detector_error_sweep.py`](detector_error_sweep.py), constraint 6b) | **Toward convicting the living — with a ceiling.** `P(any loss)` falls **40% → 2%** as the false-conviction rate rises, then *worsens* past the optimum. The mechanism is error cancellation, not caution: slow detection makes a viewer over-count, false conviction under-counts, and the two annul right where loss bottoms out. Cost is **storage, not bandwidth** — sync cost *falls*, less shrinking meaning less re-growing |
-| **Does a mixed network need per-peer detector tuning?** ([`hetero_detector_sweep.py`](hetero_detector_sweep.py)) | **Not measurably — and heterogeneity turns out to help.** Getting one global threshold roughly right is a **38 pp** effect (42% → 4%); tuning each latency class separately adds ≤4 pp, which a selection-bias null test reproduces in 11% of grids by chance. Self-calibrating detectors (φ accrual and relatives) are therefore second-order here. Separately: a homogeneous slow network loses data in **40%** of runs, and mixing in an equal half that detects twice as fast takes it to **0/24** — **safety tracks the fastest class, not the slowest**, the same backbone effect §10 found for a polite minority |
-| **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract — fix offered upstream ([PR #572](https://github.com/holochain/kitsune2/pull/572), open, awaiting review); a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
-| **Does the announcement need its own wire message?** ([REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)) | **No — but it needs one bit.** Carrying the intent on the already-gossiped `AgentInfo` arc claim is model-checked safe and removes ~255 lines plus a wire format; what it cannot carry is *"intending to leave"* vs *"already gone"*, and deriving that from claim age is falsified by a single misclassification. The encoding wins on the shrink race (346× fewer holes), 90%-lossy gossip and storage fairness; it loses on reachability at scale and on how *often* a mass die-off costs data (6–9% of runs vs 1%) |
+| **Which way should a failure detector be wrong?** ([`detector_error_sweep.py`](detector_error_sweep.py), constraint 6b) | **Toward convicting the living — with a ceiling.** Replicated on fresh seeds (150 per point): `P(any loss)` falls **36% → 2.7%** at p ≈ 0.10, then rises again to **15%** at p = 0.40 (non-overlapping 95% intervals; [RELATED_WORK.md §5](RELATED_WORK.md)). At p = 0.40 nodes hold more data *and* lose more, so this is not plain caution; whether the optimum is error cancellation or thrashing is open. Cost is **storage, not bandwidth** — sync cost *falls*, less shrinking meaning less re-growing |
+| **Does a mixed network need per-peer detector tuning?** ([`hetero_detector_sweep.py`](hetero_detector_sweep.py)) | **Not measurably — and heterogeneity turns out to help.** Getting one global threshold roughly right is a **38 pp** effect (42% → 4%); tuning each latency class separately adds ≤4 pp, which a selection-bias null test reproduces in 11% of grids by chance. Self-calibrating detectors (φ accrual and relatives) are therefore second-order here. Separately, replicated on fresh seeds: a homogeneous slow network (dl = 192) loses data in **35%** of runs, all-fast (dl = 96) in 15%, and a 50/50 mix in **18%** — **a mixed network tracks its faster half**, the same backbone shape §10 found for a polite minority. (An earlier "0/24" came from an uncommitted probe and did not replicate.) |
+| **Upstream findings from doing the work** | kitsune2's mem transport violated its unresponsive-marking contract — fix offered upstream ([PR #572](https://github.com/holochain/kitsune2/pull/572)) — closed by maintainers 2026-09-29: that transport is test-only, so they prefer not to add a feature nothing uses; a broadcast head-of-line liveness bug only real transport could surface (fixed on the fork) |
+| **Does the announcement need its own wire message?** ([REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md)) | **No — but it needs one bit.** Carrying the intent on the already-gossiped `AgentInfo` arc claim is model-checked safe and removes ~255 lines plus a wire format; what it cannot carry is *"intending to leave"* vs *"already gone"*, and deriving that from claim age is falsified by a single misclassification. The encoding wins on the shrink race (346× fewer holes), 90%-lossy gossip and storage fairness; it loses on reachability at scale and on how *often* a mass die-off costs data (6–9% of runs vs 1%, against a one-event V3 baseline). *Oct 2026:* on safety alone the stale-view check now favours this encoding — see [REPORT_stale_views.md](REPORT_stale_views.md) |
 
 **What we don't claim:** these are simulation + kitsune2-substrate
 measurements on one machine — not a Holochain-conductor deployment, not WAN.
@@ -109,7 +116,7 @@ policy has to respect, whoever writes it. (This is the *policy* half. The *gate*
 | **Size the shrink wait against death-detection latency, not gossip staleness** | they are independent clocks on a real transport. Detection *faster* than gossip drives the residual race to **zero**; the storm brake shares the detection clock, so it bounds but cannot close it |
 | **Decide which way the failure detector should be *wrong*, and give it a ceiling** | convicting a live peer makes a node hold more (costs storage); missing a dead one makes it shrink wrongly (costs data). Erring toward conviction takes `P(any loss)` **40% → 2%** — but past the optimum it worsens again, because the mechanism is one error cancelling another, not caution. The optimum therefore moves with detection latency (constraint 6b) |
 | **Don't spend effort on per-peer calibration before the global threshold is right** | one well-chosen global threshold is a **38 pp** effect; tuning per latency class adds ≤4 pp and is not distinguishable from selection noise. Self-calibrating detectors buy little until the first-order effect is already captured |
-| **Don't treat a spread of detection speeds as a hazard** | it is protective. A uniformly slow network loses data in **40%** of runs; an equal half detecting twice as fast takes that to **0/24**. Safety tracks the *fastest* class — so a policy that homogenises node behaviour may remove a margin it never knew it had (cf. the arc-distribution constraint below) |
+| **Don't treat a spread of detection speeds as a hazard** | it helps. Replicated on fresh seeds: uniformly slow detection loses data in **35%** of runs, a 50/50 mix with twice-as-fast nodes in **18%** — about what an all-fast network loses (15%). A mixed network tracks its *faster* half — so a policy that homogenises node behaviour may remove a margin it never knew it had (cf. the arc-distribution constraint below) |
 | **Don't flatten the arc distribution** | the top decile holds **~91%** of stored sectors — and the skew is hysteresis path-dependence, not the tie-break (corr ≈ +0.08). Those big arcs are the emergent insurance behind sparse recovery's global reach, so **the textbook uniform `R/N` is probably the wrong policy** |
 
 Each constraint traces to a run; sources and full detail in
@@ -176,6 +183,19 @@ realism, and the formal proof — with the result and a link to each write-up.
   to be protective rather than hazardous. Its summary carries both corrections
   that got there: a first grid whose baseline lost nothing, so every cell was
   noise; and a verdict that was an artefact of taking a minimum over 25 cells.
+- **[REPORT_stale_views.md](REPORT_stale_views.md)** — *October 2026, read
+  this before trusting the proof.* The TLA+ model gave every node a fresh view,
+  so the tie-break was never exercised. Re-checked exhaustively with real stale
+  views: a bare re-check fails everywhere; the ID tie-break (V3) is necessary but
+  fails a staggered cascade and one-death schedules; discounting every announcer
+  (V5) is safe in all of them, with a proof for any N.
+- **[RELATED_WORK.md](RELATED_WORK.md)** — the same problem in other fields:
+  sensor-network sleep scheduling (the same race, twenty years earlier),
+  k-exclusion and the bakery algorithm (the race's classical name), and
+  delay-stability theory from congestion control (tested here: no sharp
+  oscillation threshold, own-lag scaling helps in the operating range, and
+  identical-lag networks oscillate more). Also the fresh-seed replications of
+  the two detection-side headlines.
 - **[METHOD.md](METHOD.md)** — how claims here are graded and how to check
   them: machine-checked proof vs simulation evidence vs known gap, why the
   ablation ladder is reported instead of the headline number (cf. McGreivy &
@@ -197,7 +217,7 @@ Two places, by design:
   mechanism is ~30 lines — [`polite_shrink.py`](polite_shrink.py), `_decide` (phase 1:
   announce the vacate intent instead of dropping) and `_execute_intent`
   (phase 2: after the wait, re-check the vacated half counting every
-  lower-priority intender as already gone; proceed only if still ≥ R).
+  lower-id (higher-priority) intender as already gone; proceed only if still ≥ R).
   The V4 expanding-ring repair extension is [`repair_sim.py`](repair_sim.py).
   Everything else here is the machinery for attacking those lines.
 - **The rule, as deployable** (Rust, kitsune2 fork):
@@ -236,7 +256,7 @@ real network stack.
 | **V0 naive** | react immediately to the stale view | — (the strawman) |
 | **V1 damped** | act only after the condition persists ≥ K × *own measured lag* (grow 1×, shrink 4× — "grow eager, shrink slow") | control theory: react slower than your information is stale |
 | **V2 +jitter** | desynchronised decision epochs | TCP-RED: break lockstep reactions |
-| **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-priority intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
+| **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-id (higher-priority) intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
 | **V4 polite+repair** *(Stage 3)* | + expanding-ring repair: a hole in the level+g ancestor block motivates growth after `grow_need + (g−1)·2·lag` persistence — ring-near agents move first, distant timers reset when the hole closes | expanding-ring search (ad-hoc routing) |
 | **V5 polite (AgentInfo-only)** *(2026-07-25)* | the intent rides on the gossiped arc claim instead of a dedicated message: announcing = publishing the *reduced* arc while still holding the data. No tie-break (peers cannot tell an intender from a departed node), so the gate counts current claimants only | reviewer feedback from Holochain core — reuse what is already gossiped |
 
@@ -281,8 +301,8 @@ for the storm margin you want — V4 at R+1 dominated V3 at R in our runs.
 |---|---|
 | Naive control reproduces the oscillation exactly | V0 never settles in any scenario, floor repeatedly hits 0 (data loss), ~15× the resize traffic and sync cost |
 | Lag-scaled hysteresis does most of the stabilising | V1 cuts resizes ~15×, eliminates loss in most runs |
-| **Jitter alone is unreliable — sometimes harmful** | across seeds, V2 *caused* loss in 3 of 4 storm runs where V1 had none: staggered unilateral drops erode the floor in a slow drip that synchronized drops don't |
-| The two-phase handoff is what buys safety | **V3: zero data loss in all 8 runs (4 seeds × 2 scenarios + main run)**; during activation its floor never dips below R at all; lowest under-replication exposure everywhere |
+| **Jitter alone is unreliable** | in a 4-seed check V2 lost data in 3 storm runs where V1 had none, yet at seed 42 the reverse holds, and on the 312-seed sweep the two are indistinguishable overall (24.0% vs 24.3%). The mechanism when it does hurt: staggered unilateral drops erode the floor in a slow drip that synchronized drops don't |
+| The two-phase handoff is what buys safety | **V3: zero data loss in every seed-check run**; during activation its floor never dips below R; lowest under-replication exposure everywhere |
 
 Robustness: `check_seeds.py` repeats activation+storm on seeds 7/99/1234 —
 the ordering holds (V0 always loses data; V3 never does).
@@ -297,7 +317,7 @@ with live connection churn**, and measures it under Wind Tunnel. This is where
 
 | Finding | Evidence |
 |---|---|
-| Coverage stayed continuous through a **33% simultaneous node loss** on real transport | floor never below 6 (≥ R=5), including through the mass death; **0 orphaned sectors; 0 of 23,745 published ops lost** |
+| Coverage stayed continuous through a **33% simultaneous node loss** on real transport | floor never below 6 (≥ R=5), including through the mass death; **0 orphaned sectors**. (Op-level reachability was measured on the timed-storm runs: 0 of 23,673 lost.) |
 | The **storm brake** caught the §6.1 intent-death race in the wild | in the timed-storm run, six agents die and the brake cancels **nine** pending shrink intents that had been announced into the die-off on stale views — none executed |
 | Real transport surfaced a bug simulation could not | a broadcast head-of-line **liveness bug**, invisible to the in-memory sim, found and fixed on the fork — plus an upstream mem-transport contract bug identified, with a fix offered ([PR #572](https://github.com/holochain/kitsune2/pull/572), open) |
 | Sharding actually happens (not just "doesn't break") | equilibrium arc span shrinks to ~0.58–0.63 of full (≈1.6–1.7× gain at N=12, growing with N) while the floor holds above R |
@@ -311,14 +331,14 @@ studies, one command (`./run_stage3.sh`, which now also runs the detection-side 
 
 | Question | Answer |
 |---|---|
-| Netsplit + heal — is data lost? | **No durability loss in 9/9 runs**; V3's floor never left R, and the heal-time shrink storm is absorbed. Flapping partitions defeat the damped controller (V1), not polite shrink. |
+| Netsplit + heal — is data lost? | **No durability loss** in any of 3 geometries × 3 controllers (single seed, 42 — V1 and V2 also lose nothing here, so this does not discriminate); V3's floor never left R, and the heal-time shrink storm is absorbed. Flapping partitions defeat the damped controller (V1), not polite shrink. |
 | Forged shrink-intents? | **Fail-safe by construction and measurement** — worst-case forgery is a *cost* attack (2.3× sync, zero loss); receiver-side range-validation cuts it to ~4% and is **implemented on the fork**. |
 | Does it survive scale? | **V3 to N=5,000** (rings up to 16,384 sectors), zero loss, per-agent cost flat — where the damped controller starts losing data at **N ≥ 2,000**. |
 | The sparse-network recovery deadlock? | Real (V3 without the clamp stuck in 5/90 port-scale seeds); **V4 expanding-ring repair recovers 120/120**, still sharding, no thundering herd. |
 | How often does the shrink-race actually bite? | Shrink-executed holes = **0.002% at R=5** (≥99.9% of all holes are generic churn outrunning recovery, not a controller defect), and all transient (median 23 ticks). |
 | Nodes that **lie** about what they store? | The one real gap: past **K=R** phantom declarations, data is lost invisibly — sensor integrity, not control. Proof-gated **verified coverage** removes the threshold (zero loss to K=3R); *partial* liars cause zero data loss with a tunable audit-sample knob. |
 | Is a *partial* rollout safe (mixed new/old nodes)? | **Yes — no flag day.** With a fraction running polite shrink and the rest still naive, the shrink-race loss is **zero from ~10% adoption** across 312 seeds (a small polite minority becomes the redundancy backbone). Early rollout thins the margin, and the storm brake closes the one race it surfaces — full write-up in [REPORT_stage3.md §10](REPORT_stage3.md) / [REPORT_rolling_upgrade.md](REPORT_rolling_upgrade.md). |
-| What if death-detection is a *slower, separate* clock than gossip? | **The §6.1 race stays bounded and small.** Decoupling the death clock from view staleness ([REPORT_stage3.md §11](REPORT_stage3.md)), the race is ≤0.6% even at 2–8× the gossip lag and only at a thin margin; detection *faster* than gossip drives it to zero. It's governed by unresponsive-marking speed, not the shrink rule — so the shrink wait is sized against detection latency. |
+| What if death-detection is a *slower, separate* clock than gossip? | **The §6.1 race stays bounded and small.** Decoupling the death clock from view staleness ([REPORT_stage3.md §11](REPORT_stage3.md)), at storm 30% the race is ≤2/312 runs up to a detection latency of 64 ticks (2.7× the maximum gossip lag) and only at a thin margin — though at storm 50% and 4–8× the maximum lag, V3 loses data in 15–35% of runs ([RELATED_WORK.md §5](RELATED_WORK.md)); detection *faster* than gossip drives it to zero. It's governed by unresponsive-marking speed, not the shrink rule — so the shrink wait is sized against detection latency. |
 | What if gossip is *lossy* — each viewer's coverage picture incomplete and inconsistent? | **Polite shrink holds, up to 90% message drop.** Giving each viewer a per-peer lossy view (missing a peer's shrink/death makes it *over-count* — the dangerous direction), the data-loss rate is **flat in the loss axis** across 6,000 runs ([REPORT_stage3.md §12](REPORT_stage3.md)): activation loses nothing at any drop rate, and storm's only losses are the pre-existing correlated mass-death (present at zero loss, non-monotonic in loss), never lossy over-counting. The two-phase re-check doesn't need a complete view. (Scope: this drops coverage/arc declarations; the intent channel the handshake depends on is kept reliable, so lost-*intent* robustness is future work.) |
 
 The ninth Stage-3 study — a *proof* rather than a test of the core safety
@@ -436,6 +456,9 @@ python3 mz_attribution.py           # exact Shapley, 128 fits/cell (~7 min)
 python3 detector_error_sweep.py     # detector-error sweep         (~25 min)
 python3 diag_detector_bias.py       # why the curve turns over     (~5 min)
 python3 hetero_detector_sweep.py    # per-peer calibration worth it? (~12 min)
+python3 oscillation_sweep.py        # is the dance a delay instability? (~12 min)
+python3 detector_replication.py     # fresh-seed replication (~45 min)
+cd spec && python3 timed_check.py --sweep   # stale-view check (pure stdlib)
 ```
 
 These are numpy-only (no sklearn or scipy — the estimators are implemented
@@ -472,7 +495,7 @@ What still holds today, after Stage 3 — stated as current constraints, not his
 - **Most findings are simulation evidence, not proof.** The *core safety*
   property ("never vacate a sector below R") is now formally model-checked
   (§9), but the broader results — costs, adversary outcomes, the surprising V2
-  finding that jitter *without* the handoff is harmful — characterise this
+  finding that jitter *without* the handoff is unreliable — characterise this
   rule-set on this model, not theorems, and may be specific to it.
 
 For the other side of the ledger — what the controller has been shown to

@@ -165,7 +165,7 @@ this study should not be.
 An unsafe gate is a decision where the agent's view passed the R check but
 perfect current information would not have. **It is a precursor, not a loss.**
 Actual declared loss (`zero_sector_ticks`) was **0 at every latency**, including
-the 96-tick cells with 217 precursors — consistent with §11's published f = 1.0
+the 96-tick cells with 635 precursors — consistent with §11's published f = 1.0
 race counts, which are 0 almost everywhere.
 
 That gap is the point of using it. The published race study had 0–2 events per

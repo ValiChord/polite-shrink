@@ -4,11 +4,16 @@
 
 ## In a sentence or two
 
-When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every *lower-ID* node that announced the same vacate as already gone** (a deterministic tie-break), instead of dropping immediately.
+When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every node that announced a vacate as already gone**, instead of dropping immediately.
 
 That last clause is the load-bearing part. Announce-and-re-check *while everyone still counts each other as present* does **not** close the race: two nodes each removing only themselves both conclude "R will remain" and both drop, and coverage falls below R — the exact 2021 failure.
 
-What closes it is that **a node about to vacate must stop counting toward the redundancy of the nodes it is racing.** The ID tie-break is one way to arrange that: order the contenders so exactly one proceeds and the rest defer. There is a second way, which falls out of carrying the announcement on the arc claim that is already gossiped rather than on a message of its own — then announcing *is* removing yourself from everyone's count, and no ordering is needed. Both are model-checked safe; they trade differently, and the comparison is in [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+What closes it is that **a node about to vacate must stop counting toward the redundancy of the nodes it is racing.** There are two ways to arrange that, and October 2026 work separated them:
+
+- **Discount every announcer** (V5). This falls out of carrying the announcement on the arc claim that is already gossiped — announcing *is* removing yourself from everyone's count. Checked with real stale views it is **safe for any number of nodes**, with a short proof, as long as deaths are noticed before anyone acts on a view still counting them.
+- **Discount only lower-ID announcers** (V3, the original TCAS-style tie-break). It applies the principle only halfway: higher-ID announcers still count for lower-ID ones. That is enough for small networks with a wait over twice the lag, but a *staggered cascade* of announcers, or one death plus staggered announcements, walks through the gap.
+
+The original TLA+ proof could not tell these apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe. The stale-view check, the cascade and the proof are in [REPORT_stale_views.md](REPORT_stale_views.md); the costs of each encoding are in [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
 
 ## The problem it addresses
 
@@ -39,27 +44,33 @@ Polite-shrink applies exactly that cure to shrinking: when nodes contend to vaca
 Two phases, in [`polite_shrink.py`](polite_shrink.py):
 
 1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors.
-2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, applies the **TCAS tie-break** — count every *lower-ID* intender as already gone, so the lowest ID proceeds and the rest defer — and drops **only if ≥ R copies remain**.
+2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, counts announced intenders as already gone, and drops **only if ≥ R copies remain**. The code's V3 counts only *lower-ID* intenders (the TCAS tie-break); V5 counts all of them, which is the version that survives stale views in general.
 
-Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, partitions, scale to 5,000 agents, 90%-lossy gossip, and 33% of the network killed at once on real iroh transport — **not one sector ever dropped below R**.
+Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, partitions, scale to 5,000 agents, 90%-lossy gossip, and 33% of the network killed at once on real iroh transport — **no run in the designed scenarios lost data** (coverage dips below R during deaths; what the gate aims at is that no *shrink* takes it there). Data is lost under slow death detection in heavy storms, and by nodes that lie — both characterised below.
 
 ## What is proven vs. what is evidence
 
 Stated plainly, because the distinction matters:
 
-- **Proven** (TLA+/TLC, exhaustive over every reachable state, N ≤ 8, R = 1–7): the **gate** — the pre-drop re-check in which an announcing node no longer counts toward its rivals' redundancy — means concurrent stale-view shrinks *cannot* drive a sector below R. This holds both for the ID tie-break and for the arc-claim encoding that achieves the same thing without one. The naive rule (no wait, no discount) fails the same check with a counterexample, as does the plausible-looking middle option of *guessing* which un-declared peers have really left: one wrong guess loses a copy.
+- **Checked exhaustively, with stale views** ([REPORT_stale_views.md](REPORT_stale_views.md); every announce schedule and per-node lag, N ≤ 5): a bare re-check fails in every configuration; the ID tie-break (V3) is safe for small networks with a wait over twice the lag but fails a staggered cascade (R = 1) and one-death schedules (R = 2); discounting every announcer (V5) is safe in all of them at a 1× wait.
+- **Proven for any N:** V5 under stale views, given prompt death detection (proof in [REPORT_stale_views.md](REPORT_stale_views.md) §4). Also proven: *guessing* which un-declared peers have really left fails on one wrong guess (`spec/AgentInfoAgeGated.tla`).
+- **What the original TLA+ proof shows** (five configurations, N = 6–8): re-checking against a perfectly fresh view is safe — true, but close to trivial, and it does not exercise the tie-break.
 - **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
 
 ## The one lever outside the gate: how fast deaths are noticed
 
-The gate is proven, but it rests on a precondition — the wait must outlast the staleness — and pinning that down turned up the only other thing a policy author has to get right. All three are simulation-evidenced, not proven:
+The V5 gate is proven safe provided a death is noticed before anyone acts on a view that still counts the dead node — and pinning that down turned up the only other thing a policy author has to get right. The three points below are simulation-evidenced, not proven:
 
-- **Size the wait against death-detection latency, not gossip staleness.** They are independent clocks on a real transport (kitsune2's *unresponsive marking* vs peer-store propagation). Detection faster than gossip drives the residual race to zero; slower leaves a residual, and a node provably cannot *infer* its way out of it — though it can be *offset*, which is the next point.
-- **Decide which way the detector should be wrong, and cap it.** Convicting a live peer costs storage; missing a dead one costs data. Erring toward conviction takes `P(any loss)` from **40% to 2%** — then *worsens* past the optimum, because the mechanism is one error cancelling another rather than caution. Getting one global threshold roughly right is a 38-point effect; tuning it per peer adds ≤4 and is not distinguishable from noise, so a self-calibrating detector is not where the first effort goes.
-- **A spread of detection speeds is protective, not hazardous.** A uniformly slow network loses data in 40% of runs; an equal half detecting twice as fast takes that to 0 of 24. Safety tracks the *fastest* class — so homogenising node behaviour can remove a margin nobody knew was there. (The same trap as flattening the arc distribution, which is also load-bearing.)
+- **Size the wait against death-detection latency, not gossip staleness.** They are independent clocks on a real transport (kitsune2's *unresponsive marking* vs peer-store propagation). Detection faster than gossip drives the residual race to zero; slower leaves a residual, and a node cannot *infer* its way out of it from its own observation history (measured, not proven, and only in one dimension of observable space) — though it can be *offset*, which is the next point.
+- **Decide which way the detector should be wrong, and cap it.** Convicting a live peer costs storage; missing a dead one costs data. Erring toward conviction takes `P(any loss)` from **36% to 2.7%** at a false-conviction rate near 0.10 — then *worsens* again (15% at 0.40), replicated on fresh seeds with non-overlapping intervals. Nodes at 0.40 hold more data and still lose more, so this is not plain caution; the mechanism is open. Getting one global threshold roughly right is a 38-point effect; tuning it per peer adds ≤4 and is not distinguishable from noise, so a self-calibrating detector is not where the first effort goes.
+- **A spread of detection speeds is protective, not hazardous.** Replicated on fresh seeds: a uniformly slow network loses data in 35% of runs, a 50/50 mix with twice-as-fast nodes in 18% — close to an all-fast network's 15%. A mixed network tracks its *faster* half — so homogenising node behaviour can remove a margin nobody knew was there. (The same trap as flattening the arc distribution, which is also load-bearing.)
 
-Detail: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md) and constraint 6b in [REPORT_stage3.md](REPORT_stage3.md).
+Detail: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md), [RELATED_WORK.md](RELATED_WORK.md) §5, and constraint 6b in [REPORT_stage3.md](REPORT_stage3.md).
+
+## Related fields
+
+Sensor networks met this exact race twenty years ago ("blind points" when neighbours switch off together) and used wait-and-re-check heuristics that left holes; the race is the classical **k-exclusion** problem with k = holders − R; and the oscillation is the subject of decentralised delay-stability theory from congestion control. What each connection is worth, and the experiments it prompted: [RELATED_WORK.md](RELATED_WORK.md).
 
 ## Relation to the Kitsune2 Github repository issue #160
 

@@ -33,9 +33,9 @@ file, so the Stage-1 byte-determinism claims stand.
 | 6 | How often does the §6.1 race actually bite? | **Almost never, even under escalated hazard — in the single-clock model.** Across ~2.3M observed holes, ≥99.9% were pure churn outrunning recovery (the generic replication floor, not a controller defect); shrink-executed holes (§6.1 proper) were 0.002% at R=5 — and zero at R=5/lag=24 at *every* hazard tested. Hole rate scales with hazard at slope ≈ 3–4 (R=5) vs ≈ 2–2.4 (R=3), consistent with the blind-window model. All holes are transient (median 23 ticks, p90 ≈ 95). **Caveat:** these figures couple death-detection to gossip staleness (one lag); the decoupled death-clock is unquantified and is bounded by the storm brake (§6, item 4), not by this decimal. |
 | 7 | Can the K = R liar ceiling (finding 3) be removed? | **Yes — proof-gated "verified coverage" makes it disappear, at a bandwidth cost the operator sets.** Counting a peer only while a fresh proof-of-serve backs it holds the true floor at 6.4–6.6 with zero dead sectors at *every* K from 0 to 3R (vs declared coverage's 25–69% ring death from K=R). The pessimism cost in an honest network is a knob: starving the audit is 7.5× sync, but at 6–10 audits/agent-epoch it matches declared sharding at ≈13–16% extra sync. Full-arc liars closed; partial liars measured in finding 8. |
 | 8 | Does verified coverage survive *partial* liars (store a strategic fraction, serve some challenges)? | **Yes against data loss, with a measured margin dip and a tunable knob.** A sampled c-check certifies a fraction-p liar with probability p^c; verified coverage loses **zero data at every p** (declared loses 69% of the ring to full liars), but the true floor dips *below R* at intermediate p (3.7 at p=0.5 — the liar both evades often and withholds coverage). Raising the audit sample count restores the margin (floor 5.6 ≥ R by c=3): partial lying is made costly and bounded, not impossible. |
-| 9 | Is the core safety property provable, not just well-tested? | **Yes — exhaustively.** TLA+/TLC verifies "a sector never drops below R" over *every* reachable state, no error, for N up to 8 (R from 1 to 7). The naive rule (no wait, no tie-break) fails the same check with a counterexample, isolating the two-phase tie-break as what buys safety. A proof of the control-loop property, complementing the sampled sims. |
+| 9 | Is the core safety property provable, not just well-tested? | **Partly — corrected October 2026.** TLA+/TLC verifies "a sector never drops below R" over every reachable state in five configurations (N = 6–8), but every node reads the true holder set instantly, so the tie-break is never exercised and the naive rule's failure isolates nothing. Re-checked with real stale views ([REPORT_stale_views.md](REPORT_stale_views.md)): the ID tie-break is necessary but not sufficient; discounting every announcer (V5) is safe for any N given prompt death detection. |
 | 10 | Is a *partially* upgraded network (mixed V3/V0 during rollout) safe? | **Yes, from ~10% adoption — no flag day.** Shrink-race loss is zero at every f ≥ 0.10 across 312 seeds in activation/flashcrowd/churn (a cliff, not a slope): a small polite minority forms a redundancy backbone the naive majority free-rides on. Storm keeps a ~0.3% residual — 9/11 unpreventable simultaneous mass-death, 2/11 the §6.1 race, which the storm brake closes. Cost of early rollout: a thinner margin. (`rolling_upgrade_sim.py`, `REPORT_rolling_upgrade.md`) |
-| 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 even at 2–8× the gossip lag and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. **Amended 2026-08-07:** "irreducible by any local rule" holds for local *estimators* (measured: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)) but not for a deliberately *biased* detector, which cuts `P(any loss)` 40% → 2% by cancelling the over-count rather than inferring it. See the amendment in §11. |
+| 11 | How bad is the §6.1 race when death-detection is a *separate* (slower) clock than gossip staleness? | **Bounded and small — governed by detection latency, not the shrink rule.** Decoupling the death clock (`decoupled_sim.py`, byte-identical to the base sim when coupled), storm 312 seeds: the race is ≤2/312 up to a detection latency of 64 ticks (2.7× the maximum gossip lag, 8× the minimum) and only at a thin margin (f=0.1); over-provisioned f≥0.3 is immune; detection *faster* than gossip drives it to 0. The brake shares the detection clock, so it bounds but cannot close the slow-detection residual — the shrink wait must be sized against unresponsive-marking speed. **Amended 2026-08-07:** "irreducible by any local rule" holds for local *estimators* (measured: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)) but not for a deliberately *biased* detector, which cuts `P(any loss)` 40% → 2% by cancelling the over-count rather than inferring it. See the amendment in §11. |
 | 12 | Does *lossy* gossip — dropped messages, so each viewer's coverage picture is incomplete and inconsistent — break polite shrink? | **No, up to 90% per-round drop.** Replacing the complete-but-stale view with a per-viewer, per-peer lossy one (`message_loss_sim.py`, byte-identical to the mixed sim at loss=0), the data-loss rate is **flat in the loss axis** across 6,000 runs (2 scenarios × 3 fractions × 10 loss rates × 100 seeds). Activation: 0/100 at *every* loss rate and fraction. Storm: the only losses are the pre-existing correlated storm-death (every losing run orphans *at* the storm tick, and seed-level attribution shows they occur at loss=0 too and are non-monotonic in loss) — none are lossy over-counting. The two-phase re-check runs on whatever view an agent has and still never shrinks into a hole. |
 
 ## 1. Partitions (`partition_sim.py`)
@@ -207,14 +207,17 @@ copy), with durations tracked to recovery.
   a sector died before anyone could regrow — the generic floor of *any*
   R-replicated system under that hazard, static sharding included. The
   controller-specific §6.1 mechanism contributed, at R=5, **19 holes out
-  of ~1.0M** (0.002%), all at hazards ≥ 2e-2 (mean node lifetime ≤ 50
-  ticks); at R=5/lag=24 it contributed **zero at every hazard**.
+  of ~1.0M** (0.002%), all but two at hazards ≥ 2e-2 (mean node lifetime ≤ 50
+  ticks; the other two at R=5/lag=96, p=8e-3); at R=5/lag=24 it contributed
+  **zero at every hazard**. *(Corrected Oct 2026: earlier text said "all".)*
 - **Scaling behaves as the blind-window model predicts:** log-log slope of
   hole rate vs p ≈ 2.0–2.4 at R=3 vs ≈ 3.0–4.0 at R=5 — raising R steepens
   the exponent (sub-R absolute values are expected: recovery truncates the
-  window and the top of the range saturates). At R=5, every hazard
+  window and the top of the range saturates). At R=5/lag=24, every hazard
   ≤ 4e-3 — a full population turnover every ~4 minutes at 1 tick ≈ 1 s —
-  produced zero holes of any kind in 60,000 observed ticks per point.
+  produced zero holes of any kind in 60,000 observed ticks per point. *(Corrected
+  Oct 2026: earlier text said "at R=5", but R=5/lag=48 at p=4e-3 and R=5/lag=96
+  at p=2e-3 each have ~160 churn holes in `results/race_summary.md`.)*
 - **Holes are transient:** median 23 ticks to re-covered, p90 ≈ 95,
   max 824. And per REPORT §6.1, a shrink-hole's leaver still holds the op
   data, so prompt regrow recovers it; churn-holes are the genuinely lethal
@@ -553,7 +556,7 @@ Over-provisioned regimes are effectively immune: f=0.3, 0.5, and 1.0 (pure V3)
 show **zero races at every latency** bar a single stray at death_lag=64 — the
 accidental ~2R margin absorbs the over-count. Pure-death losses are flat across
 all latencies (detection-independent, as expected). So the decoupled death-clock,
-at R=5, keeps the race **bounded and small (≤0.6% even at 2–8× the gossip lag)**
+at R=5, keeps the race **bounded and small (≤ 2/312 runs ≈ 0.64%, up to 2.7× the maximum gossip lag, at storm 30%)**
 and drives it to **zero under detection faster than gossip** — the coupled §5
 figure was not hiding a blow-up.
 
@@ -614,6 +617,17 @@ not by the shrink rule.**
 > but it can be offset locally — and the optimal offset is a function of
 > detection latency**, which is the same quantity this section already
 > identifies. See constraint 6 below.
+>
+> **Amendment (October 2026).** Two parts of the paragraph above did not survive
+> scrutiny. (1) The curve's optimum is nearer p ≈ 0.10 than 0.05: a replication
+> on fresh seeds (150 per point) gives 36% → 2.7% at p = 0.10 → 15.3% at p = 0.40,
+> non-overlapping intervals ([RELATED_WORK.md](RELATED_WORK.md) §5). (2) "Error
+> cancellation, not inference" is one reading, not an established mechanism: at
+> p = 0.40 nodes hold markedly more data and still lose more, which fits
+> thrashing as well. The robust part is the direction and the ceiling.
+> Separately, a stale-view model check ([REPORT_stale_views.md](REPORT_stale_views.md))
+> now states the residual exactly: under the discount-every-announcer rule it is
+> precisely a death not yet noticed when someone acts on a view counting it.
 
 ## 12. Lossy gossip — the incomplete view (`message_loss_sim.py`)
 
@@ -724,7 +738,7 @@ rather than arbitrary fractions.
 6. **Size the shrink wait against death-detection latency, not gossip
    staleness.** These are independent clocks on a real transport
    ([REPORT_stage1.md §6.1](REPORT_stage1.md)). Detection *faster* than gossip
-   drives the residual race to zero; at 2–8× the gossip lag it is ≤2/312 and only
+   drives the residual race to zero; up to 2.7× the maximum gossip lag it is ≤2/312 and only
    at a thin margin, and the storm brake — which shares the detection clock —
    bounds but cannot close it (§11, finding 11). The wait is therefore a function
    of unresponsive-marking speed, and a policy that tunes it against gossip
@@ -749,6 +763,9 @@ rather than arbitrary fractions.
    (less shrinking means less re-growing). Caveat: `p` there is a
    false-positive rate *per look*; real accrual detectors run orders of
    magnitude lower, so only the left end of that sweep is an operating regime.
+   *October 2026:* the ceiling is replicated on fresh seeds and the optimum sits
+   nearer p ≈ 0.10; the error-cancellation mechanism is not established (see
+   the amendment in §11 and [RELATED_WORK.md](RELATED_WORK.md) §5).
 
 7. **Do not flatten the arc distribution without replacing the reach it
    provides.** The equilibrium is extremely unequal — the top decile of agents
@@ -804,7 +821,7 @@ results say where to look next, not that the search is over.
 | decoupled-clock study (§11) | `decoupled_sim.py` → `results/decoupled_{summary.md,cells.jsonl}`; guard `validate_decoupled.py`; sweep `python3 decoupled_sweep.py --seeds 312` (storm, ≈30 min) |
 | lossy-gossip study (§12) | `message_loss_sim.py` → `results/message_loss_{summary.md,cells.jsonl}`; guard `validate_message_loss.py`; sweep `python3 message_loss_sweep.py --seeds 100` (6,000 cells, resumable — checkpoints to `message_loss_cells.jsonl`) |
 | shared style/helpers | `ext_common.py` |
-| one-command runner | `./run_stage3.sh` (nine studies, ≈ 55 min on 8 cores; log → `results/stage3_run.log`) |
+| one-command runner | `./run_stage3.sh` (guards, the nine studies and the detection-side group, ≈ 3 h on 8 cores; log → `results/stage3_run.log`) |
 
 Same environment as Stage 1 (`REPRODUCE.md`): Python 3.12, numpy 2.5.1,
 matplotlib 3.11.0. All seeds fixed; `polite_shrink.py` unmodified.

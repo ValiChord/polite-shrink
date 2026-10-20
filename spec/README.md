@@ -1,5 +1,14 @@
 # Formal safety proof (TLA+ / TLC)
 
+> **October 2026 — read [../REPORT_stale_views.md](../REPORT_stale_views.md) first.**
+> The specs here let `Execute` read the *current* holder set atomically. Under
+> that assumption a bare re-check is already safe, so the tie-break is never
+> exercised — `stale_check.py --fresh --no-tb` reproduces TLC's state counts
+> exactly and still finds no error. The stale-view check (`timed_check.py`)
+> tests the mechanism that matters: acting on a view up to `lag` ticks old. It
+> shows the ID tie-break is necessary but not sufficient, and that discounting
+> every announcer (V5 / `AgentInfoConservative`) is safe for any N.
+
 The simulation sweep found **0 data losses in 1,248 runs**. That is strong
 *evidence*, but it is still sampling. This directory upgrades the core safety
 property to a **proof**: exhaustive model checking over *every* reachable state

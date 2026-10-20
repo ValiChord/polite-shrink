@@ -17,7 +17,7 @@ churn** — the layer the sharding module lives at.
 
 They are **not**:
 
-- a full Holochain-conductor run (Holochain pins kitsune2 0.4.x; rebuilding it
+- a full Holochain-conductor run (at the time Holochain pinned kitsune2 0.4.x; 0.7.0 moved to 0.5.0 and 0.7.1 to 0.5.1 — see PROVENANCE.md; rebuilding it
   against the fork is out of scope);
 - a WAN measurement — transport, relay, and connection lifecycle are real
   iroh, but all endpoints share one machine, so latencies are LAN-scale;

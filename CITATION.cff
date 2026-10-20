@@ -27,7 +27,11 @@ abstract: >-
   variant), an evolutionary adversarial search, a kitsune2 reference
   implementation with an 8-node storm test, and Wind Tunnel measurements
   over real iroh transport surviving a 33% simultaneous node loss with no
-  sector ever orphaned. Research programme conceived and directed by Ceri
+  sector ever orphaned. An October 2026 stale-view model check found the
+  lower-id tie-break necessary but not sufficient (a staggered cascade defeats
+  it), and the discount-every-announcer variant (the AgentInfo encoding) safe
+  for any number of nodes given prompt death detection. Research programme
+  conceived and directed by Ceri
   John; design elaboration, implementation, and analysis executed with AI
   assistance (Claude, Anthropic); all results human-reviewed.
 keywords:

@@ -11,9 +11,13 @@ Three commitments, each of which a reader can verify without trusting anyone.
 ## 1. The proposal may come from anywhere. The proof does not.
 
 The load-bearing claim in this repository — that a node obeying the gate cannot
-take a sector below R — is **model-checked by TLC over every reachable state**
-for N ≤ 8 and R = 1–7 ([`spec/`](spec/)). The naive rule fails the same check
-with a counterexample. So does the plausible-looking middle option of inferring
+take a sector below R — was first **model-checked by TLC** in five
+configurations ([`spec/`](spec/)). In October 2026 that check was found to give
+every node a perfectly fresh view, under which the tie-break is never exercised;
+it was re-done with real stale views ([REPORT_stale_views.md](REPORT_stale_views.md)),
+which separated the two encodings: the ID tie-break fails specific schedules,
+discounting every announcer is proven safe for any N. That correction is itself
+an instance of commitment 3 below. So does the plausible-looking middle option of inferring
 which un-declared peers have really left ([`spec/AgentInfoAgeGated.tla`](spec/):
 verifies at `Budget = 0`, violated at `Budget = 1`).
 
@@ -106,7 +110,9 @@ A repository where nothing was ever wrong would be the less trustworthy one.
 
 Stated plainly so it can be aimed at:
 
-- A TLC counterexample to [`spec/PoliteShrink.tla`](spec/) at any N ≤ 8, R ≤ 7.
+- A schedule in which V5 (discount every announcer) takes a sector below R with
+  deaths detected promptly — the proof in REPORT_stale_views.md §4 says there is
+  none; `spec/timed_check.py --rule all` is the place to look.
 - A run in which an agent obeying the gate drives a sector below R with all
   peers honest.
 - A demonstration that the gate's precondition — that the wait outlasts the

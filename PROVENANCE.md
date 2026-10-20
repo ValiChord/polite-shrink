@@ -34,6 +34,25 @@ reproduction of the simulation results has also occurred (see repository history
 Append newest entry first. Each entry: date · source (commit/PR/issue) · observation ·
 which polite-shrink pattern it relates to · verbatim quote where useful.
 
+### 2026-10-20 — still no shrink upstream; PR #572 closed; 0.7.1 pins kitsune2 0.5.1
+
+Checked against `holochain/kitsune2` @ `1e44c65` (2026-10-16):
+
+- `grep -rin shrink crates/*/src` — **still nothing.**
+- `sharding = []` in `crates/gossip/Cargo.toml` — **still off by default.**
+- `storage_arc.rs::update_storage_arcs` still adopts only a strictly larger arc
+  (`arc.arc_span() > current_storage_arc.arc_span()`) — **still grow-only.**
+- kitsune2 #160 — open, no activity since 2026-07-17.
+- Releases since the last entry: kitsune2 0.5.1 (2026-09-01), 0.5.2
+  (2026-09-24), 0.6.0-dev.0–dev.2. Holochain **0.7.1** (2026-10-14) pins
+  kitsune2 **0.5.1**; the 0.8.0-dev series pins **0.6.0-dev.1**.
+
+**PR #572 closed unmerged (2026-09-29).** jost-s: *"The mem transport is only
+used in tests. If the feature for marking peers unresponsive hasn't been part of
+it so far, it's currently not needed there."* A reasonable call — the fix
+mattered to this repo's own failure-mode tests, not to production — and the
+README no longer describes it as awaiting review.
+
 ### 2026-08-03 — Holochain 0.7.0 pins kitsune2 **0.5.0**; a full-conductor run is no longer out of scope
 
 Checked against the shipped `holochain-0.7.0` tag's workspace manifest:
