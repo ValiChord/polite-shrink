@@ -110,9 +110,9 @@ Raw data: [rust_stale_compare.csv](rust_stale_compare.csv).
 | **control:** V6, wait 0.5× (10) | **every run**, down to 1 copy, twice to 0 | 3–31 | 34.5 |
 
 The control failing every time shows the test can catch a failure. **V3 was
-not caught failing.** The model puts V3's failures in a narrow band of timings
-(6 of 159,984 schedules at N=4, R=1), so ten random runs missing it is expected.
-That is a non-result, not evidence that V3 is safe.
+not caught failing in these random runs.** The model puts V3's failures in a
+narrow band of timings (6 of 159,984 schedules at N=4, R=1), so random runs
+rarely hit it. Section 7 forces that timing, and there V3 fails.
 
 ## 5. Where V3's re-growing comes from, and the fix
 
@@ -172,6 +172,56 @@ the address check. On real deployments this is only as strong as the
 transport's peer authentication (kitsune2's iroh transport identifies peers by
 key; the in-memory test transport does not).
 
+## 7. The staggered cascade, forced on the real code
+
+Section 4's random runs never hit V3's failure, because it needs one precise
+timing. `crates/gossip/tests/sharding_cascade.rs` forces that timing, the one
+the model check found:
+
+- four nodes, one agent each, all with their home in the same half of the
+  ring, so all four would vacate the *other* half;
+- target 1, so that half may lose three of its four holders but not all four;
+- every node acting on the network as it was 2 s ago;
+- each agent announcing exactly once, in **descending ID order, 1 s apart**,
+  then waiting 4 s before re-checking. A test-only schedule
+  (`harness::set_sharding_announce_schedule`) dictates who announces when.
+
+Every step has about a second of margin, so tick jitter cannot change the
+outcome. In the model, this exact schedule loses the sector under V3 and not
+under V6.
+
+**A defence the model does not have.** The first time this ran, all four V3
+nodes left, but coverage never fell below 2. The real controller's growers
+count announced departures as already gone, so the first leavers saw the later
+announcements and grew straight back. That rescues V3 only if growing back
+finishes before the last holder leaves, about 3 s here. In this test, growing
+back is near instant, because there are only a handful of tiny items to copy.
+In a real network, taking on half the ring's data again is not. So the delay
+before a leaver starts growing back was made a parameter and swept (raw data:
+[rust_cascade_sweep.csv](rust_cascade_sweep.csv)):
+
+| delay before a leaver grows back | V3: lowest copies left (3 runs) | V6: lowest copies left (3 runs) |
+|---|---|---|
+| 0.5 s | 2, 2, 2 | 2, 2, 2 |
+| 1 s | 1, 1, 1 | 2, 3, 3 |
+| **2 s** | **0, 0, 0** | 2, 2, 2 |
+| **3 s** | **0, 0, 0** | 1, 2, 1 |
+| **4 s** | **0, 0, 0** | 1, 2, 1 |
+| **8 s** | **0, 0, 0** | 1, 1, 1 |
+
+**On the real code, V3 loses every copy of the half in every run once growing
+back takes 2 s or more (12 of 12). V6 keeps at least one copy at every delay
+(18 of 18).** V6 does not rely on anyone growing back. Its lowest racer waits,
+and the others back off. Controls, asserted in the test: on fresh views, V3
+keeps a copy on the same schedule (so the cascade is a stale-view failure), and
+with near-instant growth the grow rule masks it.
+
+What "0 copies" means here: no node *declares* that half any more, so nobody
+will serve it, and new data for it has nowhere to go. The nodes that left still
+have the old data on disk; kitsune2 itself never deletes it, though the
+application on top may. So this is a hole in what the network promises, which
+the controller then has to repair, rather than proven permanent loss.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -182,4 +232,6 @@ cargo test -p kitsune2_gossip --features sharding --test sharding_race          
 cargo test -p kitsune2_gossip --features sharding --test sharding_stale             # 2 s stale views, V6
 RACE_RUNS=6 cargo test -p kitsune2_gossip --features sharding --test sharding_race forced_race_compare -- --ignored --nocapture
 STALE_RUNS=4 cargo test -p kitsune2_gossip --features sharding --test sharding_stale stale_views_compare -- --ignored --nocapture
+cargo test -p kitsune2_gossip --features sharding --test sharding_cascade           # forced cascade: V3 fails, V6 holds, two controls
+CASCADE_RUNS=3 cargo test -p kitsune2_gossip --features sharding --test sharding_cascade forced_cascade_regrow_sweep -- --ignored --nocapture
 ```

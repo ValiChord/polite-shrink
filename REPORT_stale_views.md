@@ -317,8 +317,16 @@ Two further tests ([results/rust_fork_v6.md](results/rust_fork_v6.md)):
   measures churn, not V3's stale-view failure.
 - **Stale views on a real network** (each node acting on the network as it
   was 2 s ago): V6 never fell below target; a control with a too-short wait
-  fell below target in every run; V3 was not caught failing in 14 runs, which
-  the narrow timing band above makes unsurprising.
+  fell below target in every run; V3 was not caught failing in 14 random runs,
+  which the narrow timing band above makes unsurprising.
+- **The staggered cascade, forced on the real code.** Four nodes announcing in
+  descending ID order, 1 s apart, on 2 s old views, with a 4 s wait: the
+  schedule this report's checker found. V3 takes the shared half to zero
+  declared copies in every run (12 of 12) once leavers wait 2 s or more before
+  growing back; V6 keeps a copy at every delay (18 of 18). The real code has a
+  defence the model lacks: growers count announced departures as gone, so
+  early leavers grow back, which rescues V3 only when growing back beats the
+  cascade.
 - **The churn's cause, and a fix.** All of V3's re-grows came from abandoned
   intents still live at peers, which this report's model never has (here a
   stood-down intent is gone from the next view). Withdrawing them when a node
