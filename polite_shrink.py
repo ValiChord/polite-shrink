@@ -2,10 +2,16 @@
 polite_shrink — the two-phase "polite shrink" controller and its Stage-1
 simulator for DHT storage-arc dynamics (kitsune2 issue #160).
 
-This is the core contribution. The pattern itself is ~30 lines: `_decide`
+This is the core contribution. The pattern is a few dozen lines: `_decide`
 (phase 1 — announce a vacate intent instead of dropping) and
-`_execute_intent` (phase 2 — re-check, then the lowest-id-proceeds
-tie-break). The V4 expanding-ring repair extension subclasses `Sim` in
+`_execute_intent` (phase 2 — re-check after waiting out staleness).
+
+The RECOMMENDED rule is the `V6` variant ("patient lowest", October 2026):
+count every racing intender as gone; if that fails only because of higher-id
+racers, the lowest racer waits instead of cancelling; nobody announces while a
+lower id is racing them. `V3` (the original lowest-id tie-break) and `V5` (the
+AgentInfo encoding) are kept because every earlier study measures them; both
+have a gap V6 closes — see REPORT_stale_views.md. The V4 expanding-ring repair extension subclasses `Sim` in
 `repair_sim.py`. Everything else in the repo is a study built on this file.
 
 (Renamed from `arc_sim.py`; no external reference pointed at the old name.)
@@ -70,6 +76,7 @@ class Variant:
     jitter: bool
     polite: bool
     agentinfo: bool = False     # carry the intent on the arc claim, not a message
+    patient: bool = False       # V6: count every racer gone; lowest waits, not cancels
 
 
 VARIANTS = [
@@ -80,6 +87,36 @@ VARIANTS = [
     Variant("V5 polite (AgentInfo-only)", hysteresis=True, jitter=True,
             polite=True, agentinfo=True),
 ]
+
+# V6 — polite shrink, "patient lowest". The recommended rule as of October 2026
+# (REPORT_stale_views.md). Kept out of VARIANTS on purpose: several published
+# studies iterate that list and their outputs would change if it grew.
+#
+#   COUNT    At the re-check, every intender racing me (announced, overlapping
+#            my sectors) counts as already gone — V5's rule. Vacate if at least
+#            R copies still remain. Nobody is ever counted as present while
+#            announcing, so the safety proof for V5 applies unchanged: safe for
+#            any number of nodes with a wait of at least the maximum lag,
+#            provided deaths are noticed before anyone acts on a view that still
+#            counts the dead node.
+#   WAIT     If the count fails only because of HIGHER-id racers, and no lower
+#            id is racing me, I am the lowest: keep my announcement up and
+#            re-check next tick instead of cancelling.
+#   YIELD    A node does not announce while it can see a lower-id intender
+#            racing it for the same sectors.
+#
+# WAIT + YIELD are the TCAS ordering, used only to decide who goes next when
+# the margin is thin: higher ids clear out of the way, the lowest goes through.
+# That removes V5's weakness (identical nodes cancelling each other forever)
+# without V3's (counting a higher-id racer as staying when it may be leaving —
+# the gap a staggered cascade walks through). When the margin is wide the
+# count passes for many nodes at once, so it shards concurrently.
+#
+# Like V3 it must SEE who is announcing — a dedicated message, or one explicit
+# "intending to leave" bit on AgentInfo. A narrowed arc claim alone (V5) cannot
+# tell an announcer from a node that has already left.
+V6 = Variant("V6 polite shrink (patient lowest)", hysteresis=True, jitter=True,
+             polite=True, patient=True)
 
 
 @dataclass
@@ -204,6 +241,24 @@ class Sim:
         variant and deliberately never sets a sim-level `self.v`."""
         v = getattr(self, "v", None)
         return v is not None and v.agentinfo
+
+    def _variant_for(self, a: Agent):
+        """The deciding agent's variant: per-agent under MixedSim, else the sim's."""
+        return getattr(a, "variant", None) or getattr(self, "v", None)
+
+    def _yields(self, a: Agent, ilist) -> bool:
+        """V6 YIELD: hold off announcing while a lower id is racing me."""
+        v = self._variant_for(a)
+        if v is None or not v.patient or a.level <= 0:
+            return False
+        vs, ve = vacate_half(a.home, a.level, self.cfg.log2s)
+        return self._lower_racer(a, ilist, vs, ve)
+
+    @staticmethod
+    def _lower_racer(a: Agent, ilist, vs: int, ve: int) -> bool:
+        """Is a lower-id intender racing me for any sector in [vs, ve)?"""
+        return any(aid2 < a.aid and max(vs, s2) < min(ve, e2)
+                   for aid2, s2, e2 in ilist)
 
     def _agentinfo_for(self, a: Agent) -> bool:
         """Per-agent form. `MixedSim` gives each agent its own variant, so a
@@ -340,7 +395,8 @@ class Sim:
 
         if grow_cond and a.grow_acc >= grow_need:
             self._start_grow(a)          # safety first: growing aborts intents
-        elif shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0:
+        elif (shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0
+              and not self._yields(a, _ilist)):
             if self.v.polite:
                 a.intent_at = self.t + cfg.intent_delay
                 self.announces += 1
@@ -363,12 +419,30 @@ class Sim:
         eff = cov[vs:ve].astype(np.int32)
         if int(lvl[a.aid]) >= a.level:      # my own stale declaration covers it
             eff -= 1
-        for aid2, s2, e2 in ilist:
-            if aid2 < a.aid:                # only lower ids outrank me
+        v = self._variant_for(a)
+        if v is not None and v.patient:
+            higher = False
+            for aid2, s2, e2 in ilist:
+                if aid2 == a.aid:
+                    continue
                 lo, hi = max(vs, s2), min(ve, e2)
                 if lo < hi:
-                    eff[lo - vs:hi - vs] -= 1
-        if bool(eff.min() >= cfg.redundancy):
+                    eff[lo - vs:hi - vs] -= 1   # every racer counts as gone
+                    if aid2 > a.aid:
+                        higher = True
+            go = bool(eff.min() >= cfg.redundancy)
+            if (not go and higher
+                    and not self._lower_racer(a, ilist, vs, ve)):
+                a.intent_at = self.t + 1        # lowest racer: wait, don't cancel
+                return
+        else:
+            for aid2, s2, e2 in ilist:
+                if aid2 < a.aid:                # only lower ids outrank me
+                    lo, hi = max(vs, s2), min(ve, e2)
+                    if lo < hi:
+                        eff[lo - vs:hi - vs] -= 1
+            go = bool(eff.min() >= cfg.redundancy)
+        if go:
             self._do_shrink(a)
         else:
             a.intent_at = -1

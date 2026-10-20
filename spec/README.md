@@ -8,6 +8,8 @@
 > tests the mechanism that matters: acting on a view up to `lag` ticks old. It
 > shows the ID tie-break is necessary but not sufficient, and that discounting
 > every announcer (V5 / `AgentInfoConservative`) is safe for any N.
+> `hybrid_check.py` adds progress: V5 can stall forever, and the recommended
+> V6 ("patient lowest") is safe *and* always makes progress.
 
 The simulation sweep found **0 data losses in 1,248 runs**. That is strong
 *evidence*, but it is still sampling. This directory upgrades the core safety

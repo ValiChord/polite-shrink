@@ -413,15 +413,18 @@ away.
 
 ## 5. Verdict
 
-> **October 2026 — the safety half of this verdict has reversed.** Below, the
-> explicit bit is preferred so the ID tie-break can be kept. A stale-view check
-> ([REPORT_stale_views.md](REPORT_stale_views.md)) shows the tie-break is the
-> *weaker* rule: it fails a staggered cascade and one-death schedules that
-> encoding A survives, and encoding A has a proof of safety for any N given
-> prompt death detection. The case for the explicit bit now rests only on
-> encoding A's costs — the reachability dip at scale and the storm-loss
-> frequency in §4.9 — not on V3 being safer. The 346× fewer shrink holes in §4.6
-> are consistent with that.
+> **October 2026 — the conclusion below stands, for a different reason.** The
+> explicit bit is still recommended, but not to keep the ID tie-break: a
+> stale-view check ([REPORT_stale_views.md](REPORT_stale_views.md)) shows the
+> tie-break fails a staggered cascade and one-death schedules that encoding A
+> survives. The bit is needed because the recommended rule, **V6**, combines
+> encoding A's count (every announcer counts as gone — proven safe for any N)
+> with a progress rule that has to *see* who is announcing: the lowest
+> announcer waits instead of cancelling, and others do not announce while a
+> lower ID is racing them. Encoding A alone cannot tell an announcer from a
+> departed node, and can stall. At 200 nodes V6 avoids encoding A's costs —
+> no phantom reachability holes, arcs close to V3's, and 0/100 storm-40%
+> losses against encoding A's 11/100 ([results/v6_summary.md](results/v6_summary.md)).
 
 **The new wire message is not needed. One bit is.**
 

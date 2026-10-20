@@ -24,13 +24,14 @@ reproducible from `spec/stale_check.py` and `spec/timed_check.py` (pure stdlib).
    staggered announcements** (R=2, just 4 nodes, even with instant detection).
 4. **The AgentInfo-style rule (V5) — discount *every* visible announcer, not just
    lower IDs — is safe for any number of nodes with a wait of just 1× lag**, and
-   it has a short proof. Its only failure mode is a death that has not been
+   it has a short proof. But it can **stall**: identical nodes can cancel each
+   other forever.
+5. **The recommended rule is V6, "patient lowest"** (§7): V5's count, plus — when
+   the margin is thin — the lowest announcer waits instead of cancelling and the
+   others get out of its way. Safe by V5's proof, always makes progress, and at
+   200 nodes its arcs stay close to V3's with about a third of the sync traffic.
+   Its only failure mode, shared with every rule, is a death that has not been
    noticed by the time someone acts on a view that still counts the dead node.
-5. That reverses the recommendation in
-   [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md) §5, which
-   preferred keeping the tie-break. On safety, V5 is now the stronger rule. Its
-   documented costs (transient reachability dips, a wider equilibrium, more
-   frequent but smaller storm losses) are unchanged and still have to be weighed.
 
 ## 1. Why the published proof cannot see the tie-break
 
@@ -189,6 +190,8 @@ means "known before anyone next decides".
 - **The 2× rule.** For V3 it is derived for small N and shown insufficient in
   general. For V5 it is unnecessary — 1× suffices — though a longer wait still
   helps everything that depends on detection.
+- **The recommended rule.** V6 (§7). The two analyses below were written
+  before V6 existed and are kept as the record of how it was reached.
 - **The AgentInfo recommendation.**
   [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md) §5 recommended
   carrying an explicit "intending to leave" bit so the tie-break could be kept.
@@ -200,7 +203,93 @@ means "known before anyone next decides".
   to detection latency; the higher-id survivor flaw is a second, structural
   candidate. Telling them apart is open work.
 
-## 7. Limitations
+## 7. Making it live — the hybrid search, and V6
+
+Judged by principle, V5 has a gap of its own, in **progress** rather than
+safety. If several nodes announce together and each discounts all the others,
+they can all cancel even when one of them could safely leave — and identical
+nodes retrying in step then cancel forever. That is the symmetric-deference
+livelock the TCAS-style tie-break was introduced to prevent. So the target is a
+rule with three properties at once: **safe** (including when an ordinary death
+is noticed promptly), **live** (holders always reach R when leaving is safe) and
+**concurrent** (many nodes may leave in the same round when the margin allows —
+otherwise 200 nodes never finish sharding).
+
+`spec/hybrid_check.py` checks the first two exhaustively with every node a
+*persistent* leaver that keeps retrying; `spec/timed_check.py --crash` adds a
+death at any tick; `v6_study.py` measures the third at N = 200. Five candidates:
+
+| candidate | safe, no deaths | safe, prompt deaths | always progresses | concurrent at N=200 |
+|---|---|---|---|---|
+| V3 — lowest-ID tie-break | ✗ cascade | ✗ | ✓ | ✓ |
+| V5 — count every announcer | ✓ | ✓ | ✗ stalls (e.g. 133,240 of 160,000 schedules, N=4 R=2) | ✓ |
+| V5 + retries ordered by ID rank | ✓ | ✓ | ✗ stalls (15,561) — the retry stagger resonated with the wait | — |
+| … + don't announce while a lower ID is visible | ✓ | ✓ | ✗ stalls (6,369) — the lowest ID still discounts higher ones, so they block it | — |
+| strict TCAS yield — defer outright to any lower-ID racer | ✓ (wait ≥ 2× lag) | ✓ | ✓ | ✗ — only one node may leave at a time: arcs stay near full, 95% of announcements cancel |
+| "safe-or-lowest" — V5's test, or "I'm the lowest and R remain counting the rest" | ✓ (wait ≥ 2× lag) | **✗ one instantly-detected death** | ✓ | ✓ |
+| **V6 "patient lowest"** | **✓ (wait ≥ 1× lag)** | **✓** | **✓** | **✓** |
+
+The failures teach the shape of the answer. "Safe-or-lowest" broke on the same
+schedule as V3: node 4 leaves via V5's test (correctly allowing for node 3 to
+leave too), node 1 then dies and uses up that margin, and node 3 — the lowest —
+leaves counting node 4 as still present. The general rule: **a decision survives
+deaths only if it never relies on a node that might itself be leaving.** V5 never
+relies on an announcer. Strict yield relies on higher announcers but forbids them
+to leave — which is why it serialises.
+
+**V6 "patient lowest"** follows that rule exactly:
+
+1. **Count** every racing announcer as gone (V5's rule). Vacate if R remain.
+2. **Wait**: if the count fails only because of *higher*-ID racers and no lower
+   ID is racing me, keep my announcement up and re-check next tick instead of
+   cancelling.
+3. **Yield**: don't announce while a lower ID is racing me for the same sectors.
+
+Nobody is ever counted as present while announcing, so §4's proof applies word
+for word — waiting and yielding change only *when* decisions happen, never what
+a decision may rely on. Progress: the lowest racer never yields; higher racers
+fail their own counts, stand down and stay quiet while it waits; once they have
+cleared out of its view it re-checks with nobody left to discount. Concurrency
+comes from the count itself: when the margin is wide, it passes for many nodes in
+the same round.
+
+**Exhaustive results for V6** *(spec/patient_safety.txt, spec/hybrid_table.txt)*:
+safe at a wait of 1× lag in all configurations (N = 3–5, R = 1–3, L = 2–3); safe
+with a death at any tick when it is noticed before the next decision
+(14,054,400 schedules each); fails, like every rule, when a death goes unnoticed
+for longer; and **always reaches R** in all eight progress configurations, where
+V5 stalls in 35–87% of schedules.
+
+**At N = 200** ([results/v6_summary.md](results/v6_summary.md); fresh seeds,
+exact 95% intervals):
+
+| | V3 | V5 | **V6** |
+|---|---|---|---|
+| equilibrium arc level (4 standard scenarios) | 0.57–1.05 | 0.81–2.23 | **0.80–1.30** |
+| sync cost per run | ≈ 19,000–22,000 | ≈ 3,000–9,000 | **≈ 6,000–7,800** |
+| cancel rate | 2.7–3.3% | 7.4–9.5% | **2.0–2.8%** |
+| time below R (sector-ticks, storm/churn) | 14–22 | 40–48 | **2–10** |
+| phantom (declared-only) holes | 0 | 1,800–2,700 per scenario | **0** |
+| runs losing data, storm 30% / 40% (×100) | 0 / 0 | 1 / 11 | **1 / 0** |
+| runs losing data, storm 50% + detection 192 ticks late (×72) | 26 | 35 | **28** |
+
+Every storm loss for V5 and V6 began **at the storm tick itself**: the mass
+death took every holder of some sector in one blow, before any shrink decision.
+The difference between rules there is how much spare margin the arcs happened to
+hold at that instant; V3's accidental ~2R margin covered all 100 worlds. Under
+very late death detection all three lose data in a third or more of runs — the
+residual no re-check rule can close (§5). V6 sits closest to the target R the
+rest of the time, which is where its lower sync cost and lower time below R
+come from.
+
+**Cost.** Like V3, V6 must *see* who is announcing — a dedicated message, or one
+explicit "intending to leave" bit on `AgentInfo`. A narrowed arc claim alone
+(V5) cannot tell an announcer from a node that has already left, and the
+waiting and yielding need exactly that distinction. So the August conclusion of
+[REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md) — carry one bit —
+stands, for a different reason. V6 is not yet implemented on the Rust fork.
+
+## 8. Limitations
 
 - Exhaustive only for small networks (N ≤ 5; ~5–14 million schedules per
   configuration). The V5 claim rests on the proof, not on the enumeration; the
@@ -228,6 +317,9 @@ python timed_check.py --sweep                         # tie-break vs none, table
 python timed_check.py --n 5 --r 1 --lag 2 --wait 5             # the cascade
 python timed_check.py --n 5 --r 1 --lag 2 --wait 5 --rule all  # V5: safe
 python timed_check.py --n 4 --r 2 --lag 2 --wait 5 --rule tb  --crash --detect 0
+python timed_check.py --n 4 --r 2 --lag 2 --wait 5 --rule patient --crash --detect 0  # V6: safe
+python hybrid_check.py --table          # safety + progress for every candidate
+cd .. && python v6_study.py             # V6 vs V3 vs V5 at N = 200
 ```
 
 *Research directed by Ceri John; design, implementation, and analysis with AI

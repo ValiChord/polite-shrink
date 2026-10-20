@@ -68,6 +68,8 @@ def run_schedule(n_nodes, R, D, ann, lags, tiebreak, crash=None, detect=0):
     history = {}
     init = (frozenset(nodes), frozenset())
     horizon = max([a for a in ann if a is not None] + [0]) + D + 2
+    if rule == 'patient':
+        horizon += n_nodes * (D + 2 * max(lags) + 2)   # room for waiting
     if crash:
         horizon = max(horizon, crash[1] + 2)
 
@@ -92,13 +94,38 @@ def run_schedule(n_nodes, R, D, ann, lags, tiebreak, crash=None, detect=0):
         for n in nodes:
             if intent.get(n) == t and n in holds:
                 hs, its = view_at(t, lags[n - 1], n)
-                if rule == 'tb':
+                if rule == 'patient':
+                    # V5's count: every visible announcer is gone. If that
+                    # fails only because of HIGHER-id announcers and no lower
+                    # one is racing me, wait and re-check next tick instead of
+                    # cancelling (my announcement stays up). Nobody is ever
+                    # counted as present while announcing, so V5's proof holds.
+                    e5 = len((hs - {n}) - (set(its) - {n}))
+                    if (e5 < R and not any(m < n for m in its)
+                            and any(m > n for m in its)):
+                        intent[n] = t + 1
+                        continue
+                    eff = e5
+                    tb = None
+                elif rule == 'combo':
+                    # go if V5's check passes (R remain even if every visible
+                    # announcer leaves) OR strict yield's (I am the lowest
+                    # visible announcer and R remain counting the rest as staying)
+                    e5 = len((hs - {n}) - (set(its) - {n}))
+                    lowest = not any(m < n for m in its)
+                    eff = e5 if e5 >= R else (len(hs - {n}) if lowest else -1)
+                    tb = None
+                elif rule == 'yield' and any(m < n for m in its):
+                    eff = -1          # strict yield: a lower id is racing me
+                    tb = None
+                elif rule == 'tb' or rule == 'yield':
                     tb = {m for m in its if m < n}
                 elif rule == 'all':
                     tb = set(its) - {n}
                 else:
                     tb = set()
-                eff = len((hs - {n}) - tb)
+                if tb is not None:
+                    eff = len((hs - {n}) - tb)
                 del intent[n]
                 if eff >= R:
                     holds.discard(n)
@@ -179,7 +206,7 @@ def main():
     ap.add_argument("--lag", type=int, default=2, help="max per-node lag L")
     ap.add_argument("--wait", type=int, default=5, help="wait D")
     ap.add_argument("--no-tb", action="store_true")
-    ap.add_argument("--rule", choices=["tb", "none", "all"], default=None,
+    ap.add_argument("--rule", choices=["tb", "none", "all", "yield", "combo", "patient"], default=None,
                     help="tb = V3 lower-id tie-break; all = V5 discount every "
                          "visible intender; none = bare re-check")
     ap.add_argument("--crash", action="store_true")

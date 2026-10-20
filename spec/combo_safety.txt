@@ -1,0 +1,26 @@
+### breaking point (wait = 1x lag, 1x lag + 1)
+N=4 R=1 L=2 D=2 rule=yield: VIOLATED (after 10,932 schedules)
+  [node1: announce@0 lag=1, node2: announce@1 lag=1, node3: announce@4 lag=2, node4: announce@3 lag=2] -> tick 6: node 3 vacated on a view counting [3, 4]; true holders now []
+N=4 R=2 L=2 D=2 rule=yield: VIOLATED (after 1,572 schedules)
+  [node2: announce@0 lag=1, node3: announce@3 lag=2, node4: announce@2 lag=2] -> tick 5: node 3 vacated on a view counting [1, 3, 4]; true holders now [1]
+N=4 R=1 L=3 D=3 rule=yield: VIOLATED (after 133,010 schedules)
+  [node1: announce@0 lag=1, node2: announce@1 lag=1, node3: announce@5 lag=3, node4: announce@3 lag=2] -> tick 8: node 3 vacated on a view counting [3, 4]; true holders now []
+N=4 R=1 L=3 D=4 rule=yield: VIOLATED (after 170,433 schedules)
+  [node1: announce@0 lag=1, node2: announce@1 lag=1, node3: announce@6 lag=3, node4: announce@4 lag=3] -> tick 10: node 3 vacated on a view counting [3, 4]; true holders now []
+N=4 R=1 L=2 D=2 rule=combo: VIOLATED (after 9,620 schedules)
+  [node1: announce@0 lag=1, node2: announce@0 lag=1, node3: announce@2 lag=2, node4: announce@1 lag=2] -> tick 4: node 3 vacated on a view counting [3, 4]; true holders now []
+N=4 R=2 L=2 D=2 rule=combo: VIOLATED (after 1,428 schedules)
+  [node2: announce@0 lag=1, node3: announce@2 lag=2, node4: announce@1 lag=2] -> tick 4: node 3 vacated on a view counting [1, 3, 4]; true holders now [1]
+N=4 R=1 L=3 D=3 rule=combo: VIOLATED (after 120,381 schedules)
+  [node1: announce@0 lag=1, node2: announce@0 lag=2, node3: announce@2 lag=2, node4: announce@1 lag=3] -> tick 5: node 3 vacated on a view counting [3, 4]; true holders now []
+N=4 R=1 L=3 D=4 rule=combo: VIOLATED (after 155,619 schedules)
+  [node1: announce@0 lag=1, node2: announce@0 lag=2, node3: announce@3 lag=3, node4: announce@1 lag=3] -> tick 7: node 3 vacated on a view counting [3, 4]; true holders now []
+### combo: smallest safe wait (2L-1 and 2L)
+N=5 R=1 L=2 D=3 rule=combo: SAFE over 1,889,536 schedules
+N=5 R=2 L=2 D=3 rule=combo: SAFE over 1,889,536 schedules
+N=4 R=1 L=3 D=5 rule=combo: SAFE over 2,313,360 schedules
+N=4 R=2 L=3 D=6 rule=combo: SAFE over 3,111,615 schedules
+### combo: deaths (N=4 R=2 L=2 D=5)
+N=4 R=2 L=2 D=5 rule=combo crash detect=0: VIOLATED (after 21,246 schedules)
+N=4 R=2 L=2 D=5 rule=combo crash detect=1: VIOLATED (after 21,246 schedules)
+N=4 R=2 L=2 D=5 rule=combo crash detect=2: VIOLATED (after 10,565 schedules)

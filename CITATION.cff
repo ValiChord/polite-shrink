@@ -28,9 +28,12 @@ abstract: >-
   implementation with an 8-node storm test, and Wind Tunnel measurements
   over real iroh transport surviving a 33% simultaneous node loss with no
   sector ever orphaned. An October 2026 stale-view model check found the
-  lower-id tie-break necessary but not sufficient (a staggered cascade defeats
-  it), and the discount-every-announcer variant (the AgentInfo encoding) safe
-  for any number of nodes given prompt death detection. Research programme
+  original lower-id tie-break defeated by a staggered cascade, and the
+  discount-every-announcer rule safe but able to stall; the recommended rule
+  (V6, "patient lowest") counts every announcer as gone and lets the lowest
+  announcer wait rather than cancel — safe for any number of nodes given prompt
+  death detection, always making progress, and at 200 nodes about three times
+  cheaper in sync traffic than the original. Research programme
   conceived and directed by Ceri
   John; design elaboration, implementation, and analysis executed with AI
   assistance (Claude, Anthropic); all results human-reviewed.

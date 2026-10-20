@@ -2,14 +2,22 @@
 
 > **New here?** Start with **[CORE_IDEA.md](CORE_IDEA.md)** — the one-page version of everything below.
 
-> ## Damping the 2021 "hallway dance" leaves a stale-view shrink race wide open. Polite shrink closes it: announce, wait out the staleness, re-check discounting announced rivals — checked exhaustively against every schedule, not just tested.
+> ## Damping the 2021 "hallway dance" leaves a stale-view shrink race wide open. Polite shrink closes it: announce, wait out the staleness, then re-check counting every rival announcer as already gone — and when the margin is thin, the lowest ID waits while the others clear out of its way.
 
-> **⚠️ Corrected October 2026 — read [REPORT_stale_views.md](REPORT_stale_views.md).** The original TLA+ proof gave every node a perfectly fresh view, under which the tie-break is never exercised (delete it and the spec still passes). Re-checked with real stale views: a bare re-check fails everywhere; the **ID tie-break (V3) is necessary but not sufficient** — a staggered cascade of announcers, or one death plus staggered announcements, defeats it; **discounting *every* visible announcer (V5, the AgentInfo encoding) is proven safe for any number of nodes**, provided deaths are noticed before anyone acts on a view still counting them.
+> **The recommended rule is V6, "patient lowest" (October 2026 — [REPORT_stale_views.md](REPORT_stale_views.md)).** Checked exhaustively against every announce schedule and per-node lag with real stale views, and against a death at any moment:
 >
-> *Scope, stated plainly: the safety property is that no shrink takes a sector below its redundancy target R (deaths can). The original TLC runs covered five configurations (N = 6–8; R ∈ {1, 2, 3, 4, 7}) under atomic fresh reads; the stale-view check covers every announce schedule and per-node lag for N ≤ 5, and the V5 result has a proof that holds for any N. Honest nodes and prompt death detection are assumed. What is checked is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
+> | rule | never loses data to a shrink | always makes progress | shards concurrently |
+> |---|---|---|---|
+> | V3 — lowest-ID tie-break (the original) | ✗ a staggered cascade, or one ordinary death, defeats it | ✓ | ✓ |
+> | V5 — count every announcer as gone | ✓ proven for any N | ✗ identical nodes can cancel each other forever | ✓ |
+> | **V6 — V5's count + the lowest ID waits instead of cancelling** | **✓ (V5's proof applies unchanged)** | **✓** | **✓** |
+>
+> At 200 nodes V6's arcs stay close to V3's (V5's are much wider), it spends **≈ 3× less sync traffic** than V3, and sectors spend **2–8× less time below R** than under V3 (4–20× less than under V5). All of it assumes deaths are noticed before anyone acts on a view still counting the dead node; when detection is far slower, every rule loses data, and only faster detection helps. The original TLA+ proof could not tell these rules apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe.
+>
+> *Scope, stated plainly: the safety property is that no shrink takes a sector below its redundancy target R (deaths can). The original TLC runs covered five configurations (N = 6–8; R ∈ {1, 2, 3, 4, 7}) under atomic fresh reads; the stale-view checks cover every announce schedule and per-node lag for N ≤ 5, and the V5/V6 safety result has a proof that holds for any N. Honest nodes and prompt death detection are assumed. What is checked is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
 > ### 👉 The contribution is two files
-> - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The whole idea is ~30 lines: `_decide` (announce an intent to vacate instead of dropping) and `_execute_intent` (wait out gossip staleness, re-check, then a lowest-id-proceeds tie-break).
+> - **[`polite_shrink.py`](polite_shrink.py)** — the polite-shrink controller itself. The idea is a few dozen lines: `_decide` (announce an intent to vacate instead of dropping; don't announce while a lower ID is racing you) and `_execute_intent` (wait out gossip staleness, re-check counting every rival announcer as gone; if that fails only because of higher-ID rivals, wait instead of cancelling). The recommended rule is the `V6` variant; `V3` is the original tie-break, kept because every earlier study measures it.
 > - **[`repair_sim.py`](repair_sim.py)** — the V4 expanding-ring repair extension (Stage 3), a subclass that adds recovery for sparse networks.
 >
 > Every other `.py` file is a study that *attacks* those two — sweeps, an evolutionary adversary, partitions, Byzantine agents, scale, the shrink-race. See [Where is the code?](#where-is-the-code) for the full map.
@@ -40,10 +48,13 @@ their stated reason for disabling sharding was testing and maintenance burden,
 not observed loss.
 
 **The contribution:** a two-phase **"polite shrink"** controller — announce an
-intent to vacate, wait out gossip staleness, re-check with a deterministic
-TCAS-style tie-break, and only then drop — plus an expanding-ring repair rule
-for sparse networks. Designed by ablation, then attacked from every direction
-we could think of.
+intent to vacate, wait out gossip staleness, re-check counting every rival
+announcer as already gone, and only then drop; when the margin is thin, a
+TCAS-style ordering decides who goes (the lowest ID waits, the others clear out
+of its way) — plus an expanding-ring repair rule for sparse networks. Designed
+by ablation, then attacked from every direction we could think of. The current
+rule (V6) is the third design: the original lowest-ID tie-break (V3) and the
+AgentInfo encoding (V5) each turned out to have a gap the other did not.
 
 > **The empirical record.** In the designed scenarios — a 1,248-run sweep
 > (0 runs losing data vs 95.9% for the naive controller), network partitions,
@@ -72,7 +83,8 @@ we could think of.
 | **Wind Tunnel measurements — real iroh transport, live churn** ([wind_tunnel/results/REPORT_stage2_wind_tunnel.md](wind_tunnel/results/REPORT_stage2_wind_tunnel.md)) | 33% of the network killed simultaneously: **zero orphaned sectors** (that run's intents had already resolved, so the brake was not exercised). In the separate *timed* storm, deaths landed while intents were pending: the brake cancelled all 9, and op-level reachability found **0 of 23,673 ops lost** |
 | **Stage-3 robustness studies** ([REPORT_stage3.md](REPORT_stage3.md)) | netsplits + heal: zero durability loss; forged intents: fail-safe (cost-only); scale to 5,000 agents: zero loss where the damped controller loses data; the residual shrink-race measured at 0.002% of holes and transient; the sparse-network deadlock found real and fixed (V4 repair: 120/120 recovery); Byzantine defenses measured — range-validation cuts the forgery cost attack to ~4% (and is implemented on the fork), the serve-audit fully rescues a liar-collapsed network, and **proof-gated "verified coverage" removes the K=R liar ceiling entirely** — flat, zero-loss at every K from 0 to 3R, at a bandwidth cost the operator sets (≈13–16% at adequate audit budget); and **partial liars** (store a strategic fraction, serve some challenges) still cause **zero data loss**, with a mid-fraction margin dip that a higher audit sample-count restores |
 | **Lossy-gossip stress** — each viewer's coverage view left incomplete *and* inconsistent (messages dropped, not merely stale), missing peers' shrinks/deaths so it *over-counts* — the dangerous direction ([REPORT_stage3.md §12](REPORT_stage3.md)) | at **90% per-round message drop** the data-loss rate stays *flat* — no loss attributable to the loss itself, across 6,000 runs. **Scope:** drops are per tick, so 90% adds roughly ten ticks of staleness against a fifty-tick wait; one seed loses only at intermediate drop rates; and the intent-announcement channel is kept reliable here, so robustness to lost *intents* is future work |
-| **Formal safety checks** ([spec/](spec/), [REPORT_stale_views.md](REPORT_stale_views.md)) | *Original TLA+:* "a sector never drops below R" holds in five configurations — but every node reads the true holder set instantly, so the tie-break is never used and the naive rule's failure isolates nothing. *Stale-view check (Oct 2026):* exhaustive over announce schedules and per-node lags, N ≤ 5. A bare re-check fails everywhere; the ID tie-break (V3) needs a wait > 2× lag for small N and still fails a staggered cascade (R = 1) and one-death schedules (R = 2); **V5 — discount every visible announcer — is safe in all of them at a 1× wait, with a proof for any N** |
+| **Formal safety checks** ([spec/](spec/), [REPORT_stale_views.md](REPORT_stale_views.md)) | *Original TLA+:* "a sector never drops below R" holds in five configurations — but every node reads the true holder set instantly, so the tie-break is never used and the naive rule's failure isolates nothing. *Stale-view checks (Oct 2026):* exhaustive over announce schedules, per-node lags and a death at any tick, N ≤ 5. A bare re-check fails everywhere; V3 fails a staggered cascade and one-death schedules; V5 is safe but can stall forever; **V6 is safe in all of them at a 1× wait (V5's proof, any N) and always makes progress** |
+| **V6 against V3 and V5 at N = 200** ([results/v6_summary.md](results/v6_summary.md)) | Fresh seeds, standard scenarios + storm severity + slow-detection stress. V6's arcs are close to V3's (a little wider; V5's are much wider), sync traffic ≈ 3× lower than V3, cancel rate as low as V3's, and **time below R 2–8× lower than V3 and 4–20× lower than V5**. Storm 40%: V5 lost data in 11/100 runs, V3 and V6 in 0. The one V6 loss (1 of 100 worlds at storm 30%) began at the storm tick itself — the mass death took every holder at once, no shrink involved; V3's accidental ~2R margin happened to cover it |
 | **Is the residual really irreducible by a local rule?** ([REPORT_mz_decomposition.md](REPORT_mz_decomposition.md)) | §11 asserted it; this measures it. A Mori–Zwanzig decomposition over 72 seeds and ~166k gate decisions: detection latency drives the failure mode up **29×** while the part recoverable from an agent's own history stays flat, against a control that detects memory ~8× more strongly where it exists. So a node cannot **learn** its way out — but it *can* be **biased** out, which is the amendment §11 now carries |
 | **Which way should a failure detector be wrong?** ([`detector_error_sweep.py`](detector_error_sweep.py), constraint 6b) | **Toward convicting the living — with a ceiling.** Replicated on fresh seeds (150 per point): `P(any loss)` falls **36% → 2.7%** at p ≈ 0.10, then rises again to **15%** at p = 0.40 (non-overlapping 95% intervals; [RELATED_WORK.md §5](RELATED_WORK.md)). At p = 0.40 nodes hold more data *and* lose more, so this is not plain caution; whether the optimum is error cancellation or thrashing is open. Cost is **storage, not bandwidth** — sync cost *falls*, less shrinking meaning less re-growing |
 | **Does a mixed network need per-peer detector tuning?** ([`hetero_detector_sweep.py`](hetero_detector_sweep.py)) | **Not measurably — and heterogeneity turns out to help.** Getting one global threshold roughly right is a **38 pp** effect (42% → 4%); tuning each latency class separately adds ≤4 pp, which a selection-bias null test reproduces in 11% of grids by chance. Self-calibrating detectors (φ accrual and relatives) are therefore second-order here. Separately, replicated on fresh seeds: a homogeneous slow network (dl = 192) loses data in **35%** of runs, all-fast (dl = 96) in 15%, and a 50/50 mix in **18%** — **a mixed network tracks its faster half**, the same backbone shape §10 found for a polite minority. (An earlier "0/24" came from an uncommitted probe and did not replicate.) |
@@ -184,11 +196,11 @@ realism, and the formal proof — with the result and a link to each write-up.
   that got there: a first grid whose baseline lost nothing, so every cell was
   noise; and a verdict that was an artefact of taking a minimum over 25 cells.
 - **[REPORT_stale_views.md](REPORT_stale_views.md)** — *October 2026, read
-  this before trusting the proof.* The TLA+ model gave every node a fresh view,
-  so the tie-break was never exercised. Re-checked exhaustively with real stale
-  views: a bare re-check fails everywhere; the ID tie-break (V3) is necessary but
-  fails a staggered cascade and one-death schedules; discounting every announcer
-  (V5) is safe in all of them, with a proof for any N.
+  this first.* How the recommended rule (V6) was arrived at: the TLA+ model gave
+  every node a fresh view, so the tie-break was never exercised; re-checked with
+  real stale views, V3 fails a staggered cascade and one-death schedules, V5 is
+  safe but can stall, and five candidate hybrids were tested for safety,
+  progress and concurrency until one (V6, "patient lowest") passed all three.
 - **[RELATED_WORK.md](RELATED_WORK.md)** — the same problem in other fields:
   sensor-network sleep scheduling (the same race, twenty years earlier),
   k-exclusion and the bakery algorithm (the race's classical name), and
@@ -258,6 +270,7 @@ real network stack.
 | **V2 +jitter** | desynchronised decision epochs | TCP-RED: break lockstep reactions |
 | **V3 polite** | two-phase shrink: announce intent, wait 2× max lag, re-check counting all lower-id (higher-priority) intenders as already gone, lowest-id proceeds | TCAS tie-break + self-stabilization ("never vacate before your replacement is confirmed") |
 | **V4 polite+repair** *(Stage 3)* | + expanding-ring repair: a hole in the level+g ancestor block motivates growth after `grow_need + (g−1)·2·lag` persistence — ring-near agents move first, distant timers reset when the hole closes | expanding-ring search (ad-hoc routing) |
+| **V6 polite (patient lowest)** *(2026-10-21, recommended)* | re-check counts **every** racing intender as gone (V5's rule); if that fails only because of higher-ID racers, the lowest racer keeps its announcement up and re-checks next tick instead of cancelling; a node does not announce while a lower ID is racing it. Needs to *see* announcers (a message or one explicit bit on `AgentInfo`) | bakery algorithm's "wait for lower tickets" + TCAS complementary orders |
 | **V5 polite (AgentInfo-only)** *(2026-07-25)* | the intent rides on the gossiped arc claim instead of a dedicated message: announcing = publishing the *reduced* arc while still holding the data. No tie-break (peers cannot tell an intender from a departed node), so the gate counts current claimants only | reviewer feedback from Holochain core — reuse what is already gossiped |
 
 > **TCAS?** The Traffic Collision Avoidance System in aircraft cockpits.
@@ -458,7 +471,9 @@ python3 diag_detector_bias.py       # why the curve turns over     (~5 min)
 python3 hetero_detector_sweep.py    # per-peer calibration worth it? (~12 min)
 python3 oscillation_sweep.py        # is the dance a delay instability? (~12 min)
 python3 detector_replication.py     # fresh-seed replication (~45 min)
-cd spec && python3 timed_check.py --sweep   # stale-view check (pure stdlib)
+python3 v6_study.py                 # V6 vs V3 vs V5 at N=200 (~25 min)
+cd spec && python3 timed_check.py --sweep   # stale-view safety (pure stdlib)
+cd spec && python3 hybrid_check.py --table  # safety + progress, all candidates
 ```
 
 These are numpy-only (no sklearn or scipy — the estimators are implemented

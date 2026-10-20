@@ -148,7 +148,8 @@ class MixedSim(Sim):
 
         if grow_cond and a.grow_acc >= grow_need:
             self._start_grow(a)
-        elif shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0:
+        elif (shrink_cond and a.shrink_acc >= shrink_need and a.intent_at < 0
+              and not self._yields(a, _ilist)):
             if v.polite:
                 a.intent_at = self.t + cfg.intent_delay
                 self.announces += 1

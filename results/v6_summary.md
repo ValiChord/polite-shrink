@@ -1,0 +1,42 @@
+# V6 against V3 and V5 at N = 200
+
+V6 = patient lowest: every racing intender counts as gone; the lowest racer waits instead of cancelling; higher ids do not announce while a lower one is racing them. 'time below R' = sector-ticks below R (fraction-weighted). Fresh seeds (920000+). 95% intervals are exact.
+
+Environment: Python 3.14.8, numpy 2.5.1.
+
+## A. Standard scenarios
+
+| scenario | rule | runs losing data | 95% CI | declared loss | time below R | eq. arc level | sync cost | cancel rate |
+|---|---|---|---|---|---|---|---|---|
+| activation | **V3** | 0/48 | 0–7% | 0 | 0 | 0.88 | 21,189 | 2.7% |
+| activation | **V5** | 0/48 | 0–7% | 2,686 | 18 | 2.23 | 2,988 | 9.5% |
+| activation | **V6** | 0/48 | 0–7% | 0 | 0 | 1.17 | 7,533 | 2.8% |
+| storm | **V3** | 0/48 | 0–7% | 0 | 17 | 1.05 | 19,879 | 2.7% |
+| storm | **V5** | 0/48 | 0–7% | 1,784 | 40 | 1.40 | 7,145 | 7.4% |
+| storm | **V6** | 1/48 | 0–11% | 384 | 2 | 1.30 | 7,231 | 2.5% |
+| flashcrowd | **V3** | 0/48 | 0–7% | 0 | 0 | 0.57 | 21,745 | 3.3% |
+| flashcrowd | **V5** | 0/48 | 0–7% | 1,998 | 17 | 1.40 | 3,093 | 9.0% |
+| flashcrowd | **V6** | 0/48 | 0–7% | 0 | 0 | 0.80 | 7,697 | 2.6% |
+| churn | **V3** | 0/48 | 0–7% | 0 | 21 | 0.83 | 21,531 | 3.3% |
+| churn | **V5** | 0/48 | 0–7% | 2,164 | 47 | 0.81 | 8,952 | 7.6% |
+| churn | **V6** | 0/48 | 0–7% | 0 | 10 | 0.82 | 7,811 | 2.0% |
+
+## B. Storm severity (cf. REPORT_agentinfo_encoding §4.9)
+
+| scenario | rule | runs losing data | 95% CI | declared loss | time below R | eq. arc level | sync cost | cancel rate |
+|---|---|---|---|---|---|---|---|---|
+| storm30 | **V3** | 0/100 | 0–4% | 0 | 14 | 1.01 | 19,333 | 2.7% |
+| storm30 | **V5** | 1/100 | 0–5% | 2,801 | 41 | 1.44 | 7,247 | 7.4% |
+| storm30 | **V6** | 1/100 | 0–5% | 384 | 3 | 1.15 | 6,499 | 2.0% |
+| storm40 | **V3** | 0/100 | 0–4% | 0 | 22 | 1.08 | 18,651 | 2.7% |
+| storm40 | **V5** | 11/100 | 6–19% | 5,832 | 48 | 1.64 | 8,089 | 7.0% |
+| storm40 | **V6** | 0/100 | 0–4% | 0 | 5 | 1.10 | 5,982 | 1.8% |
+
+## C. Stress: storm 50%, death detection 192 ticks late
+
+| scenario | rule | runs losing data | 95% CI | declared loss | time below R | eq. arc level | sync cost | cancel rate |
+|---|---|---|---|---|---|---|---|---|
+| stress50_dl192 | **V3** | 26/72 | 25–48% | 125,059 | 185 | 1.37 | 19,671 | 2.6% |
+| stress50_dl192 | **V5** | 35/72 | 37–61% | 112,264 | 211 | 1.85 | 8,255 | 6.7% |
+| stress50_dl192 | **V6** | 28/72 | 28–51% | 290,548 | 62 | 1.19 | 7,342 | 1.2% |
+

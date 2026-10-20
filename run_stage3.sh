@@ -96,7 +96,7 @@ done
 # mz_attribution ranks, and diag_detector_bias explains the curve
 # detector_error_sweep produces.
 for study in mz_probe mz_attribution detector_error_sweep diag_detector_bias \
-             hetero_detector_sweep detector_replication oscillation_sweep; do
+             hetero_detector_sweep detector_replication oscillation_sweep v6_study; do
     echo "=== $study START $(date -u +%F' '%T) ==="
     if "$PY" "$study.py"; then
         echo "=== $study DONE $(date -u +%F' '%T) ==="

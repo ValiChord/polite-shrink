@@ -110,9 +110,12 @@ A repository where nothing was ever wrong would be the less trustworthy one.
 
 Stated plainly so it can be aimed at:
 
-- A schedule in which V5 (discount every announcer) takes a sector below R with
-  deaths detected promptly — the proof in REPORT_stale_views.md §4 says there is
-  none; `spec/timed_check.py --rule all` is the place to look.
+- A schedule in which V6 (or V5) takes a sector below R with deaths detected
+  promptly — the proof in REPORT_stale_views.md §4 says there is none;
+  `spec/timed_check.py --rule patient` is the place to look.
+- A schedule in which V6 never lets the sector reach R although leaving is
+  safe — progress is checked exhaustively only for N ≤ 5;
+  `spec/hybrid_check.py --rule patient` is the place to look.
 - A run in which an agent obeying the gate drives a sector below R with all
   peers honest.
 - A demonstration that the gate's precondition — that the wait outlasts the

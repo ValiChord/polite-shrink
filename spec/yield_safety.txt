@@ -1,0 +1,13 @@
+### yield: smallest safe wait
+N=4 R=1 L=2 D=3 rule=yield: SAFE over 104,960 schedules
+N=4 R=2 L=2 D=3 rule=yield: SAFE over 104,960 schedules
+N=5 R=1 L=2 D=3 rule=yield: SAFE over 1,889,536 schedules
+N=5 R=1 L=2 D=4 rule=yield: SAFE over 3,199,968 schedules
+N=5 R=2 L=2 D=4 rule=yield: SAFE over 3,199,968 schedules
+N=4 R=1 L=3 D=5 rule=yield: SAFE over 2,313,360 schedules
+N=4 R=1 L=3 D=6 rule=yield: SAFE over 3,111,615 schedules
+N=4 R=2 L=3 D=6 rule=yield: SAFE over 3,111,615 schedules
+### yield: deaths (N=4 R=2 L=2 D=5)
+N=4 R=2 L=2 D=5 rule=yield crash detect=0: SAFE over 14,054,400 schedules
+N=4 R=2 L=2 D=5 rule=yield crash detect=1: SAFE over 14,054,400 schedules
+N=4 R=2 L=2 D=5 rule=yield crash detect=2: VIOLATED (after 11,526 schedules)

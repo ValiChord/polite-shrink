@@ -1,0 +1,10 @@
+### patient at 1x lag wait
+N=3 R=1 L=2 D=2 rule=patient: SAFE over 4,088 schedules
+N=4 R=1 L=2 D=2 rule=patient: SAFE over 65,520 schedules
+N=4 R=3 L=2 D=2 rule=patient: SAFE over 65,520 schedules
+N=5 R=1 L=2 D=2 rule=patient: SAFE over 1,048,544 schedules
+N=5 R=2 L=2 D=2 rule=patient: SAFE over 1,048,544 schedules
+N=4 R=2 L=3 D=3 rule=patient: SAFE over 1,185,840 schedules
+### patient: death noticed 2 ticks late
+N=4 R=2 L=2 D=5 rule=patient crash detect=2: VIOLATED (after 10,565 schedules)
+  [node3: announce@0 lag=1, node4: announce@0 lag=1; node1 dies @4] -> tick 5: node 4 vacated on a view counting [1, 2, 3, 4]; true holders now [2]

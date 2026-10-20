@@ -4,16 +4,21 @@
 
 ## In a sentence or two
 
-When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every node that announced a vacate as already gone**, instead of dropping immediately.
+When a DHT node wants to shrink its storage arc from a stale gossip view, it should **announce an intent to vacate, wait out the staleness, then re-check and drop only if the redundancy target R would still be met — after treating every node that announced a vacate as already gone**, instead of dropping immediately. **When the margin is thin, the lowest ID among the announcers waits instead of giving up, and the others get out of its way.**
 
 That last clause is the load-bearing part. Announce-and-re-check *while everyone still counts each other as present* does **not** close the race: two nodes each removing only themselves both conclude "R will remain" and both drop, and coverage falls below R — the exact 2021 failure.
 
-What closes it is that **a node about to vacate must stop counting toward the redundancy of the nodes it is racing.** There are two ways to arrange that, and October 2026 work separated them:
+What closes it is that **a node about to vacate must stop counting toward the redundancy of the nodes it is racing** — and must never rely on a racer who might itself be leaving. October 2026 work tested three ways of arranging that:
 
-- **Discount every announcer** (V5). This falls out of carrying the announcement on the arc claim that is already gossiped — announcing *is* removing yourself from everyone's count. Checked with real stale views it is **safe for any number of nodes**, with a short proof, as long as deaths are noticed before anyone acts on a view still counting them.
-- **Discount only lower-ID announcers** (V3, the original TCAS-style tie-break). It applies the principle only halfway: higher-ID announcers still count for lower-ID ones. That is enough for small networks with a wait over twice the lag, but a *staggered cascade* of announcers, or one death plus staggered announcements, walks through the gap.
+| rule | what the re-check does | never loses data to a shrink | always makes progress |
+|---|---|---|---|
+| V3 — the original TCAS-style tie-break | counts only *lower-ID* announcers as gone | ✗ — it relies on higher-ID announcers staying, and a *staggered cascade* or one ordinary death walks through that gap | ✓ |
+| V5 — the AgentInfo encoding | counts *every* announcer as gone | ✓ proven for any number of nodes | ✗ — identical nodes can cancel each other forever |
+| **V6 — "patient lowest" (recommended)** | counts every announcer as gone; if that fails only because of higher-ID announcers, the lowest **waits** instead of cancelling, and nobody announces while a lower ID is racing them | **✓ — V5's proof applies unchanged** | **✓** |
 
-The original TLA+ proof could not tell these apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe. The stale-view check, the cascade and the proof are in [REPORT_stale_views.md](REPORT_stale_views.md); the costs of each encoding are in [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+V6 keeps the TCAS ordering, but only for deciding **who goes next** when the margin is thin — never for assuming **who stays**. At 200 nodes its arcs stay close to V3's, with about a third of the sync traffic and several times less time below R ([results/v6_summary.md](results/v6_summary.md)). One cost: like V3, it must *see* who is announcing, so it needs a dedicated message or one explicit bit on `AgentInfo` — a narrowed arc claim alone cannot tell an announcer from a node that has already left.
+
+The original TLA+ proof could not tell any of these apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe. The stale-view checks, the cascade, the proof and the five candidate hybrids tried on the way to V6 are in [REPORT_stale_views.md](REPORT_stale_views.md).
 
 ## The problem it addresses
 
@@ -27,7 +32,7 @@ The evidence, in order:
 
 - Lag-scaled **hysteresis** ("grow eager, shrink slow") cuts the data-loss rate from **95.9% of runs to 24%** — a big dent, but the loss doesn't go away.
 - **Jitter** (the textbook first remedy for control-loop oscillation) adds **nothing** — 24.3%.
-- The remaining 24% is the **shrink race**, and it survives every damping fix. Only the pre-drop re-check *with its tie-break* (the gate) closes it — and then loss goes to **zero across 1,248 runs**.
+- The remaining 24% is the **shrink race**, and it survives every damping fix. Only the pre-drop re-check (the gate — V3's version at the time) closes it — and then loss goes to **zero across 1,248 runs**.
 
 The consequence for a rebuilt controller is the useful part: it may well still oscillate — that may be inherent, a matter of physics — but **oscillation and durability turn out to be separable.** Leave the physics alone; close the race, and you don't lose data even while it dances.
 
@@ -37,14 +42,19 @@ The hallway dance is a **symmetry** problem: every node reacts identically to th
 
 The fix comes from **aircraft collision avoidance (TCAS)**. When two planes converge, TCAS does not let them negotiate or rely on timing — it issues *complementary, deterministic* orders (one climbs, one descends) chosen by a fixed tie-break on transponder ID. It exists precisely because symmetric reactions are the failure mode: two people in a corridor both stepping aside the same way, again and again.
 
-Polite-shrink applies exactly that cure to shrinking: when nodes contend to vacate the same sector, **the lowest ID proceeds and the rest defer** — symmetry broken by *rule*, not by timing or luck. That is the difference between V2 (jitter, still loses data) and V3 (polite, loses none).
+Polite-shrink applies that cure to shrinking: when nodes contend to vacate the same sector and the margin is thin, **the lowest ID goes and the rest get out of its way** — symmetry broken by *rule*, not by timing or luck. That is the difference between V2 (jitter, still loses data) and the polite variants.
+
+**What October 2026 changed about this insight.** The original V3 applied TCAS halfway: the higher-ID node subtracted the lower one *and still went ahead*, while the lower one counted the higher one as staying — both "partly climbed". In a staggered cascade every node counts a higher-ID announcer as its survivor just as that one leaves. V6 applies TCAS properly: complementary orders, one side acts and the other gets out of the way completely. The TCAS idea was right; the first implementation of it was not.
 
 ## The mechanism (≈30 lines)
 
 Two phases, in [`polite_shrink.py`](polite_shrink.py):
 
-1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors.
-2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, counts announced intenders as already gone, and drops **only if ≥ R copies remain**. The code's V3 counts only *lower-ID* intenders (the TCAS tie-break); V5 counts all of them, which is the version that survives stale views in general.
+1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors — unless it can see a lower ID already racing it for them, in which case it waits.
+2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, counts **every** announced rival as already gone, and drops **only if ≥ R copies remain**.
+3. **If the re-check fails only because of higher-ID rivals**, the node is the lowest racer: it keeps its announcement up and re-checks next tick instead of cancelling. The higher IDs fail their own re-checks, stand down, and stay quiet while it waits — so it gets through.
+
+This is the `V6` variant. The code also keeps V0–V5 so every earlier study can still be reproduced.
 
 Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, partitions, scale to 5,000 agents, 90%-lossy gossip, and 33% of the network killed at once on real iroh transport — **no run in the designed scenarios lost data** (coverage dips below R during deaths; what the gate aims at is that no *shrink* takes it there). Data is lost under slow death detection in heavy storms, and by nodes that lie — both characterised below.
 
@@ -52,8 +62,8 @@ Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, p
 
 Stated plainly, because the distinction matters:
 
-- **Checked exhaustively, with stale views** ([REPORT_stale_views.md](REPORT_stale_views.md); every announce schedule and per-node lag, N ≤ 5): a bare re-check fails in every configuration; the ID tie-break (V3) is safe for small networks with a wait over twice the lag but fails a staggered cascade (R = 1) and one-death schedules (R = 2); discounting every announcer (V5) is safe in all of them at a 1× wait.
-- **Proven for any N:** V5 under stale views, given prompt death detection (proof in [REPORT_stale_views.md](REPORT_stale_views.md) §4). Also proven: *guessing* which un-declared peers have really left fails on one wrong guess (`spec/AgentInfoAgeGated.tla`).
+- **Checked exhaustively, with stale views** ([REPORT_stale_views.md](REPORT_stale_views.md); every announce schedule, per-node lag and death time, N ≤ 5): a bare re-check fails in every configuration; V3 fails a staggered cascade (R = 1) and one-death schedules (R = 2); V5 is safe but can stall forever; **V6 is safe in all of them at a 1× wait and always makes progress.**
+- **Proven for any N:** the V5/V6 safety rule under stale views, given prompt death detection (proof in [REPORT_stale_views.md](REPORT_stale_views.md) §4 — V6's waiting never counts an announcer as present, so the proof applies unchanged). Progress for V6 is checked exhaustively for N ≤ 5 and argued, not proven, beyond that. Also proven: *guessing* which un-declared peers have really left fails on one wrong guess (`spec/AgentInfoAgeGated.tla`).
 - **What the original TLA+ proof shows** (five configurations, N = 6–8): re-checking against a perfectly fresh view is safe — true, but close to trivial, and it does not exercise the tie-break.
 - **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
