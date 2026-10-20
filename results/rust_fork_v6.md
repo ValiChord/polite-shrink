@@ -20,6 +20,7 @@ schedule is enumerated: announce ticks, per-node lags, and a death at any tick.
 | V3 failure counts against the Python checker | **identical**: 126 of 4,088 (N=3, R=1, 1× lag wait); 6 of 159,984 (N=4, R=1, 2×); 0 of 159,984 (N=4, R=2, 2×) |
 | V6 at a 1× lag wait | safe in every schedule: 4,088 (N=3 R=1), 65,520 (N=4 R=1), 65,520 (N=4 R=2) |
 | One death at any tick, detected at once | V3 fails 2,820 of 110,376; V6 fails none. Large case (N=4, R=2, wait 2.5× lag): **V6 safe in all 14,054,400 schedules**, V3 fails some |
+| **Six nodes** (overnight, 2026-10-21) | V6: **0 failures and 0 stalls in 16,777,152 schedules** at each of R = 1, 2, 3 (lag 2, wait 1× lag); **0 failures in 905,966,208 schedules with one death at any tick** (R = 2). V3 fails 567,936 / 1,220,092 / 1,552,760 of the no-death schedules and 61,725,944 with a death |
 | Progress | V6 always lets at least one node leave whenever anyone announced. Counting every announcer without waiting (V5) stalls in some schedules at every size tried |
 
 With deaths, Python counts 2,856 V3 failures where the Rust code counts 2,820. The
