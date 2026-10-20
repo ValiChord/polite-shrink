@@ -83,8 +83,11 @@ AgentInfo encoding (V5) each turned out to have a gap the other did not.
 > detection under heavy storms** (at 50% simultaneous death with detection 4–8×
 > slower than gossip, V3 loses data in 15–35% of runs — the residual that
 > constraint 6 and [RELATED_WORK.md §5](RELATED_WORK.md) quantify); and the
-> **V3 tie-break's structural gap** found in October 2026, possible in principle
-> but not yet measured in practice ([REPORT_stale_views.md](REPORT_stale_views.md)).
+> **V3 tie-break's structural gap** found in October 2026: shown by model checking,
+> and forced on the real Rust code, where it takes a sector to zero declared copies
+> whenever the timing occurs; how often that timing arises unforced is not yet
+> measured ([REPORT_stale_views.md](REPORT_stale_views.md),
+> [results/rust_fork_v6.md §7](results/rust_fork_v6.md)).
 
 ## Evidence at a glance
 
@@ -129,7 +132,8 @@ what Holochain apps store and how they read it, whether a node is a phone or a s
 what durability is worth against what bandwidth, and what validation requires a node to
 hold. What the runs *do* establish is the weaker, defensible thing — the constraints any
 policy has to respect, whoever writes it. (This is the *policy* half. The *gate* — the
-~15 lines that are actually proven — is [REPORT_stage1.md §2.2](REPORT_stage1.md).)
+~15 lines the model checks cover — is [REPORT_stage1.md §2.2](REPORT_stage1.md); the
+recommended form of it is V6, see [REPORT_stale_views.md](REPORT_stale_views.md).)
 
 | Constraint | Because |
 |---|---|
@@ -166,7 +170,7 @@ judgement belonging to whoever knows what these networks carry.
 
 **Every test on one page:** [TEST_LEDGER.md](TEST_LEDGER.md) lists everything polite
 shrink has been put through — simulation, adversarial, real transport, deployment
-realism, and the formal proof — with the result and a link to each write-up.
+realism, and the formal checks — with the result and a link to each write-up.
 
 ## The write-ups
 
@@ -185,7 +189,8 @@ realism, and the formal proof — with the result and a link to each write-up.
   scale, the §6.1 race quantified, the §6.2 repair rule simulated before
   implementation, (§7) proof-gated *verified coverage* closing the
   false-declaration liar gap, (§8) *partial* liars and the audit-sample knob,
-  and (§9) the TLA+ formal safety proof. Ends with **"Constraints on any sizing
+  and (§9) the original TLA+ model (what it could and could not show is in
+  REPORT_stale_views.md). Ends with **"Constraints on any sizing
   policy"** — what these runs establish that *any* target-arc policy has to
   respect (and why the textbook uniform `R/N` is probably the wrong one), kept
   separate from the proven gate.
@@ -226,8 +231,9 @@ realism, and the formal proof — with the result and a link to each write-up.
   ablation ladder is reported instead of the headline number (cf. McGreivy &
   Hakim, *Nat. Mach. Intell.* 2024, on weak baselines), and the repo's
   published corrections. Also states what would falsify the central claim.
-- **[spec/README.md](spec/README.md)** — the formal proof: the two-phase rule
-  model-checked safe over every reachable state, the naive rule falsified.
+- **[spec/README.md](spec/README.md)** — the formal checks: the original model
+  (fresh reads, so it could not see the stale-view race) and `StaleShrink.tla`,
+  where TLC finds V3's staggered cascade by itself and checks V6 safe and live.
 - **[RELATED_regularisation.md](RELATED_regularisation.md)** — *a reading aid, not a result.*
   The shrink race read as an L1 problem, for readers coming from statistics or ML: why the
   objective determines coverage but provably cannot determine which nodes hold it, and why the
@@ -356,7 +362,7 @@ with live connection churn**, and measures it under Wind Tunnel. This is where
 ## Stage-3 results — adversaries, scale, repair, and the one real gap
 
 Stage 3 attacks the controller along the four threats [REPORT_stage1.md](REPORT_stage1.md)
-§7 left open, then the Byzantine "liar" problem and a formal proof — nine
+§7 left open, then the Byzantine "liar" problem and a formal model check — nine
 studies, one command (`./run_stage3.sh`, which now also runs the detection-side group). Full report:
 [REPORT_stage3.md](REPORT_stage3.md).
 
@@ -372,17 +378,25 @@ studies, one command (`./run_stage3.sh`, which now also runs the detection-side 
 | What if death-detection is a *slower, separate* clock than gossip? | **The §6.1 race stays bounded and small.** Decoupling the death clock from view staleness ([REPORT_stage3.md §11](REPORT_stage3.md)), at storm 30% the race is ≤2/312 runs up to a detection latency of 64 ticks (2.7× the maximum gossip lag) and only at a thin margin — though at storm 50% and 4–8× the maximum lag, V3 loses data in 15–35% of runs ([RELATED_WORK.md §5](RELATED_WORK.md)); detection *faster* than gossip drives it to zero. It's governed by unresponsive-marking speed, not the shrink rule — so the shrink wait is sized against detection latency. |
 | What if gossip is *lossy* — each viewer's coverage picture incomplete and inconsistent? | **Polite shrink holds, up to 90% message drop.** Giving each viewer a per-peer lossy view (missing a peer's shrink/death makes it *over-count* — the dangerous direction), the data-loss rate is **flat in the loss axis** across 6,000 runs ([REPORT_stage3.md §12](REPORT_stage3.md)): activation loses nothing at any drop rate, and storm's only losses are the pre-existing correlated mass-death (present at zero loss, non-monotonic in loss), never lossy over-counting. The two-phase re-check doesn't need a complete view. (Scope: this drops coverage/arc declarations; the intent channel the handshake depends on is kept reliable, so lost-*intent* robustness is future work.) |
 
-The ninth Stage-3 study — a *proof* rather than a test of the core safety
-property — is important enough to stand on its own:
+The ninth Stage-3 study was a model check rather than a test of the core safety
+property. It is kept here with what it did and did not show:
 
-## Formal safety proof — the shrink race *cannot* recur (TLA+ / TLC)
+## Formal checks (TLA+ / TLC) — what the first model showed, what it missed
 
 The 1,248-run sweep found zero data loss, but a sweep is still *sampling* — it
 only visits the interleavings its seeds happen to produce. The core safety
-property is small enough to do better than sample: **prove** it, by exhaustive
-model checking over *every* reachable state of a small system, in
+property is small enough to do better than sample: check it exhaustively, over
+*every* reachable state of a small system, in
 [TLA+](https://lamport.azurewebsites.net/tla/tla.html) and its checker TLC.
 Full detail and reproduction: [spec/README.md](spec/README.md).
+
+> **Correction, October 2026.** The first model below let every node read the
+> *current* holder set at the moment it acted. Under that assumption even a bare
+> re-check is safe, so the model never exercised the tie-break and could not see
+> the stale-view race at all. Its "no error" did not mean the race cannot recur.
+> The second model, `StaleShrink.tla`, gives nodes stale views; there TLC finds a
+> cascade that breaks the original V3 rule and checks the recommended V6 rule
+> safe and live. See [REPORT_stale_views.md](REPORT_stale_views.md).
 
 > **Why this is worth far more than a passing test — and who relies on it.**
 > A test exercises the handful of event orderings a given run happens to hit;
@@ -393,13 +407,13 @@ Full detail and reproduction: [spec/README.md](spec/README.md).
 > checker TLC does what testing cannot: it explores **every** possible ordering
 > and either finds a failing one or proves none exists. "All tests passed"
 > means *we didn't trigger the bug this time*; "model-checked, no error" means
-> *no ordering can trigger it*. That categorical difference is why the teams
-> who cannot afford silent data loss reach for it: **AWS** used TLA+ to catch
-> deep bugs in S3, DynamoDB and EBS before customers ever saw them; **Microsoft**
+> *no ordering the model allows can trigger it*. That is why the teams who
+> cannot afford silent data loss reach for it: **AWS** used TLA+ to catch deep
+> bugs in S3, DynamoDB and EBS before customers ever saw them; **Microsoft**
 > (Azure Cosmos DB), **MongoDB**, and **CockroachDB** use it on their
-> replication and consistency protocols. Here it is pointed at the exact race
-> that caused Holochain's original data loss — and shows that race can no
-> longer happen.
+> replication and consistency protocols. The caveat is in "the model allows":
+> this repo's first model left out stale views, which is exactly where the race
+> lives.
 
 **The property (per-sector):**
 
@@ -411,9 +425,9 @@ independently whether to drop it, and the arc geometry only sets *which* nodes
 contest *which* sector — so proving it for one contested sector proves it for
 the whole ring.
 
-**Two specs, and a negative control that gives the proof teeth:**
+**The first model (2026-07), and its negative control:**
 
-- **`PoliteShrink.tla`** — the real rule. Nodes announce a vacate intent (worst
+- **`PoliteShrink.tla`** — the V3 rule, with fresh reads. Nodes announce a vacate intent (worst
   case: everyone announces at once), and *execute* only after reading the
   current holder/intent sets — exactly what the "wait 2× max gossip lag" delay
   buys — using the TCAS tie-break (treat every lower-id intender as already
@@ -425,7 +439,7 @@ the whole ring.
   two phases, and safety *fails* — so the safety is bought by the mechanism,
   not by the way the model happens to be written.
 
-Verified with no error, exhaustively, at every configuration tried:
+No error, exhaustively, at every configuration tried (with fresh reads):
 
 | Nodes | R | distinct states |
 |---|---|---|
@@ -440,14 +454,28 @@ java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # -> No error has been f
 java -cp tla2tools.jar tlc2.TLC spec/NaiveShrink.tla    # -> Invariant SafeCoverage is violated
 ```
 
-**Scope, stated honestly.** This proves the *control-loop* safety property —
-concurrent stale-view shrinks can never drive a sector below R — under the
-model's abstraction: one sector, execute-time intent visibility (the wait),
-honest holders, atomic actions. It **complements, not replaces** the
-simulations, which carry the things the proof abstracts away: detailed gossip
-timing, Byzantine liars, and arc geometry. What it removes is any doubt that
-the *rule itself* can be made to lose a copy through an unlucky interleaving —
-it cannot.
+**What this first model does not show.** Its execute step reads the true
+holder set, so it assumes away the staleness the rule exists to survive. The
+negative control fails because the naive rule has no wait at all, not because
+the model can tell a good tie-break from a bad one.
+
+**The stale-view model (2026-10): `StaleShrink.tla`.** Each node reads the state
+as it was up to `L` ticks ago (per node), may announce at any tick, and
+re-checks `D` ticks later:
+
+| model | rule | wait | TLC result |
+|---|---|---|---|
+| `StaleShrink.cfg` | V6 | 1× the max lag | no error (safety and progress), 65,001 states |
+| `StaleShrinkV6Wait2x.cfg` | V6 | 2× | no error, 245,146 states |
+| `StaleShrinkV3Cascade.cfg` | V3 | 2× | **safety violated**: nodes 4, 3, 2, 1 announce a tick apart; the last copy goes |
+| `StaleShrinkV6TooShort.cfg` | V6 | 0.5× | **safety violated** (control: no rule is safe with too short a wait) |
+
+**Scope, stated honestly.** Small networks (N ≤ 5), one sector, honest
+holders, no deaths in the TLA+ version (the Python checker and its Rust port
+add a death at any tick). It **complements, not replaces** the simulations,
+which carry what the models abstract away: detailed gossip timing, Byzantine
+liars, and arc geometry. Within those limits it shows V6 cannot be made to take
+a sector below R by an unlucky interleaving, and that V3 can.
 
 ## Run it
 
@@ -456,7 +484,7 @@ pip install numpy matplotlib
 python3 run_experiments.py          # Stage 1: ~45 s, results/*.png + summary.md
 python3 check_seeds.py              # Stage 1: seed-robustness check
 ./run_stage3.sh                     # Stage 3 + the detection-side group: ~3 h on 8 cores
-java -cp tla2tools.jar tlc2.TLC spec/PoliteShrink.tla   # formal proof (needs JRE + tla2tools.jar)
+java -cp tla2tools.jar tlc2.TLC -deadlock spec/StaleShrink.tla   # stale-view model check of V6 (needs JRE + tla2tools.jar)
 ```
 
 The script resolves its own interpreter — it *executes* each candidate rather
@@ -526,8 +554,10 @@ What still holds today, after Stage 3 — stated as current constraints, not his
   kill makes *some* post-storm floor dip unavoidable; the metric is how the
   controller responds, not whether dips can be prevented.
 - **Most findings are simulation evidence, not proof.** The *core safety*
-  property ("never vacate a sector below R") is now formally model-checked
-  (§9), but the broader results — costs, adversary outcomes, the surprising V2
+  property ("never vacate a sector below R") is model-checked for the
+  recommended rule (V6) under stale views, for small networks
+  (`spec/StaleShrink.tla`; the original §9 model used fresh reads and could not
+  see the race), but the broader results — costs, adversary outcomes, the surprising V2
   finding that jitter *without* the handoff is unreliable — characterise this
   rule-set on this model, not theorems, and may be specific to it.
 

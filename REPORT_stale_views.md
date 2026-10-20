@@ -356,11 +356,12 @@ spec has no deaths; the death results remain those of section 5. Details:
   delay.
 - Announcements are unconstrained. A real trigger (hysteresis, the shrink
   condition) makes many of these schedules impossible, so the V3 failures are
-  *possible* behaviours of the rule, not measured rates. Whether a cascade
-  arises in practice is a simulation question this report does not answer.
-- Pure Python; not yet re-expressed in TLA+. A `StalePoliteShrink.tla` that TLC
-  can check would be the natural next step for anyone who wants the result in
-  the original tool.
+  *possible* behaviours of the rule, not measured rates. The forced test on the
+  Rust code (results/rust_fork_v6.md §7) shows the cascade does happen on a real
+  network when the timing occurs; how often that timing arises unforced is
+  still unmeasured (random stale-view runs did not hit it).
+- The TLA+ version (§7b) has no deaths. The results with a death rest on the
+  Python checker and its Rust port.
 
 ## Reproduce
 

@@ -174,18 +174,20 @@ Edit the `CONSTANTS` block in the `.cfg` files to check other `Nodes` / `R`
 
 ## Scope and honesty
 
-This proves the *control-loop* safety property — concurrent stale-view shrinks
-never drive a sector below R — under the model's abstraction: one sector,
-execute-time intent visibility (the wait), honest holders, atomic actions. It
-is a complement to, not a replacement for, the simulations: it does not model
-gossip timing in detail, Byzantine liars (see the sim studies for those), or
-the arc geometry. What it removes is any doubt that the *rule itself* can be
-made to lose a copy through unlucky interleaving — it cannot.
+`PoliteShrink.tla` and the AgentInfo specs check the safety property under
+their abstraction: one sector, execute-time intent visibility, honest holders,
+atomic actions. Because execute reads the *current* holder set, they do not
+model the staleness the rule exists to survive, so they cannot show that the
+rule survives it (see the October note at the top). `StaleShrink.tla` does model
+it, for small networks and without deaths: there V3 fails and V6 holds. All of
+these complement, not replace, the simulations: they do not model gossip timing
+in detail, Byzantine liars (see the sim studies for those), or the arc
+geometry.
 
 It is also narrower than "polite shrink is proven", and deliberately so. What
 is modelled here is the **gate**: the pre-drop re-check — discount your own
-stale declaration, count every lower-id intender as already gone, proceed only
-if R remain. The controller's *policy* — redundancy target, hysteresis
+stale declaration, count announced intenders as already gone (lower-id ones
+under V3, all of them under V6), proceed only if R remain. The controller's *policy* — redundancy target, hysteresis
 constants, growth rule, small-network clamp, intent delay — is not modelled and
 is not proven; it is engineering judgement, evidenced by simulation rather than
 by TLC. The property therefore reads: *no agent obeying this gate can take a
