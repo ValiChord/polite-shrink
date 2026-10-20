@@ -17,10 +17,11 @@
 > *Scope, stated plainly: the safety property is that no shrink takes a sector below its redundancy target R (deaths can). The original TLC runs covered five configurations (N = 6–8; R ∈ {1, 2, 3, 4, 7}) under atomic fresh reads; the stale-view checks cover every announce schedule and per-node lag for N ≤ 5, and the V5/V6 safety result has a proof that holds for any N. Honest nodes and prompt death detection are assumed. What is checked is the **gate** (the pre-drop re-check), not the surrounding **policy** (redundancy target, hysteresis constants, growth rule, clamp) — that part is engineering judgement, evidenced by simulation. Robustness to adversaries and to real networks is shown by the simulations and kitsune2-fork runs below — strong evidence, not proof. Proof details: [`spec/`](spec/).*
 
 > ### 🧪 Want to test it? Use V6 on branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6)
-> The Rust implementation to try is **V6 "patient lowest"** on the kitsune2 fork, branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6) — rebased onto kitsune2 `main` (October 2026), behind the existing `sharding` feature flag. V6 is the default there; `patient_lowest: false` switches back to the original V3 tie-break for comparison.
+> The Rust implementation to try is **V6 "patient lowest"** on the kitsune2 fork, branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6) — rebased onto kitsune2 `main` (October 2026), behind the existing `sharding` feature flag. V6 is the default there, with withdrawal of abandoned intents on (`withdraw_on_stand_down`); `patient_lowest: false` switches back to the original V3 tie-break for comparison.
 > ```
 > cargo test -p kitsune2_gossip --features sharding --lib sharding        # unit tests + exhaustive stale-view model check of the real re-check code
 > cargo test -p kitsune2_gossip --features sharding --test sharding_race  # forced simultaneous race, V6 and V3
+> cargo test -p kitsune2_gossip --features sharding --test sharding_stale # nodes acting on 2 s old views, V6
 > cargo test -p kitsune2_gossip --features sharding --test sharding_storm # 8-node storm, V6 and V3
 > ```
 > What these tests found: [results/rust_fork_v6.md](results/rust_fork_v6.md).

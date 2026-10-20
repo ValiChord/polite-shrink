@@ -315,6 +315,14 @@ Two further tests ([results/rust_fork_v6.md](results/rust_fork_v6.md)):
   re-growing, while V3 announces about 5× as often and re-grows a median of
   10 times per run before settling. The views there are fresh, so this
   measures churn, not V3's stale-view failure.
+- **Stale views on a real network** (each node acting on the network as it
+  was 2 s ago): V6 never fell below target; a control with a too-short wait
+  fell below target in every run; V3 was not caught failing in 14 runs, which
+  the narrow timing band above makes unsurprising.
+- **The churn's cause, and a fix.** All of V3's re-grows came from abandoned
+  intents still live at peers, which this report's model never has (here a
+  stood-down intent is gone from the next view). Withdrawing them when a node
+  stands down removes V3's re-grows in the forced race entirely.
 
 ## 8. Limitations
 

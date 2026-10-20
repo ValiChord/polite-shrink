@@ -89,6 +89,17 @@ peer-keyed; third-party forgery requires defeating transport auth);
 (iii) sign intents (REPORT §7 already requires this for production).
 Defense (i) is now measured and implemented — see item 2 of the §6 addendum.
 
+> **Addendum, 2026-10-20.** "Fail-safe" holds for forged intents *added* to
+> the table, which this section analyses. It does not hold for a forged intent
+> that *replaces* a genuine one. The fork's intent table kept one intent per
+> agent, and a later announcement replaced the earlier one whoever sent it. So
+> a short-lived forgery in a leaving node's name could displace its genuine
+> intent; once the forgery expired, peers counted a node that was really
+> leaving as staying, which is the unsafe direction. Defense (ii) closes it,
+> and is now implemented on branch `feat/sharding-v6`: intents are keyed by
+> sending peer and only the one from the agent's own declared URL is consumed.
+> See [results/rust_fork_v6.md §6](results/rust_fork_v6.md).
+
 ### 2b. False coverage — the real Byzantine gap, threshold at K = R
 
 K liars declare full arcs but store nothing. Declarations are the

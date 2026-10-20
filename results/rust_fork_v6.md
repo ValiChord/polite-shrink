@@ -3,7 +3,8 @@
 Branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6)
 of `topeuph-ai/kitsune2`, rebased onto kitsune2 `main` @ `1e44c65` (2026-10-16).
 V6 ("patient lowest") is the default there (`patient_lowest: true`); `false`
-gives the original V3 tie-break. Measured 2026-10-20 on one Windows machine.
+gives the original V3 tie-break. Measured 2026-10-20 on one Windows machine. Sections 1–3 were measured before
+intent withdrawal (section 5) was added; section 2's V3 figures are without it.
 
 ## 1. The stale-view model check, run on the real Rust code
 
@@ -87,12 +88,98 @@ stop counting it as gone while it may still leave. `refreshed_expiry` is tested
 over 1,000 consecutive waits at four interval/wait settings: the notice never
 lapses, and it is re-broadcast at most once per wait.
 
+## 4. Stale views on a real network
+
+`crates/gossip/tests/sharding_stale.rs`. The in-memory transport is near
+instant, so section 2's views were fresh. A test-only switch
+(`harness::set_sharding_view_delay`, compiled only in test builds) makes every
+node act on the network as it was 2 seconds ago: peer arcs and "leaving"
+notices both from that instant. Six nodes, one agent each, target 4, no
+deaths. The model predicts that with a wait of 1.5× the staleness V6 is safe
+and V3 need not be. A control arm runs V6 with a wait of 0.5× the staleness,
+where no rule is safe.
+
+Raw data: [rust_stale_compare.csv](rust_stale_compare.csv).
+
+| arm (runs) | ever below target | re-grows per run | announcements (median) |
+|---|---|---|---|
+| V6, wait 1.5× (10) | **never** | **0** | 6 |
+| V6 + withdrawal, wait 1.5× (4) | **never** | **0** | 6 |
+| V3, wait 1.5× (10) | never | 5–20 (median 12) | 33 |
+| V3 + withdrawal, wait 1.5× (4) | never | 4–11 (median 8.5) | 31.5 |
+| **control:** V6, wait 0.5× (10) | **every run**, down to 1 copy, twice to 0 | 3–31 | 34.5 |
+
+The control failing every time shows the test can catch a failure. **V3 was
+not caught failing.** The model puts V3's failures in a narrow band of timings
+(6 of 159,984 schedules at N=4, R=1), so ten random runs missing it is expected.
+That is a non-result, not evidence that V3 is safe.
+
+## 5. Where V3's re-growing comes from, and the fix
+
+Every grow decision is now logged with its cause: was the half the node would
+grow into short of real copies, or did it only look short because of
+"leaving" notices? In the forced race, **all 225 of V3's re-grows were of the
+second kind**; none was a real shortage. When a node backs off, its notice
+stayed live at other nodes until it expired. Growers count announced departures
+as already gone, so they grew to cover departures that never came. The model
+checks never saw this, because there a withdrawn notice is gone from the next
+view.
+
+**Fix: withdrawal** (`withdraw_on_stand_down`, now the default on the branch).
+A node that backs off broadcasts a withdrawal naming its exact notice (agent and
+expiry), and peers drop it at once. It is safe because a node that backs off
+really does keep its data, so counting it as present again is correct.
+
+Forced race (section 2's setup), 5 complete rounds per arm (raw data:
+[rust_race_withdraw.csv](rust_race_withdraw.csv)):
+
+| per run | V3 | **V3 + withdrawal** | V6 | **V6 + withdrawal** |
+|---|---|---|---|---|
+| announcements | 8–808 (median 470) | **8** | 6–8 | 6–8 |
+| re-grows | 2–156 (median 90) | **0** | 0 | 0 |
+| seconds to settle | 2.7–277 (median 225) | **2.2–2.4** | 2.3–3.2 | 2.2–2.4 |
+| re-checks spent waiting | 0 | 0 | 1–10 | 1–2 |
+| final copies (mean) | 3,482 | **3,072 every run** | 3,533 | 3,482 |
+
+In a sixth round, V3 without withdrawal was still changing when the 5-minute
+limit ran out.
+
+With withdrawal, V3 settles as fast as V6 and ends the most sharded. Under stale
+views (section 4) withdrawal helps V3 much less, because the withdrawal is seen
+late too. V6 never re-grows with or without it. So V6 remains the recommended
+rule, for its safety on stale views (section 1); withdrawal is worth having in
+either rule.
+
+## 6. A weakness in the intent channel, fixed
+
+Building the withdrawal turned up an older problem. A new notice for an agent
+simply replaced that agent's previous one, whoever sent it. So anyone could send
+a short-lived forged notice in a leaving node's name. It would replace the
+genuine notice, expire quickly, and leave other nodes counting a node that is
+really leaving as staying. That is the unsafe direction.
+[REPORT_stage3.md](../REPORT_stage3.md) §2a judged forged notices "fail-safe",
+but it only considered forgeries *added* to the table, which can only make
+coverage look lower. It listed checking the sender's identity as a defence;
+the fork had not implemented it.
+
+Now each notice is stored with the network address it came from, and a node
+only counts the notice that came from the agent's own declared address. A
+withdrawal is honoured only from that same address and only for the exact notice
+it names, so a late or forged withdrawal cannot cancel a newer or genuine one.
+Unit tests cover the displacement attack, forged withdrawals and out-of-order
+withdrawals. The race test checks that genuine notices between nodes always pass
+the address check. On real deployments this is only as strong as the
+transport's peer authentication (kitsune2's iroh transport identifies peers by
+key; the in-memory test transport does not).
+
 ## Reproduce
 
 In a checkout of the branch:
 ```
-cargo test -p kitsune2_gossip --features sharding --lib sharding                    # 29 unit + model-check tests
+cargo test -p kitsune2_gossip --features sharding --lib sharding                    # unit + model-check tests
 cargo test --release -p kitsune2_gossip --features sharding --lib stale_model -- --ignored  # the 14M-schedule case
 cargo test -p kitsune2_gossip --features sharding --test sharding_race              # forced race, V6 and V3
+cargo test -p kitsune2_gossip --features sharding --test sharding_stale             # 2 s stale views, V6
 RACE_RUNS=6 cargo test -p kitsune2_gossip --features sharding --test sharding_race forced_race_compare -- --ignored --nocapture
+STALE_RUNS=4 cargo test -p kitsune2_gossip --features sharding --test sharding_stale stale_views_compare -- --ignored --nocapture
 ```
