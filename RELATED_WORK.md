@@ -65,6 +65,65 @@ The residual race is also precisely located by this framing: it is the gap
 between "waited out the staleness" and "read atomically" — which a death that
 has not yet been detected re-opens.
 
+V5 then stalls, because identical announcers can all cancel. V6 ("patient
+lowest") keeps V5's count and uses the ID order only to decide *who waits*,
+never who is assumed to stay.
+
+## 2b. Mutual inclusion — the closer name
+
+k-exclusion caps how many may be *inside*. The polite-shrink invariant is the
+mirror image: at least R must stay holding each sector. That is **l-mutual
+inclusion**, at least *l* processes in the critical section at all times, and
+its two-sided form is the **global (l, k)-critical section problem**: Kamei &
+Kakugawa, *An asynchronous message-passing distributed algorithm for the global
+critical section problem* (PDAA 2017; extended version
+[arXiv:1807.05674](https://arxiv.org/abs/1807.05674)). Their motivating example
+is keeping at least *l* servers running while others are switched off to save
+cost, which is the shrink decision with servers in place of sector holders.
+There is also a local form, where each process has its own bounds over its
+neighbourhood (Kakugawa and Kamei's self-stabilising "local (l, k)-critical
+section" papers), and UPPAAL timed-automata models of k-exclusion and m-mutual
+inclusion algorithms (2021).
+
+How the published solution differs from V6, from the paper itself:
+
+| | Kamei & Kakugawa, l-mutual inclusion | V6 polite shrink |
+|---|---|---|
+| leaving | ask a quorum who is inside, then acquire and wait for every quorum member's acknowledgement | announce, wait a fixed time, re-check a local (stale) view; no replies |
+| concurrent leavers | serialised by a Maekawa-style mutual exclusion | leave together when the margin allows; ID order only decides who waits |
+| stale information | handled by blocking until a reply arrives | handled by waiting out a known staleness bound |
+| crashes | not modelled ("fault-tolerant design" is future work) | safe with a death at any time if it is noticed before anyone acts on a view still counting the dead node (model-checked, and a proof for any N) |
+| many overlapping minimums | one critical section | one minimum per sector, each node in many |
+| cost per decision | O(√n) messages with grid or projective-plane quorums | one broadcast, plus one withdrawal if it stands down |
+
+So the problem is known. What is not in this literature, as far as this search
+found, is a solution that is coordinator- and permission-free, lets leavers go
+concurrently, and stays safe on stale gossip views with failures. That is the
+claim to make, and it is narrower than "a new problem". A search on "mutual
+inclusion" turned up quorum-based and token-based algorithms, but nothing
+gossip-based.
+
+**Where else the same shape appears.** Any duty that many members share, that
+each may give up voluntarily, with a floor that must always hold, no
+coordinator, and members acting on out-of-date information. Scaling down a
+replicated service without a controller is the textbook case: the server-
+invocation example above. Sensor-network sleep scheduling (section 1) is
+another.
+
+**A contrasting design: Autonomi.** Autonomi's node software
+([`WithAutonomi/ant-node`, docs/REPLICATION_DESIGN.md](https://github.com/WithAutonomi/ant-node/blob/main/docs/REPLICATION_DESIGN.md))
+avoids voluntary shrinking altogether. Responsibility is fixed by XOR distance:
+a record belongs to the closest 7 nodes, and a node never decides to give up a
+record it is still responsible for. It prunes only records it has been out of
+range for, continuously, for 3 days. Before deleting a record that is only just
+out of range, it asks the current close group to prove possession, and deletes
+only if 6 of the 7 return valid proofs. Records far out of range are deleted
+without proof, a trade-off the design states openly. So the race polite shrink
+solves does not arise there, at the cost of re-replicating whenever membership
+shifts. Its possession proofs are the same idea as this repo's Stage-3 finding
+that verified coverage, not declared coverage, is the real defence against nodes
+that lie (REPORT_stage3.md §6–§7).
+
 ## 3. Congestion control — the oscillation as a delay instability
 
 Johari & Tan, *End-to-end congestion control for the Internet: delays and
