@@ -291,6 +291,15 @@ class Sim:
         a.intent_at = -1
         self.resize_events += 1
 
+    def _persistence_lag(self, a: Agent) -> float:
+        """The lag hysteresis is scaled by: the agent's OWN measured lag.
+
+        A hook rather than an inline `a.lag` so `oscillation_sweep.py` can test
+        the alternative — one network-wide constant — which is what the
+        decentralised delay-stability results (Johari & Tan 2001; Vinnicombe
+        2002) say should be *less* stable when lags differ."""
+        return a.lag
+
     def _decide(self, a: Agent):
         cfg = self.cfg
         cov, lvl, icov, _ilist = self._view(a)
@@ -325,8 +334,9 @@ class Sim:
         E = cfg.eval_every
         a.grow_acc = a.grow_acc + E if grow_cond else 0
         a.shrink_acc = a.shrink_acc + E if shrink_cond else 0
-        grow_need = math.ceil(cfg.grow_k * a.lag) if self.v.hysteresis else 0
-        shrink_need = math.ceil(cfg.shrink_k * a.lag) if self.v.hysteresis else 0
+        plag = self._persistence_lag(a)
+        grow_need = math.ceil(cfg.grow_k * plag) if self.v.hysteresis else 0
+        shrink_need = math.ceil(cfg.shrink_k * plag) if self.v.hysteresis else 0
 
         if grow_cond and a.grow_acc >= grow_need:
             self._start_grow(a)          # safety first: growing aborts intents
@@ -344,7 +354,7 @@ class Sim:
 
     def _execute_intent(self, a: Agent):
         """Two-phase shrink, phase 2: proceed only if the vacated half keeps
-        >= R copies after me AND every lower-priority (lower-id) announced
+        >= R copies after me AND every lower-id (higher-priority) announced
         intender have all left (TCAS tie-break: lower id proceeds first;
         higher-id intenders count me the same way and so defer to me)."""
         cfg = self.cfg

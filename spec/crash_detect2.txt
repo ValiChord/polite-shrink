@@ -1,0 +1,2 @@
+N=4 R=2 L=2 D=5 rule=all crash detect=2: VIOLATED (after 10,565 schedules)
+  [node3: announce@0 lag=1, node4: announce@0 lag=1; node1 dies @4] -> tick 5: node 4 vacated on a view counting [1, 2, 3, 4]; true holders now [2]

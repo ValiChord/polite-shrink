@@ -1,0 +1,8 @@
+N=5 R=1 L=2 D=4 tiebreak: VIOLATED (after 458,256 schedules)
+N=5 R=1 L=2 D=5 tiebreak: VIOLATED (after 2,525,280 schedules)
+N=5 R=2 L=2 D=4 tiebreak: VIOLATED (after 138,256 schedules)
+N=5 R=2 L=2 D=5 tiebreak: SAFE over 5,153,600 schedules
+N=4 R=1 L=3 D=6 tiebreak: VIOLATED (after 305,073 schedules)
+N=4 R=1 L=3 D=7 tiebreak: VIOLATED (after 1,715,658 schedules)
+N=4 R=2 L=3 D=6 tiebreak: VIOLATED (after 82,809 schedules)
+N=4 R=2 L=3 D=7 tiebreak: SAFE over 4,100,544 schedules

@@ -1,0 +1,46 @@
+replication: 966 runs (966 to run)
+  50/966
+  100/966
+  150/966
+  200/966
+  250/966
+  300/966
+  350/966
+  400/966
+  450/966
+  500/966
+  550/966
+  600/966
+  650/966
+  700/966
+  750/966
+  800/966
+  850/966
+  900/966
+  950/966
+  966/966
+# Detection-side claims: independent replication
+
+Fresh seeds (910000+, disjoint from every earlier study). Storm 50% at t=1500, N=200, R=5, pure V3. 95% intervals are exact (Clopper-Pearson).
+
+Environment: Python 3.14.8.
+
+## A. Is a spread of detection speeds protective? (p = 0)
+
+| network | runs losing data | rate | 95% CI |
+|---|---|---|---|
+| homogeneous dl=96 | 11/72 | 15% | 8–26% |
+| homogeneous dl=192 | 25/72 | 35% | 24–47% |
+| 50/50 mix dl=96 + dl=192 | 13/72 | 18% | 10–29% |
+
+## B. Does erring toward conviction need a ceiling? (dl = 192)
+
+| p | runs losing data | rate | 95% CI | eq. arc level |
+|---|---|---|---|---|
+| 0.0 | 54/150 | 36.0% | 28.3–44.2% | 1.37 |
+| 0.05 | 16/150 | 10.7% | 6.2–16.7% | 1.29 |
+| 0.1 | 4/150 | 2.7% | 0.7–6.7% | 1.32 |
+| 0.2 | 13/150 | 8.7% | 4.7–14.4% | 1.50 |
+| 0.4 | 23/150 | 15.3% | 10.0–22.1% | 2.11 |
+
+wrote C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-claude-code-feynman-Valichord\cc7bbb6b-97f4-4e3e-a3c1-5ac9377744e4\scratchpad\polite-shrink\results\detector_replication_summary.md

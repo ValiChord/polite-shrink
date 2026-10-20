@@ -1,0 +1,8 @@
+N=3 R=1 L=2 D=2 rule=all: SAFE over 4,088 schedules
+N=4 R=1 L=2 D=2 rule=all: SAFE over 65,520 schedules
+N=4 R=2 L=2 D=2 rule=all: SAFE over 65,520 schedules
+N=4 R=3 L=2 D=2 rule=all: SAFE over 65,520 schedules
+N=5 R=1 L=2 D=2 rule=all: SAFE over 1,048,544 schedules
+N=5 R=2 L=2 D=2 rule=all: SAFE over 1,048,544 schedules
+N=4 R=1 L=3 D=3 rule=all: SAFE over 1,185,840 schedules
+N=4 R=2 L=3 D=3 rule=all: SAFE over 1,185,840 schedules

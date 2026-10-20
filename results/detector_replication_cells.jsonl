@@ -1,0 +1,966 @@
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910001, "loss": true, "held": 1585}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910002, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910000, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910004, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910003, "loss": true, "held": 342}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910005, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910006, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910008, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910007, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910009, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910010, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910011, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910012, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910014, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910013, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910015, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910016, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910017, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910018, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910019, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910020, "loss": true, "held": 44}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910021, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910022, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910023, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910024, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910025, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910026, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910027, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910029, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910028, "loss": true, "held": 394}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910030, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910032, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910031, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910033, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910035, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910034, "loss": true, "held": 21777}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910036, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910037, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910038, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910039, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910040, "loss": true, "held": 912}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910041, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910042, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910043, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910044, "loss": true, "held": 3631}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910045, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910046, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910047, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910048, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910049, "loss": true, "held": 1936}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910050, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910051, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910052, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910053, "loss": true, "held": 3532}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910054, "loss": true, "held": 783}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910055, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910056, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910057, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910058, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910059, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910060, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910061, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910062, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910063, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910064, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910065, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910066, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910067, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910068, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910069, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910070, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=96", "seed": 910071, "loss": true, "held": 5137}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910000, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910001, "loss": true, "held": 4842}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910002, "loss": true, "held": 1080}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910003, "loss": true, "held": 4507}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910004, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910005, "loss": true, "held": 2064}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910006, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910007, "loss": true, "held": 2472}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910008, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910009, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910010, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910011, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910012, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910013, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910014, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910015, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910016, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910017, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910018, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910019, "loss": true, "held": 517}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910020, "loss": true, "held": 44}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910021, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910022, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910023, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910024, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910025, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910026, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910027, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910028, "loss": true, "held": 6034}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910029, "loss": true, "held": 1645}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910030, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910031, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910032, "loss": true, "held": 6728}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910033, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910034, "loss": true, "held": 41744}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910035, "loss": true, "held": 1797}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910036, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910037, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910038, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910039, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910040, "loss": true, "held": 8193}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910041, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910042, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910043, "loss": true, "held": 3850}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910044, "loss": true, "held": 10887}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910045, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910046, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910047, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910049, "loss": true, "held": 10855}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910048, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910050, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910051, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910052, "loss": true, "held": 4077}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910053, "loss": true, "held": 11699}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910054, "loss": true, "held": 2774}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910055, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910056, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910057, "loss": true, "held": 8109}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910058, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910059, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910060, "loss": true, "held": 918}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910061, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910062, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910063, "loss": true, "held": 2316}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910064, "loss": true, "held": 2979}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910065, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910066, "loss": true, "held": 518}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910067, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910068, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910069, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910070, "loss": false, "held": 0}
+{"kind": "het", "label": "homogeneous dl=192", "seed": 910071, "loss": true, "held": 19152}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910000, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910001, "loss": true, "held": 1619}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910002, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910003, "loss": true, "held": 342}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910004, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910005, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910006, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910007, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910008, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910009, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910010, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910011, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910013, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910012, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910014, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910015, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910016, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910017, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910018, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910019, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910020, "loss": true, "held": 44}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910021, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910022, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910023, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910024, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910025, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910026, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910027, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910028, "loss": true, "held": 763}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910029, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910030, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910031, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910032, "loss": true, "held": 1463}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910033, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910034, "loss": true, "held": 22858}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910035, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910037, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910036, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910038, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910040, "loss": true, "held": 960}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910039, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910041, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910042, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910043, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910044, "loss": true, "held": 4251}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910045, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910046, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910047, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910048, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910049, "loss": true, "held": 2181}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910050, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910051, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910052, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910053, "loss": true, "held": 3777}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910054, "loss": true, "held": 783}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910055, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910056, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910057, "loss": true, "held": 332}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910058, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910059, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910060, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910061, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910062, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910063, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910064, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910065, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910066, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910067, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910068, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910069, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910070, "loss": false, "held": 0}
+{"kind": "het", "label": "50/50 mix dl=96 + dl=192", "seed": 910071, "loss": true, "held": 6219}
+{"kind": "det", "p": 0.0, "seed": 910000, "loss": false, "held": 0, "eq_level": 1.5774333333333335, "sync": 21049}
+{"kind": "det", "p": 0.0, "seed": 910001, "loss": true, "held": 4842, "eq_level": 1.6702333333333332, "sync": 27428}
+{"kind": "det", "p": 0.0, "seed": 910002, "loss": true, "held": 1080, "eq_level": 1.9514666666666665, "sync": 27344}
+{"kind": "det", "p": 0.0, "seed": 910003, "loss": true, "held": 4507, "eq_level": 1.0199999999999996, "sync": 21468}
+{"kind": "det", "p": 0.0, "seed": 910004, "loss": false, "held": 0, "eq_level": 0.54, "sync": 11912}
+{"kind": "det", "p": 0.0, "seed": 910005, "loss": true, "held": 2064, "eq_level": 1.01, "sync": 17495}
+{"kind": "det", "p": 0.0, "seed": 910006, "loss": false, "held": 0, "eq_level": 1.6032000000000002, "sync": 14057}
+{"kind": "det", "p": 0.0, "seed": 910007, "loss": true, "held": 2472, "eq_level": 1.5600000000000003, "sync": 15590}
+{"kind": "det", "p": 0.0, "seed": 910008, "loss": false, "held": 0, "eq_level": 1.28, "sync": 19656}
+{"kind": "det", "p": 0.0, "seed": 910009, "loss": false, "held": 0, "eq_level": 0.9000000000000002, "sync": 4987}
+{"kind": "det", "p": 0.0, "seed": 910010, "loss": false, "held": 0, "eq_level": 1.0, "sync": 11229}
+{"kind": "det", "p": 0.0, "seed": 910011, "loss": false, "held": 0, "eq_level": 1.9600000000000009, "sync": 7920}
+{"kind": "det", "p": 0.0, "seed": 910012, "loss": false, "held": 0, "eq_level": 1.94, "sync": 16266}
+{"kind": "det", "p": 0.0, "seed": 910013, "loss": false, "held": 0, "eq_level": 1.5999999999999999, "sync": 12004}
+{"kind": "det", "p": 0.0, "seed": 910014, "loss": false, "held": 0, "eq_level": 1.0737333333333334, "sync": 27842}
+{"kind": "det", "p": 0.0, "seed": 910015, "loss": false, "held": 0, "eq_level": 1.6635666666666666, "sync": 24185}
+{"kind": "det", "p": 0.0, "seed": 910016, "loss": false, "held": 0, "eq_level": 1.8127333333333335, "sync": 28007}
+{"kind": "det", "p": 0.0, "seed": 910017, "loss": false, "held": 0, "eq_level": 2.0109999999999997, "sync": 22324}
+{"kind": "det", "p": 0.0, "seed": 910018, "loss": false, "held": 0, "eq_level": 1.41, "sync": 13315}
+{"kind": "det", "p": 0.0, "seed": 910019, "loss": true, "held": 517, "eq_level": 2.0576999999999996, "sync": 31207}
+{"kind": "det", "p": 0.0, "seed": 910020, "loss": true, "held": 44, "eq_level": 1.28, "sync": 15167}
+{"kind": "det", "p": 0.0, "seed": 910021, "loss": false, "held": 0, "eq_level": 1.2573333333333332, "sync": 15943}
+{"kind": "det", "p": 0.0, "seed": 910022, "loss": false, "held": 0, "eq_level": 0.54, "sync": 10945}
+{"kind": "det", "p": 0.0, "seed": 910024, "loss": false, "held": 0, "eq_level": 0.6751666666666667, "sync": 10183}
+{"kind": "det", "p": 0.0, "seed": 910023, "loss": false, "held": 0, "eq_level": 1.4659, "sync": 25017}
+{"kind": "det", "p": 0.0, "seed": 910025, "loss": false, "held": 0, "eq_level": 1.0358333333333334, "sync": 13689}
+{"kind": "det", "p": 0.0, "seed": 910026, "loss": false, "held": 0, "eq_level": 1.26, "sync": 7188}
+{"kind": "det", "p": 0.0, "seed": 910027, "loss": false, "held": 0, "eq_level": 1.1085333333333331, "sync": 8516}
+{"kind": "det", "p": 0.0, "seed": 910028, "loss": true, "held": 6034, "eq_level": 1.7164666666666668, "sync": 27445}
+{"kind": "det", "p": 0.0, "seed": 910029, "loss": true, "held": 1645, "eq_level": 0.8449333333333333, "sync": 18829}
+{"kind": "det", "p": 0.0, "seed": 910030, "loss": false, "held": 0, "eq_level": 1.4700000000000004, "sync": 10795}
+{"kind": "det", "p": 0.0, "seed": 910031, "loss": false, "held": 0, "eq_level": 1.5772333333333333, "sync": 29561}
+{"kind": "det", "p": 0.0, "seed": 910032, "loss": true, "held": 6728, "eq_level": 1.1538, "sync": 18522}
+{"kind": "det", "p": 0.0, "seed": 910033, "loss": false, "held": 0, "eq_level": 1.8319333333333332, "sync": 32337}
+{"kind": "det", "p": 0.0, "seed": 910034, "loss": true, "held": 41744, "eq_level": 1.6922333333333335, "sync": 24202}
+{"kind": "det", "p": 0.0, "seed": 910035, "loss": true, "held": 1797, "eq_level": 2.078633333333333, "sync": 24441}
+{"kind": "det", "p": 0.0, "seed": 910036, "loss": false, "held": 0, "eq_level": 0.82, "sync": 13152}
+{"kind": "det", "p": 0.0, "seed": 910037, "loss": false, "held": 0, "eq_level": 1.4733666666666667, "sync": 27642}
+{"kind": "det", "p": 0.0, "seed": 910038, "loss": false, "held": 0, "eq_level": 1.4016999999999995, "sync": 28100}
+{"kind": "det", "p": 0.0, "seed": 910039, "loss": false, "held": 0, "eq_level": 2.1791, "sync": 25750}
+{"kind": "det", "p": 0.0, "seed": 910040, "loss": true, "held": 8193, "eq_level": 1.406666666666667, "sync": 23512}
+{"kind": "det", "p": 0.0, "seed": 910041, "loss": false, "held": 0, "eq_level": 0.7220333333333332, "sync": 16278}
+{"kind": "det", "p": 0.0, "seed": 910042, "loss": false, "held": 0, "eq_level": 1.9, "sync": 13573}
+{"kind": "det", "p": 0.0, "seed": 910043, "loss": true, "held": 3850, "eq_level": 1.7066666666666666, "sync": 20671}
+{"kind": "det", "p": 0.0, "seed": 910045, "loss": false, "held": 0, "eq_level": 1.3, "sync": 10766}
+{"kind": "det", "p": 0.0, "seed": 910044, "loss": true, "held": 10887, "eq_level": 1.2188333333333332, "sync": 29962}
+{"kind": "det", "p": 0.0, "seed": 910046, "loss": false, "held": 0, "eq_level": 0.7800000000000001, "sync": 8152}
+{"kind": "det", "p": 0.0, "seed": 910047, "loss": false, "held": 0, "eq_level": 1.04, "sync": 14349}
+{"kind": "det", "p": 0.0, "seed": 910048, "loss": false, "held": 0, "eq_level": 2.0570000000000004, "sync": 21978}
+{"kind": "det", "p": 0.0, "seed": 910049, "loss": true, "held": 10855, "eq_level": 1.2034, "sync": 20650}
+{"kind": "det", "p": 0.0, "seed": 910050, "loss": false, "held": 0, "eq_level": 1.1200000000000003, "sync": 14372}
+{"kind": "det", "p": 0.0, "seed": 910051, "loss": false, "held": 0, "eq_level": 1.711833333333333, "sync": 24443}
+{"kind": "det", "p": 0.0, "seed": 910052, "loss": true, "held": 4077, "eq_level": 0.9215333333333333, "sync": 24693}
+{"kind": "det", "p": 0.0, "seed": 910053, "loss": true, "held": 11699, "eq_level": 1.9678666666666667, "sync": 30599}
+{"kind": "det", "p": 0.0, "seed": 910054, "loss": true, "held": 2774, "eq_level": 1.8570000000000004, "sync": 29719}
+{"kind": "det", "p": 0.0, "seed": 910055, "loss": false, "held": 0, "eq_level": 1.6783333333333332, "sync": 29340}
+{"kind": "det", "p": 0.0, "seed": 910056, "loss": false, "held": 0, "eq_level": 0.54, "sync": 13856}
+{"kind": "det", "p": 0.0, "seed": 910057, "loss": true, "held": 8109, "eq_level": 1.5671333333333337, "sync": 24998}
+{"kind": "det", "p": 0.0, "seed": 910058, "loss": false, "held": 0, "eq_level": 1.5718333333333336, "sync": 19498}
+{"kind": "det", "p": 0.0, "seed": 910059, "loss": false, "held": 0, "eq_level": 0.9118999999999999, "sync": 13226}
+{"kind": "det", "p": 0.0, "seed": 910060, "loss": true, "held": 918, "eq_level": 1.6223, "sync": 22265}
+{"kind": "det", "p": 0.0, "seed": 910061, "loss": false, "held": 0, "eq_level": 1.28, "sync": 12596}
+{"kind": "det", "p": 0.0, "seed": 910062, "loss": false, "held": 0, "eq_level": 1.869133333333333, "sync": 29792}
+{"kind": "det", "p": 0.0, "seed": 910063, "loss": true, "held": 2316, "eq_level": 1.3249000000000002, "sync": 25599}
+{"kind": "det", "p": 0.0, "seed": 910064, "loss": true, "held": 2979, "eq_level": 0.9368333333333334, "sync": 22450}
+{"kind": "det", "p": 0.0, "seed": 910065, "loss": false, "held": 0, "eq_level": 1.2377, "sync": 25237}
+{"kind": "det", "p": 0.0, "seed": 910066, "loss": true, "held": 518, "eq_level": 1.2518666666666667, "sync": 16731}
+{"kind": "det", "p": 0.0, "seed": 910067, "loss": false, "held": 0, "eq_level": 1.26, "sync": 14096}
+{"kind": "det", "p": 0.0, "seed": 910068, "loss": false, "held": 0, "eq_level": 1.3930666666666665, "sync": 26397}
+{"kind": "det", "p": 0.0, "seed": 910069, "loss": false, "held": 0, "eq_level": 0.9643666666666668, "sync": 21518}
+{"kind": "det", "p": 0.0, "seed": 910070, "loss": false, "held": 0, "eq_level": 1.07, "sync": 11906}
+{"kind": "det", "p": 0.0, "seed": 910071, "loss": true, "held": 19152, "eq_level": 1.6902333333333335, "sync": 20348}
+{"kind": "det", "p": 0.0, "seed": 910072, "loss": false, "held": 0, "eq_level": 1.2699999999999996, "sync": 19363}
+{"kind": "det", "p": 0.0, "seed": 910073, "loss": false, "held": 0, "eq_level": 1.42, "sync": 18708}
+{"kind": "det", "p": 0.0, "seed": 910074, "loss": true, "held": 20844, "eq_level": 1.6179000000000001, "sync": 28895}
+{"kind": "det", "p": 0.0, "seed": 910075, "loss": false, "held": 0, "eq_level": 0.84, "sync": 15063}
+{"kind": "det", "p": 0.0, "seed": 910076, "loss": false, "held": 0, "eq_level": 1.3727333333333331, "sync": 17166}
+{"kind": "det", "p": 0.0, "seed": 910077, "loss": true, "held": 4663, "eq_level": 1.9930000000000003, "sync": 24740}
+{"kind": "det", "p": 0.0, "seed": 910078, "loss": true, "held": 11040, "eq_level": 1.18, "sync": 17601}
+{"kind": "det", "p": 0.0, "seed": 910079, "loss": true, "held": 8033, "eq_level": 1.5742666666666665, "sync": 27117}
+{"kind": "det", "p": 0.0, "seed": 910080, "loss": false, "held": 0, "eq_level": 1.18, "sync": 15508}
+{"kind": "det", "p": 0.0, "seed": 910081, "loss": false, "held": 0, "eq_level": 1.0199999999999996, "sync": 15036}
+{"kind": "det", "p": 0.0, "seed": 910082, "loss": true, "held": 2635, "eq_level": 1.7790000000000001, "sync": 29637}
+{"kind": "det", "p": 0.0, "seed": 910083, "loss": false, "held": 0, "eq_level": 1.563366666666667, "sync": 7659}
+{"kind": "det", "p": 0.0, "seed": 910084, "loss": true, "held": 40630, "eq_level": 1.8318333333333332, "sync": 28683}
+{"kind": "det", "p": 0.0, "seed": 910085, "loss": false, "held": 0, "eq_level": 1.0044666666666666, "sync": 17270}
+{"kind": "det", "p": 0.0, "seed": 910086, "loss": false, "held": 0, "eq_level": 1.6687666666666663, "sync": 20143}
+{"kind": "det", "p": 0.0, "seed": 910087, "loss": false, "held": 0, "eq_level": 1.8400000000000003, "sync": 9476}
+{"kind": "det", "p": 0.0, "seed": 910088, "loss": false, "held": 0, "eq_level": 1.42, "sync": 15973}
+{"kind": "det", "p": 0.0, "seed": 910089, "loss": false, "held": 0, "eq_level": 1.0089666666666666, "sync": 19781}
+{"kind": "det", "p": 0.0, "seed": 910090, "loss": false, "held": 0, "eq_level": 1.26, "sync": 14618}
+{"kind": "det", "p": 0.0, "seed": 910091, "loss": false, "held": 0, "eq_level": 1.46, "sync": 4616}
+{"kind": "det", "p": 0.0, "seed": 910092, "loss": false, "held": 0, "eq_level": 0.542, "sync": 14172}
+{"kind": "det", "p": 0.0, "seed": 910093, "loss": false, "held": 0, "eq_level": 1.2, "sync": 4525}
+{"kind": "det", "p": 0.0, "seed": 910094, "loss": false, "held": 0, "eq_level": 1.7564000000000002, "sync": 24067}
+{"kind": "det", "p": 0.0, "seed": 910095, "loss": true, "held": 9666, "eq_level": 1.6748999999999996, "sync": 31795}
+{"kind": "det", "p": 0.0, "seed": 910096, "loss": true, "held": 1369, "eq_level": 2.0035999999999996, "sync": 30164}
+{"kind": "det", "p": 0.0, "seed": 910097, "loss": false, "held": 0, "eq_level": 0.54, "sync": 11174}
+{"kind": "det", "p": 0.0, "seed": 910098, "loss": false, "held": 0, "eq_level": 0.6680333333333334, "sync": 12806}
+{"kind": "det", "p": 0.0, "seed": 910099, "loss": false, "held": 0, "eq_level": 1.05, "sync": 17277}
+{"kind": "det", "p": 0.0, "seed": 910100, "loss": true, "held": 885, "eq_level": 1.5929333333333333, "sync": 27662}
+{"kind": "det", "p": 0.0, "seed": 910101, "loss": false, "held": 0, "eq_level": 1.4058, "sync": 29979}
+{"kind": "det", "p": 0.0, "seed": 910102, "loss": false, "held": 0, "eq_level": 1.0999999999999999, "sync": 16681}
+{"kind": "det", "p": 0.0, "seed": 910103, "loss": true, "held": 6312, "eq_level": 1.7559999999999998, "sync": 24203}
+{"kind": "det", "p": 0.0, "seed": 910104, "loss": false, "held": 0, "eq_level": 1.43, "sync": 13431}
+{"kind": "det", "p": 0.0, "seed": 910105, "loss": false, "held": 0, "eq_level": 0.9000000000000002, "sync": 17712}
+{"kind": "det", "p": 0.0, "seed": 910106, "loss": true, "held": 10327, "eq_level": 1.2451000000000003, "sync": 23553}
+{"kind": "det", "p": 0.0, "seed": 910107, "loss": false, "held": 0, "eq_level": 1.98, "sync": 13461}
+{"kind": "det", "p": 0.0, "seed": 910108, "loss": false, "held": 0, "eq_level": 1.6072, "sync": 25012}
+{"kind": "det", "p": 0.0, "seed": 910109, "loss": false, "held": 0, "eq_level": 1.1512, "sync": 27270}
+{"kind": "det", "p": 0.0, "seed": 910110, "loss": true, "held": 7493, "eq_level": 0.9000000000000002, "sync": 16434}
+{"kind": "det", "p": 0.0, "seed": 910111, "loss": false, "held": 0, "eq_level": 1.2636, "sync": 11344}
+{"kind": "det", "p": 0.0, "seed": 910112, "loss": false, "held": 0, "eq_level": 1.0948666666666669, "sync": 25394}
+{"kind": "det", "p": 0.0, "seed": 910113, "loss": true, "held": 2262, "eq_level": 1.4988, "sync": 27398}
+{"kind": "det", "p": 0.0, "seed": 910114, "loss": false, "held": 0, "eq_level": 1.28, "sync": 15774}
+{"kind": "det", "p": 0.0, "seed": 910115, "loss": true, "held": 13679, "eq_level": 1.1220666666666668, "sync": 21614}
+{"kind": "det", "p": 0.0, "seed": 910116, "loss": true, "held": 2875, "eq_level": 1.33, "sync": 14935}
+{"kind": "det", "p": 0.0, "seed": 910117, "loss": false, "held": 0, "eq_level": 1.54, "sync": 8667}
+{"kind": "det", "p": 0.0, "seed": 910118, "loss": false, "held": 0, "eq_level": 1.6120333333333334, "sync": 18611}
+{"kind": "det", "p": 0.0, "seed": 910119, "loss": true, "held": 19283, "eq_level": 0.9000333333333334, "sync": 16599}
+{"kind": "det", "p": 0.0, "seed": 910120, "loss": false, "held": 0, "eq_level": 1.3424666666666667, "sync": 22300}
+{"kind": "det", "p": 0.0, "seed": 910121, "loss": false, "held": 0, "eq_level": 1.5120666666666667, "sync": 12989}
+{"kind": "det", "p": 0.0, "seed": 910122, "loss": false, "held": 0, "eq_level": 1.2814333333333334, "sync": 27953}
+{"kind": "det", "p": 0.0, "seed": 910123, "loss": false, "held": 0, "eq_level": 1.1783666666666666, "sync": 28048}
+{"kind": "det", "p": 0.0, "seed": 910124, "loss": true, "held": 21140, "eq_level": 1.74, "sync": 15377}
+{"kind": "det", "p": 0.0, "seed": 910125, "loss": true, "held": 3821, "eq_level": 1.46, "sync": 13509}
+{"kind": "det", "p": 0.0, "seed": 910126, "loss": false, "held": 0, "eq_level": 1.4897333333333331, "sync": 23372}
+{"kind": "det", "p": 0.0, "seed": 910127, "loss": false, "held": 0, "eq_level": 1.8384000000000003, "sync": 26227}
+{"kind": "det", "p": 0.0, "seed": 910128, "loss": true, "held": 4210, "eq_level": 1.6530333333333331, "sync": 29214}
+{"kind": "det", "p": 0.0, "seed": 910129, "loss": false, "held": 0, "eq_level": 1.3208, "sync": 15320}
+{"kind": "det", "p": 0.0, "seed": 910130, "loss": true, "held": 948, "eq_level": 1.6195333333333333, "sync": 28414}
+{"kind": "det", "p": 0.0, "seed": 910131, "loss": false, "held": 0, "eq_level": 1.8723333333333334, "sync": 27714}
+{"kind": "det", "p": 0.0, "seed": 910132, "loss": true, "held": 5250, "eq_level": 1.4399999999999997, "sync": 14574}
+{"kind": "det", "p": 0.0, "seed": 910133, "loss": true, "held": 9157, "eq_level": 0.8489333333333333, "sync": 21237}
+{"kind": "det", "p": 0.0, "seed": 910134, "loss": false, "held": 0, "eq_level": 1.3183333333333334, "sync": 19137}
+{"kind": "det", "p": 0.0, "seed": 910135, "loss": false, "held": 0, "eq_level": 1.3100000000000003, "sync": 16045}
+{"kind": "det", "p": 0.0, "seed": 910136, "loss": false, "held": 0, "eq_level": 1.3499999999999999, "sync": 11540}
+{"kind": "det", "p": 0.0, "seed": 910137, "loss": false, "held": 0, "eq_level": 1.0081333333333335, "sync": 19582}
+{"kind": "det", "p": 0.0, "seed": 910138, "loss": true, "held": 12095, "eq_level": 1.33, "sync": 20900}
+{"kind": "det", "p": 0.0, "seed": 910139, "loss": false, "held": 0, "eq_level": 1.7206999999999997, "sync": 20304}
+{"kind": "det", "p": 0.0, "seed": 910141, "loss": true, "held": 10055, "eq_level": 1.34, "sync": 14344}
+{"kind": "det", "p": 0.0, "seed": 910140, "loss": true, "held": 46700, "eq_level": 1.8580999999999999, "sync": 36428}
+{"kind": "det", "p": 0.0, "seed": 910142, "loss": false, "held": 0, "eq_level": 0.54, "sync": 16666}
+{"kind": "det", "p": 0.0, "seed": 910143, "loss": false, "held": 0, "eq_level": 1.4603666666666668, "sync": 21037}
+{"kind": "det", "p": 0.0, "seed": 910144, "loss": true, "held": 8226, "eq_level": 2.1523999999999996, "sync": 33871}
+{"kind": "det", "p": 0.0, "seed": 910145, "loss": true, "held": 1237, "eq_level": 1.5392, "sync": 29332}
+{"kind": "det", "p": 0.0, "seed": 910146, "loss": false, "held": 0, "eq_level": 1.2351999999999999, "sync": 26866}
+{"kind": "det", "p": 0.0, "seed": 910147, "loss": true, "held": 4172, "eq_level": 0.54, "sync": 15920}
+{"kind": "det", "p": 0.0, "seed": 910148, "loss": false, "held": 0, "eq_level": 1.7463, "sync": 20141}
+{"kind": "det", "p": 0.0, "seed": 910149, "loss": true, "held": 4322, "eq_level": 1.04, "sync": 18010}
+{"kind": "det", "p": 0.05, "seed": 910000, "loss": false, "held": 0, "eq_level": 1.1620000000000001, "sync": 14096}
+{"kind": "det", "p": 0.05, "seed": 910001, "loss": false, "held": 0, "eq_level": 1.2242, "sync": 12975}
+{"kind": "det", "p": 0.05, "seed": 910002, "loss": false, "held": 0, "eq_level": 1.0098333333333336, "sync": 14161}
+{"kind": "det", "p": 0.05, "seed": 910003, "loss": false, "held": 0, "eq_level": 1.2876333333333334, "sync": 7027}
+{"kind": "det", "p": 0.05, "seed": 910004, "loss": false, "held": 0, "eq_level": 1.5327666666666664, "sync": 10492}
+{"kind": "det", "p": 0.05, "seed": 910005, "loss": false, "held": 0, "eq_level": 1.4568333333333334, "sync": 6397}
+{"kind": "det", "p": 0.05, "seed": 910006, "loss": false, "held": 0, "eq_level": 1.7577333333333336, "sync": 5858}
+{"kind": "det", "p": 0.05, "seed": 910007, "loss": false, "held": 0, "eq_level": 1.4104999999999999, "sync": 15243}
+{"kind": "det", "p": 0.05, "seed": 910008, "loss": false, "held": 0, "eq_level": 1.2039, "sync": 15755}
+{"kind": "det", "p": 0.05, "seed": 910009, "loss": false, "held": 0, "eq_level": 1.2290666666666668, "sync": 7493}
+{"kind": "det", "p": 0.05, "seed": 910010, "loss": false, "held": 0, "eq_level": 1.264333333333333, "sync": 10434}
+{"kind": "det", "p": 0.05, "seed": 910011, "loss": false, "held": 0, "eq_level": 1.3853666666666666, "sync": 4286}
+{"kind": "det", "p": 0.05, "seed": 910012, "loss": true, "held": 12359, "eq_level": 1.4213, "sync": 28398}
+{"kind": "det", "p": 0.05, "seed": 910013, "loss": false, "held": 0, "eq_level": 1.3871666666666667, "sync": 7900}
+{"kind": "det", "p": 0.05, "seed": 910014, "loss": false, "held": 0, "eq_level": 1.0551333333333333, "sync": 13515}
+{"kind": "det", "p": 0.05, "seed": 910015, "loss": false, "held": 0, "eq_level": 1.4083999999999999, "sync": 8752}
+{"kind": "det", "p": 0.05, "seed": 910016, "loss": false, "held": 0, "eq_level": 1.3750333333333333, "sync": 8436}
+{"kind": "det", "p": 0.05, "seed": 910017, "loss": false, "held": 0, "eq_level": 1.722833333333333, "sync": 9183}
+{"kind": "det", "p": 0.05, "seed": 910018, "loss": false, "held": 0, "eq_level": 1.4091, "sync": 5306}
+{"kind": "det", "p": 0.05, "seed": 910019, "loss": true, "held": 10431, "eq_level": 1.1238666666666668, "sync": 20553}
+{"kind": "det", "p": 0.05, "seed": 910020, "loss": false, "held": 0, "eq_level": 1.1737, "sync": 5877}
+{"kind": "det", "p": 0.05, "seed": 910021, "loss": false, "held": 0, "eq_level": 1.2834333333333334, "sync": 9585}
+{"kind": "det", "p": 0.05, "seed": 910022, "loss": false, "held": 0, "eq_level": 1.4518666666666666, "sync": 20837}
+{"kind": "det", "p": 0.05, "seed": 910023, "loss": false, "held": 0, "eq_level": 1.3993999999999998, "sync": 10196}
+{"kind": "det", "p": 0.05, "seed": 910024, "loss": false, "held": 0, "eq_level": 1.1850999999999998, "sync": 10975}
+{"kind": "det", "p": 0.05, "seed": 910025, "loss": false, "held": 0, "eq_level": 1.3130333333333335, "sync": 12469}
+{"kind": "det", "p": 0.05, "seed": 910026, "loss": false, "held": 0, "eq_level": 1.1980666666666666, "sync": 6860}
+{"kind": "det", "p": 0.05, "seed": 910027, "loss": false, "held": 0, "eq_level": 1.2259666666666666, "sync": 8839}
+{"kind": "det", "p": 0.05, "seed": 910028, "loss": false, "held": 0, "eq_level": 0.7885666666666666, "sync": 6322}
+{"kind": "det", "p": 0.05, "seed": 910029, "loss": false, "held": 0, "eq_level": 1.1355666666666666, "sync": 13973}
+{"kind": "det", "p": 0.05, "seed": 910030, "loss": false, "held": 0, "eq_level": 1.1844, "sync": 4750}
+{"kind": "det", "p": 0.05, "seed": 910031, "loss": false, "held": 0, "eq_level": 1.0494333333333334, "sync": 14744}
+{"kind": "det", "p": 0.05, "seed": 910032, "loss": true, "held": 3277, "eq_level": 1.4741666666666668, "sync": 16567}
+{"kind": "det", "p": 0.05, "seed": 910033, "loss": false, "held": 0, "eq_level": 1.4831666666666665, "sync": 14214}
+{"kind": "det", "p": 0.05, "seed": 910035, "loss": false, "held": 0, "eq_level": 1.2039333333333333, "sync": 13639}
+{"kind": "det", "p": 0.05, "seed": 910034, "loss": false, "held": 0, "eq_level": 1.1481000000000001, "sync": 16833}
+{"kind": "det", "p": 0.05, "seed": 910036, "loss": false, "held": 0, "eq_level": 1.1819333333333333, "sync": 14373}
+{"kind": "det", "p": 0.05, "seed": 910037, "loss": false, "held": 0, "eq_level": 1.1669, "sync": 13204}
+{"kind": "det", "p": 0.05, "seed": 910038, "loss": false, "held": 0, "eq_level": 1.4651333333333336, "sync": 5894}
+{"kind": "det", "p": 0.05, "seed": 910039, "loss": false, "held": 0, "eq_level": 1.2660000000000002, "sync": 7114}
+{"kind": "det", "p": 0.05, "seed": 910040, "loss": false, "held": 0, "eq_level": 1.7042666666666666, "sync": 15384}
+{"kind": "det", "p": 0.05, "seed": 910041, "loss": true, "held": 8753, "eq_level": 1.0486333333333333, "sync": 16316}
+{"kind": "det", "p": 0.05, "seed": 910042, "loss": false, "held": 0, "eq_level": 0.8769333333333335, "sync": 8637}
+{"kind": "det", "p": 0.05, "seed": 910043, "loss": false, "held": 0, "eq_level": 1.5904, "sync": 9669}
+{"kind": "det", "p": 0.05, "seed": 910044, "loss": false, "held": 0, "eq_level": 1.5097999999999998, "sync": 8404}
+{"kind": "det", "p": 0.05, "seed": 910045, "loss": false, "held": 0, "eq_level": 1.5752333333333335, "sync": 21683}
+{"kind": "det", "p": 0.05, "seed": 910046, "loss": false, "held": 0, "eq_level": 1.2669333333333335, "sync": 7698}
+{"kind": "det", "p": 0.05, "seed": 910047, "loss": false, "held": 0, "eq_level": 1.2006666666666665, "sync": 9601}
+{"kind": "det", "p": 0.05, "seed": 910048, "loss": false, "held": 0, "eq_level": 1.234533333333333, "sync": 13929}
+{"kind": "det", "p": 0.05, "seed": 910049, "loss": false, "held": 0, "eq_level": 1.1465333333333332, "sync": 12799}
+{"kind": "det", "p": 0.05, "seed": 910050, "loss": false, "held": 0, "eq_level": 1.7431000000000003, "sync": 20793}
+{"kind": "det", "p": 0.05, "seed": 910051, "loss": true, "held": 5416, "eq_level": 1.1447999999999998, "sync": 14685}
+{"kind": "det", "p": 0.05, "seed": 910052, "loss": false, "held": 0, "eq_level": 1.0769666666666668, "sync": 16712}
+{"kind": "det", "p": 0.05, "seed": 910053, "loss": false, "held": 0, "eq_level": 1.2709333333333332, "sync": 10434}
+{"kind": "det", "p": 0.05, "seed": 910054, "loss": false, "held": 0, "eq_level": 1.0722000000000003, "sync": 9600}
+{"kind": "det", "p": 0.05, "seed": 910055, "loss": false, "held": 0, "eq_level": 0.9279666666666666, "sync": 15589}
+{"kind": "det", "p": 0.05, "seed": 910056, "loss": false, "held": 0, "eq_level": 0.7755333333333333, "sync": 9455}
+{"kind": "det", "p": 0.05, "seed": 910058, "loss": false, "held": 0, "eq_level": 0.9843333333333334, "sync": 15221}
+{"kind": "det", "p": 0.05, "seed": 910057, "loss": false, "held": 0, "eq_level": 1.3947666666666665, "sync": 8644}
+{"kind": "det", "p": 0.05, "seed": 910059, "loss": false, "held": 0, "eq_level": 1.8205, "sync": 7000}
+{"kind": "det", "p": 0.05, "seed": 910060, "loss": false, "held": 0, "eq_level": 2.1323333333333334, "sync": 18393}
+{"kind": "det", "p": 0.05, "seed": 910061, "loss": false, "held": 0, "eq_level": 1.3152666666666668, "sync": 13272}
+{"kind": "det", "p": 0.05, "seed": 910062, "loss": false, "held": 0, "eq_level": 1.3010333333333335, "sync": 9111}
+{"kind": "det", "p": 0.05, "seed": 910063, "loss": true, "held": 2250, "eq_level": 1.0781000000000003, "sync": 21535}
+{"kind": "det", "p": 0.05, "seed": 910064, "loss": false, "held": 0, "eq_level": 1.2536333333333334, "sync": 10570}
+{"kind": "det", "p": 0.05, "seed": 910065, "loss": true, "held": 25141, "eq_level": 1.4444, "sync": 12105}
+{"kind": "det", "p": 0.05, "seed": 910066, "loss": false, "held": 0, "eq_level": 0.9786000000000001, "sync": 6140}
+{"kind": "det", "p": 0.05, "seed": 910067, "loss": true, "held": 5027, "eq_level": 1.3588333333333333, "sync": 15751}
+{"kind": "det", "p": 0.05, "seed": 910068, "loss": false, "held": 0, "eq_level": 1.436033333333333, "sync": 9508}
+{"kind": "det", "p": 0.05, "seed": 910069, "loss": false, "held": 0, "eq_level": 1.3991333333333333, "sync": 4865}
+{"kind": "det", "p": 0.05, "seed": 910070, "loss": false, "held": 0, "eq_level": 1.5668, "sync": 7576}
+{"kind": "det", "p": 0.05, "seed": 910071, "loss": true, "held": 3463, "eq_level": 1.2636333333333332, "sync": 17374}
+{"kind": "det", "p": 0.05, "seed": 910072, "loss": false, "held": 0, "eq_level": 1.2014666666666665, "sync": 4409}
+{"kind": "det", "p": 0.05, "seed": 910073, "loss": false, "held": 0, "eq_level": 1.2069333333333332, "sync": 7050}
+{"kind": "det", "p": 0.05, "seed": 910074, "loss": false, "held": 0, "eq_level": 1.7527999999999997, "sync": 26445}
+{"kind": "det", "p": 0.05, "seed": 910075, "loss": false, "held": 0, "eq_level": 1.5563666666666665, "sync": 5202}
+{"kind": "det", "p": 0.05, "seed": 910076, "loss": false, "held": 0, "eq_level": 1.0406999999999997, "sync": 17485}
+{"kind": "det", "p": 0.05, "seed": 910077, "loss": false, "held": 0, "eq_level": 1.3807, "sync": 16942}
+{"kind": "det", "p": 0.05, "seed": 910078, "loss": false, "held": 0, "eq_level": 1.7578, "sync": 10046}
+{"kind": "det", "p": 0.05, "seed": 910079, "loss": true, "held": 3232, "eq_level": 1.2223000000000002, "sync": 15746}
+{"kind": "det", "p": 0.05, "seed": 910080, "loss": false, "held": 0, "eq_level": 1.2902333333333336, "sync": 6094}
+{"kind": "det", "p": 0.05, "seed": 910081, "loss": false, "held": 0, "eq_level": 1.3667666666666667, "sync": 11066}
+{"kind": "det", "p": 0.05, "seed": 910082, "loss": false, "held": 0, "eq_level": 1.4405, "sync": 7555}
+{"kind": "det", "p": 0.05, "seed": 910083, "loss": false, "held": 0, "eq_level": 1.2488333333333335, "sync": 12722}
+{"kind": "det", "p": 0.05, "seed": 910084, "loss": false, "held": 0, "eq_level": 1.5679333333333334, "sync": 13017}
+{"kind": "det", "p": 0.05, "seed": 910085, "loss": false, "held": 0, "eq_level": 0.7199999999999999, "sync": 6113}
+{"kind": "det", "p": 0.05, "seed": 910086, "loss": false, "held": 0, "eq_level": 1.4305333333333332, "sync": 7867}
+{"kind": "det", "p": 0.05, "seed": 910087, "loss": false, "held": 0, "eq_level": 1.2084, "sync": 11984}
+{"kind": "det", "p": 0.05, "seed": 910088, "loss": true, "held": 43201, "eq_level": 1.3834333333333333, "sync": 24805}
+{"kind": "det", "p": 0.05, "seed": 910089, "loss": false, "held": 0, "eq_level": 1.2335000000000003, "sync": 10842}
+{"kind": "det", "p": 0.05, "seed": 910090, "loss": false, "held": 0, "eq_level": 1.4218, "sync": 6273}
+{"kind": "det", "p": 0.05, "seed": 910091, "loss": false, "held": 0, "eq_level": 0.9640666666666667, "sync": 6684}
+{"kind": "det", "p": 0.05, "seed": 910092, "loss": false, "held": 0, "eq_level": 0.8592, "sync": 9520}
+{"kind": "det", "p": 0.05, "seed": 910093, "loss": false, "held": 0, "eq_level": 1.4691333333333334, "sync": 5679}
+{"kind": "det", "p": 0.05, "seed": 910094, "loss": false, "held": 0, "eq_level": 1.0607000000000002, "sync": 8309}
+{"kind": "det", "p": 0.05, "seed": 910095, "loss": false, "held": 0, "eq_level": 1.5361000000000002, "sync": 8473}
+{"kind": "det", "p": 0.05, "seed": 910096, "loss": false, "held": 0, "eq_level": 1.0492000000000001, "sync": 7079}
+{"kind": "det", "p": 0.05, "seed": 910097, "loss": true, "held": 2538, "eq_level": 1.0637333333333334, "sync": 17989}
+{"kind": "det", "p": 0.05, "seed": 910098, "loss": false, "held": 0, "eq_level": 0.8954666666666666, "sync": 20295}
+{"kind": "det", "p": 0.05, "seed": 910099, "loss": true, "held": 17891, "eq_level": 1.2491333333333334, "sync": 16964}
+{"kind": "det", "p": 0.05, "seed": 910100, "loss": true, "held": 712, "eq_level": 1.5768666666666669, "sync": 13837}
+{"kind": "det", "p": 0.05, "seed": 910101, "loss": false, "held": 0, "eq_level": 1.038, "sync": 8959}
+{"kind": "det", "p": 0.05, "seed": 910102, "loss": false, "held": 0, "eq_level": 1.2557666666666665, "sync": 13580}
+{"kind": "det", "p": 0.05, "seed": 910103, "loss": false, "held": 0, "eq_level": 1.1908333333333332, "sync": 12826}
+{"kind": "det", "p": 0.05, "seed": 910104, "loss": false, "held": 0, "eq_level": 0.7513333333333333, "sync": 6109}
+{"kind": "det", "p": 0.05, "seed": 910105, "loss": false, "held": 0, "eq_level": 0.9056333333333333, "sync": 6290}
+{"kind": "det", "p": 0.05, "seed": 910106, "loss": false, "held": 0, "eq_level": 1.3098333333333334, "sync": 8405}
+{"kind": "det", "p": 0.05, "seed": 910107, "loss": false, "held": 0, "eq_level": 1.2444333333333335, "sync": 18057}
+{"kind": "det", "p": 0.05, "seed": 910108, "loss": false, "held": 0, "eq_level": 1.3609666666666664, "sync": 5012}
+{"kind": "det", "p": 0.05, "seed": 910109, "loss": false, "held": 0, "eq_level": 1.1733666666666667, "sync": 7660}
+{"kind": "det", "p": 0.05, "seed": 910110, "loss": false, "held": 0, "eq_level": 1.0148, "sync": 11630}
+{"kind": "det", "p": 0.05, "seed": 910111, "loss": false, "held": 0, "eq_level": 1.1836333333333335, "sync": 6929}
+{"kind": "det", "p": 0.05, "seed": 910112, "loss": true, "held": 2588, "eq_level": 0.9206666666666669, "sync": 17131}
+{"kind": "det", "p": 0.05, "seed": 910113, "loss": false, "held": 0, "eq_level": 1.1654333333333333, "sync": 15553}
+{"kind": "det", "p": 0.05, "seed": 910114, "loss": false, "held": 0, "eq_level": 1.1553000000000002, "sync": 11653}
+{"kind": "det", "p": 0.05, "seed": 910115, "loss": false, "held": 0, "eq_level": 1.4375, "sync": 6353}
+{"kind": "det", "p": 0.05, "seed": 910116, "loss": false, "held": 0, "eq_level": 1.3433666666666668, "sync": 13193}
+{"kind": "det", "p": 0.05, "seed": 910117, "loss": false, "held": 0, "eq_level": 1.1276333333333335, "sync": 6244}
+{"kind": "det", "p": 0.05, "seed": 910118, "loss": false, "held": 0, "eq_level": 1.5532666666666668, "sync": 7567}
+{"kind": "det", "p": 0.05, "seed": 910119, "loss": false, "held": 0, "eq_level": 2.0906333333333333, "sync": 5612}
+{"kind": "det", "p": 0.05, "seed": 910120, "loss": false, "held": 0, "eq_level": 1.0567333333333333, "sync": 19456}
+{"kind": "det", "p": 0.05, "seed": 910121, "loss": false, "held": 0, "eq_level": 1.2268, "sync": 7645}
+{"kind": "det", "p": 0.05, "seed": 910122, "loss": false, "held": 0, "eq_level": 1.2876333333333334, "sync": 16790}
+{"kind": "det", "p": 0.05, "seed": 910123, "loss": false, "held": 0, "eq_level": 1.3514333333333333, "sync": 4383}
+{"kind": "det", "p": 0.05, "seed": 910124, "loss": false, "held": 0, "eq_level": 1.8688999999999998, "sync": 27039}
+{"kind": "det", "p": 0.05, "seed": 910125, "loss": false, "held": 0, "eq_level": 1.189733333333333, "sync": 22483}
+{"kind": "det", "p": 0.05, "seed": 910126, "loss": false, "held": 0, "eq_level": 1.3475333333333332, "sync": 17224}
+{"kind": "det", "p": 0.05, "seed": 910127, "loss": false, "held": 0, "eq_level": 1.1789333333333332, "sync": 6954}
+{"kind": "det", "p": 0.05, "seed": 910128, "loss": false, "held": 0, "eq_level": 1.0212999999999999, "sync": 15717}
+{"kind": "det", "p": 0.05, "seed": 910129, "loss": true, "held": 4559, "eq_level": 0.9790333333333334, "sync": 13675}
+{"kind": "det", "p": 0.05, "seed": 910130, "loss": false, "held": 0, "eq_level": 1.4584666666666666, "sync": 13369}
+{"kind": "det", "p": 0.05, "seed": 910131, "loss": false, "held": 0, "eq_level": 1.6935333333333333, "sync": 19663}
+{"kind": "det", "p": 0.05, "seed": 910132, "loss": false, "held": 0, "eq_level": 1.1993333333333336, "sync": 10219}
+{"kind": "det", "p": 0.05, "seed": 910133, "loss": false, "held": 0, "eq_level": 1.5594666666666668, "sync": 18225}
+{"kind": "det", "p": 0.05, "seed": 910134, "loss": false, "held": 0, "eq_level": 1.2975999999999999, "sync": 8780}
+{"kind": "det", "p": 0.05, "seed": 910135, "loss": false, "held": 0, "eq_level": 1.5083666666666666, "sync": 9403}
+{"kind": "det", "p": 0.05, "seed": 910136, "loss": false, "held": 0, "eq_level": 1.2292333333333332, "sync": 10998}
+{"kind": "det", "p": 0.05, "seed": 910137, "loss": false, "held": 0, "eq_level": 1.3595000000000002, "sync": 13013}
+{"kind": "det", "p": 0.05, "seed": 910138, "loss": false, "held": 0, "eq_level": 1.4322, "sync": 5226}
+{"kind": "det", "p": 0.05, "seed": 910139, "loss": false, "held": 0, "eq_level": 0.9830666666666665, "sync": 6733}
+{"kind": "det", "p": 0.05, "seed": 910140, "loss": false, "held": 0, "eq_level": 1.1744333333333332, "sync": 5624}
+{"kind": "det", "p": 0.05, "seed": 910141, "loss": false, "held": 0, "eq_level": 1.6195333333333333, "sync": 5597}
+{"kind": "det", "p": 0.05, "seed": 910142, "loss": false, "held": 0, "eq_level": 1.4913333333333332, "sync": 12672}
+{"kind": "det", "p": 0.05, "seed": 910143, "loss": false, "held": 0, "eq_level": 1.5701333333333336, "sync": 8410}
+{"kind": "det", "p": 0.05, "seed": 910144, "loss": false, "held": 0, "eq_level": 1.2091666666666665, "sync": 7403}
+{"kind": "det", "p": 0.05, "seed": 910145, "loss": false, "held": 0, "eq_level": 1.0907666666666667, "sync": 8781}
+{"kind": "det", "p": 0.05, "seed": 910146, "loss": false, "held": 0, "eq_level": 1.3346000000000002, "sync": 8998}
+{"kind": "det", "p": 0.05, "seed": 910147, "loss": false, "held": 0, "eq_level": 1.5888000000000002, "sync": 6562}
+{"kind": "det", "p": 0.05, "seed": 910148, "loss": false, "held": 0, "eq_level": 1.2217666666666667, "sync": 8704}
+{"kind": "det", "p": 0.05, "seed": 910149, "loss": false, "held": 0, "eq_level": 1.2573333333333332, "sync": 13914}
+{"kind": "det", "p": 0.1, "seed": 910000, "loss": false, "held": 0, "eq_level": 1.9444666666666672, "sync": 4840}
+{"kind": "det", "p": 0.1, "seed": 910001, "loss": true, "held": 28142, "eq_level": 1.3491, "sync": 17458}
+{"kind": "det", "p": 0.1, "seed": 910002, "loss": false, "held": 0, "eq_level": 1.1314, "sync": 10164}
+{"kind": "det", "p": 0.1, "seed": 910003, "loss": false, "held": 0, "eq_level": 1.1606, "sync": 8476}
+{"kind": "det", "p": 0.1, "seed": 910004, "loss": false, "held": 0, "eq_level": 1.4023666666666665, "sync": 8629}
+{"kind": "det", "p": 0.1, "seed": 910006, "loss": false, "held": 0, "eq_level": 1.6135666666666666, "sync": 8282}
+{"kind": "det", "p": 0.1, "seed": 910005, "loss": false, "held": 0, "eq_level": 1.7355333333333336, "sync": 8623}
+{"kind": "det", "p": 0.1, "seed": 910007, "loss": false, "held": 0, "eq_level": 1.4637666666666667, "sync": 7545}
+{"kind": "det", "p": 0.1, "seed": 910008, "loss": false, "held": 0, "eq_level": 1.1317333333333333, "sync": 7703}
+{"kind": "det", "p": 0.1, "seed": 910009, "loss": false, "held": 0, "eq_level": 1.5694666666666668, "sync": 6525}
+{"kind": "det", "p": 0.1, "seed": 910010, "loss": false, "held": 0, "eq_level": 1.0842999999999998, "sync": 11366}
+{"kind": "det", "p": 0.1, "seed": 910011, "loss": false, "held": 0, "eq_level": 1.2907999999999997, "sync": 7426}
+{"kind": "det", "p": 0.1, "seed": 910012, "loss": false, "held": 0, "eq_level": 1.393533333333333, "sync": 11392}
+{"kind": "det", "p": 0.1, "seed": 910013, "loss": false, "held": 0, "eq_level": 1.3537, "sync": 8628}
+{"kind": "det", "p": 0.1, "seed": 910014, "loss": false, "held": 0, "eq_level": 1.1462666666666665, "sync": 8153}
+{"kind": "det", "p": 0.1, "seed": 910015, "loss": false, "held": 0, "eq_level": 1.1088333333333333, "sync": 14979}
+{"kind": "det", "p": 0.1, "seed": 910016, "loss": false, "held": 0, "eq_level": 1.1743333333333335, "sync": 9781}
+{"kind": "det", "p": 0.1, "seed": 910017, "loss": false, "held": 0, "eq_level": 1.116466666666667, "sync": 15025}
+{"kind": "det", "p": 0.1, "seed": 910018, "loss": false, "held": 0, "eq_level": 1.0982999999999998, "sync": 4939}
+{"kind": "det", "p": 0.1, "seed": 910019, "loss": false, "held": 0, "eq_level": 1.4200333333333333, "sync": 6268}
+{"kind": "det", "p": 0.1, "seed": 910020, "loss": false, "held": 0, "eq_level": 1.3536000000000001, "sync": 7154}
+{"kind": "det", "p": 0.1, "seed": 910021, "loss": false, "held": 0, "eq_level": 1.1368666666666667, "sync": 13357}
+{"kind": "det", "p": 0.1, "seed": 910022, "loss": false, "held": 0, "eq_level": 1.1219, "sync": 7904}
+{"kind": "det", "p": 0.1, "seed": 910023, "loss": false, "held": 0, "eq_level": 1.5568333333333333, "sync": 23518}
+{"kind": "det", "p": 0.1, "seed": 910024, "loss": false, "held": 0, "eq_level": 1.398, "sync": 12530}
+{"kind": "det", "p": 0.1, "seed": 910025, "loss": false, "held": 0, "eq_level": 1.3753666666666666, "sync": 7866}
+{"kind": "det", "p": 0.1, "seed": 910026, "loss": false, "held": 0, "eq_level": 1.7347333333333332, "sync": 18838}
+{"kind": "det", "p": 0.1, "seed": 910027, "loss": false, "held": 0, "eq_level": 1.4572333333333332, "sync": 9687}
+{"kind": "det", "p": 0.1, "seed": 910028, "loss": false, "held": 0, "eq_level": 1.4720333333333333, "sync": 7458}
+{"kind": "det", "p": 0.1, "seed": 910029, "loss": false, "held": 0, "eq_level": 1.2324333333333335, "sync": 6977}
+{"kind": "det", "p": 0.1, "seed": 910030, "loss": false, "held": 0, "eq_level": 1.308366666666667, "sync": 9139}
+{"kind": "det", "p": 0.1, "seed": 910031, "loss": false, "held": 0, "eq_level": 1.8798333333333335, "sync": 6385}
+{"kind": "det", "p": 0.1, "seed": 910032, "loss": false, "held": 0, "eq_level": 1.2035666666666667, "sync": 10971}
+{"kind": "det", "p": 0.1, "seed": 910033, "loss": false, "held": 0, "eq_level": 1.1287333333333334, "sync": 10047}
+{"kind": "det", "p": 0.1, "seed": 910034, "loss": false, "held": 0, "eq_level": 1.520066666666667, "sync": 6081}
+{"kind": "det", "p": 0.1, "seed": 910035, "loss": false, "held": 0, "eq_level": 0.9401333333333334, "sync": 8012}
+{"kind": "det", "p": 0.1, "seed": 910036, "loss": false, "held": 0, "eq_level": 1.2326000000000001, "sync": 5864}
+{"kind": "det", "p": 0.1, "seed": 910037, "loss": false, "held": 0, "eq_level": 1.1244666666666665, "sync": 8010}
+{"kind": "det", "p": 0.1, "seed": 910038, "loss": false, "held": 0, "eq_level": 1.6436000000000002, "sync": 10567}
+{"kind": "det", "p": 0.1, "seed": 910039, "loss": false, "held": 0, "eq_level": 1.5565333333333333, "sync": 6177}
+{"kind": "det", "p": 0.1, "seed": 910040, "loss": false, "held": 0, "eq_level": 1.0740333333333334, "sync": 9405}
+{"kind": "det", "p": 0.1, "seed": 910041, "loss": false, "held": 0, "eq_level": 1.471933333333333, "sync": 7963}
+{"kind": "det", "p": 0.1, "seed": 910042, "loss": false, "held": 0, "eq_level": 0.9551999999999998, "sync": 7840}
+{"kind": "det", "p": 0.1, "seed": 910043, "loss": false, "held": 0, "eq_level": 1.0519666666666667, "sync": 12924}
+{"kind": "det", "p": 0.1, "seed": 910044, "loss": false, "held": 0, "eq_level": 1.1239666666666666, "sync": 17568}
+{"kind": "det", "p": 0.1, "seed": 910045, "loss": false, "held": 0, "eq_level": 1.2520666666666667, "sync": 13410}
+{"kind": "det", "p": 0.1, "seed": 910046, "loss": false, "held": 0, "eq_level": 1.2460666666666669, "sync": 9110}
+{"kind": "det", "p": 0.1, "seed": 910047, "loss": false, "held": 0, "eq_level": 1.3745666666666667, "sync": 6346}
+{"kind": "det", "p": 0.1, "seed": 910048, "loss": false, "held": 0, "eq_level": 1.5049666666666668, "sync": 9220}
+{"kind": "det", "p": 0.1, "seed": 910049, "loss": false, "held": 0, "eq_level": 1.6658666666666664, "sync": 7607}
+{"kind": "det", "p": 0.1, "seed": 910050, "loss": false, "held": 0, "eq_level": 1.4287666666666667, "sync": 6373}
+{"kind": "det", "p": 0.1, "seed": 910051, "loss": false, "held": 0, "eq_level": 1.5484666666666664, "sync": 7566}
+{"kind": "det", "p": 0.1, "seed": 910052, "loss": false, "held": 0, "eq_level": 1.418, "sync": 5249}
+{"kind": "det", "p": 0.1, "seed": 910053, "loss": false, "held": 0, "eq_level": 1.1391333333333333, "sync": 13620}
+{"kind": "det", "p": 0.1, "seed": 910054, "loss": false, "held": 0, "eq_level": 1.127733333333333, "sync": 7372}
+{"kind": "det", "p": 0.1, "seed": 910055, "loss": false, "held": 0, "eq_level": 1.5755666666666666, "sync": 9097}
+{"kind": "det", "p": 0.1, "seed": 910056, "loss": false, "held": 0, "eq_level": 0.9277, "sync": 6852}
+{"kind": "det", "p": 0.1, "seed": 910057, "loss": false, "held": 0, "eq_level": 1.2311666666666665, "sync": 7378}
+{"kind": "det", "p": 0.1, "seed": 910058, "loss": false, "held": 0, "eq_level": 1.1916, "sync": 7187}
+{"kind": "det", "p": 0.1, "seed": 910059, "loss": false, "held": 0, "eq_level": 1.5290666666666666, "sync": 5666}
+{"kind": "det", "p": 0.1, "seed": 910060, "loss": false, "held": 0, "eq_level": 1.3319333333333334, "sync": 10918}
+{"kind": "det", "p": 0.1, "seed": 910061, "loss": false, "held": 0, "eq_level": 0.8681333333333333, "sync": 8818}
+{"kind": "det", "p": 0.1, "seed": 910062, "loss": false, "held": 0, "eq_level": 1.1835666666666664, "sync": 7252}
+{"kind": "det", "p": 0.1, "seed": 910063, "loss": false, "held": 0, "eq_level": 1.2597666666666665, "sync": 12006}
+{"kind": "det", "p": 0.1, "seed": 910064, "loss": false, "held": 0, "eq_level": 1.1743666666666666, "sync": 11723}
+{"kind": "det", "p": 0.1, "seed": 910065, "loss": false, "held": 0, "eq_level": 1.0342, "sync": 11767}
+{"kind": "det", "p": 0.1, "seed": 910066, "loss": false, "held": 0, "eq_level": 1.6677333333333333, "sync": 4832}
+{"kind": "det", "p": 0.1, "seed": 910067, "loss": false, "held": 0, "eq_level": 1.4014666666666666, "sync": 6790}
+{"kind": "det", "p": 0.1, "seed": 910068, "loss": false, "held": 0, "eq_level": 1.3491666666666666, "sync": 9404}
+{"kind": "det", "p": 0.1, "seed": 910069, "loss": false, "held": 0, "eq_level": 1.1769333333333334, "sync": 5924}
+{"kind": "det", "p": 0.1, "seed": 910070, "loss": false, "held": 0, "eq_level": 1.2420333333333333, "sync": 10365}
+{"kind": "det", "p": 0.1, "seed": 910071, "loss": false, "held": 0, "eq_level": 1.5526, "sync": 9135}
+{"kind": "det", "p": 0.1, "seed": 910072, "loss": false, "held": 0, "eq_level": 1.4153, "sync": 4425}
+{"kind": "det", "p": 0.1, "seed": 910073, "loss": false, "held": 0, "eq_level": 0.9371333333333333, "sync": 10176}
+{"kind": "det", "p": 0.1, "seed": 910074, "loss": false, "held": 0, "eq_level": 1.0293999999999999, "sync": 10948}
+{"kind": "det", "p": 0.1, "seed": 910075, "loss": false, "held": 0, "eq_level": 1.4520666666666666, "sync": 7590}
+{"kind": "det", "p": 0.1, "seed": 910077, "loss": false, "held": 0, "eq_level": 1.1589333333333331, "sync": 10777}
+{"kind": "det", "p": 0.1, "seed": 910076, "loss": false, "held": 0, "eq_level": 1.0474, "sync": 7066}
+{"kind": "det", "p": 0.1, "seed": 910078, "loss": false, "held": 0, "eq_level": 1.0157333333333334, "sync": 6769}
+{"kind": "det", "p": 0.1, "seed": 910079, "loss": false, "held": 0, "eq_level": 1.4655, "sync": 9000}
+{"kind": "det", "p": 0.1, "seed": 910080, "loss": false, "held": 0, "eq_level": 1.6247333333333334, "sync": 7560}
+{"kind": "det", "p": 0.1, "seed": 910081, "loss": false, "held": 0, "eq_level": 1.5653000000000001, "sync": 5102}
+{"kind": "det", "p": 0.1, "seed": 910082, "loss": false, "held": 0, "eq_level": 1.3896333333333333, "sync": 5636}
+{"kind": "det", "p": 0.1, "seed": 910083, "loss": false, "held": 0, "eq_level": 1.6851999999999996, "sync": 8857}
+{"kind": "det", "p": 0.1, "seed": 910084, "loss": false, "held": 0, "eq_level": 1.1393666666666666, "sync": 10896}
+{"kind": "det", "p": 0.1, "seed": 910085, "loss": false, "held": 0, "eq_level": 1.3364, "sync": 10350}
+{"kind": "det", "p": 0.1, "seed": 910086, "loss": false, "held": 0, "eq_level": 1.1664666666666665, "sync": 7613}
+{"kind": "det", "p": 0.1, "seed": 910087, "loss": false, "held": 0, "eq_level": 1.2964, "sync": 9904}
+{"kind": "det", "p": 0.1, "seed": 910088, "loss": false, "held": 0, "eq_level": 1.4039666666666668, "sync": 6425}
+{"kind": "det", "p": 0.1, "seed": 910089, "loss": false, "held": 0, "eq_level": 1.7842, "sync": 7261}
+{"kind": "det", "p": 0.1, "seed": 910090, "loss": false, "held": 0, "eq_level": 1.1638333333333335, "sync": 6910}
+{"kind": "det", "p": 0.1, "seed": 910091, "loss": false, "held": 0, "eq_level": 1.0676666666666668, "sync": 5215}
+{"kind": "det", "p": 0.1, "seed": 910092, "loss": false, "held": 0, "eq_level": 1.2147000000000001, "sync": 18176}
+{"kind": "det", "p": 0.1, "seed": 910093, "loss": false, "held": 0, "eq_level": 1.6954, "sync": 5707}
+{"kind": "det", "p": 0.1, "seed": 910094, "loss": false, "held": 0, "eq_level": 1.3890333333333333, "sync": 9340}
+{"kind": "det", "p": 0.1, "seed": 910095, "loss": false, "held": 0, "eq_level": 1.1005666666666667, "sync": 15225}
+{"kind": "det", "p": 0.1, "seed": 910096, "loss": false, "held": 0, "eq_level": 1.3213, "sync": 5070}
+{"kind": "det", "p": 0.1, "seed": 910097, "loss": false, "held": 0, "eq_level": 0.9753333333333334, "sync": 12497}
+{"kind": "det", "p": 0.1, "seed": 910098, "loss": false, "held": 0, "eq_level": 1.4870666666666668, "sync": 16708}
+{"kind": "det", "p": 0.1, "seed": 910099, "loss": false, "held": 0, "eq_level": 0.9989333333333331, "sync": 5749}
+{"kind": "det", "p": 0.1, "seed": 910100, "loss": false, "held": 0, "eq_level": 1.2409, "sync": 6186}
+{"kind": "det", "p": 0.1, "seed": 910101, "loss": true, "held": 17615, "eq_level": 1.1489666666666667, "sync": 14042}
+{"kind": "det", "p": 0.1, "seed": 910102, "loss": false, "held": 0, "eq_level": 1.1657000000000002, "sync": 8042}
+{"kind": "det", "p": 0.1, "seed": 910103, "loss": false, "held": 0, "eq_level": 1.3094666666666668, "sync": 10721}
+{"kind": "det", "p": 0.1, "seed": 910104, "loss": false, "held": 0, "eq_level": 1.5134999999999998, "sync": 7152}
+{"kind": "det", "p": 0.1, "seed": 910105, "loss": false, "held": 0, "eq_level": 1.5376999999999998, "sync": 5318}
+{"kind": "det", "p": 0.1, "seed": 910106, "loss": false, "held": 0, "eq_level": 1.3681333333333334, "sync": 4841}
+{"kind": "det", "p": 0.1, "seed": 910107, "loss": false, "held": 0, "eq_level": 1.574, "sync": 5497}
+{"kind": "det", "p": 0.1, "seed": 910108, "loss": false, "held": 0, "eq_level": 1.2992333333333332, "sync": 4689}
+{"kind": "det", "p": 0.1, "seed": 910109, "loss": false, "held": 0, "eq_level": 0.9528333333333332, "sync": 7114}
+{"kind": "det", "p": 0.1, "seed": 910110, "loss": false, "held": 0, "eq_level": 1.0607333333333333, "sync": 6391}
+{"kind": "det", "p": 0.1, "seed": 910111, "loss": true, "held": 8804, "eq_level": 1.0302333333333333, "sync": 15716}
+{"kind": "det", "p": 0.1, "seed": 910112, "loss": false, "held": 0, "eq_level": 1.2333000000000003, "sync": 5849}
+{"kind": "det", "p": 0.1, "seed": 910113, "loss": false, "held": 0, "eq_level": 0.9980999999999999, "sync": 10436}
+{"kind": "det", "p": 0.1, "seed": 910114, "loss": false, "held": 0, "eq_level": 1.1579333333333335, "sync": 5407}
+{"kind": "det", "p": 0.1, "seed": 910115, "loss": false, "held": 0, "eq_level": 1.3180333333333334, "sync": 11318}
+{"kind": "det", "p": 0.1, "seed": 910116, "loss": false, "held": 0, "eq_level": 0.8923999999999999, "sync": 7268}
+{"kind": "det", "p": 0.1, "seed": 910118, "loss": false, "held": 0, "eq_level": 1.2556, "sync": 7537}
+{"kind": "det", "p": 0.1, "seed": 910117, "loss": false, "held": 0, "eq_level": 1.6484, "sync": 5970}
+{"kind": "det", "p": 0.1, "seed": 910119, "loss": false, "held": 0, "eq_level": 1.6366000000000003, "sync": 4762}
+{"kind": "det", "p": 0.1, "seed": 910120, "loss": false, "held": 0, "eq_level": 1.5182000000000002, "sync": 10533}
+{"kind": "det", "p": 0.1, "seed": 910121, "loss": false, "held": 0, "eq_level": 1.4347999999999999, "sync": 5593}
+{"kind": "det", "p": 0.1, "seed": 910122, "loss": false, "held": 0, "eq_level": 1.5882666666666665, "sync": 5484}
+{"kind": "det", "p": 0.1, "seed": 910123, "loss": false, "held": 0, "eq_level": 1.2590666666666666, "sync": 5262}
+{"kind": "det", "p": 0.1, "seed": 910124, "loss": false, "held": 0, "eq_level": 1.6195666666666666, "sync": 10153}
+{"kind": "det", "p": 0.1, "seed": 910125, "loss": false, "held": 0, "eq_level": 1.0255999999999998, "sync": 11391}
+{"kind": "det", "p": 0.1, "seed": 910126, "loss": false, "held": 0, "eq_level": 1.3127333333333333, "sync": 10673}
+{"kind": "det", "p": 0.1, "seed": 910127, "loss": false, "held": 0, "eq_level": 1.3971, "sync": 6157}
+{"kind": "det", "p": 0.1, "seed": 910128, "loss": false, "held": 0, "eq_level": 1.7084666666666666, "sync": 7930}
+{"kind": "det", "p": 0.1, "seed": 910129, "loss": false, "held": 0, "eq_level": 1.6353333333333333, "sync": 9948}
+{"kind": "det", "p": 0.1, "seed": 910130, "loss": false, "held": 0, "eq_level": 1.4907666666666666, "sync": 6074}
+{"kind": "det", "p": 0.1, "seed": 910131, "loss": false, "held": 0, "eq_level": 0.9357333333333334, "sync": 11940}
+{"kind": "det", "p": 0.1, "seed": 910132, "loss": false, "held": 0, "eq_level": 1.4293666666666665, "sync": 7822}
+{"kind": "det", "p": 0.1, "seed": 910133, "loss": false, "held": 0, "eq_level": 0.9586000000000001, "sync": 7691}
+{"kind": "det", "p": 0.1, "seed": 910134, "loss": false, "held": 0, "eq_level": 1.2717666666666667, "sync": 9244}
+{"kind": "det", "p": 0.1, "seed": 910135, "loss": false, "held": 0, "eq_level": 1.360333333333333, "sync": 8261}
+{"kind": "det", "p": 0.1, "seed": 910136, "loss": false, "held": 0, "eq_level": 1.1613999999999998, "sync": 9805}
+{"kind": "det", "p": 0.1, "seed": 910137, "loss": false, "held": 0, "eq_level": 1.5838333333333334, "sync": 7959}
+{"kind": "det", "p": 0.1, "seed": 910138, "loss": false, "held": 0, "eq_level": 0.7918333333333334, "sync": 8671}
+{"kind": "det", "p": 0.1, "seed": 910139, "loss": false, "held": 0, "eq_level": 1.4552999999999998, "sync": 14057}
+{"kind": "det", "p": 0.1, "seed": 910140, "loss": false, "held": 0, "eq_level": 1.1820666666666666, "sync": 8713}
+{"kind": "det", "p": 0.1, "seed": 910141, "loss": false, "held": 0, "eq_level": 1.4035666666666669, "sync": 8215}
+{"kind": "det", "p": 0.1, "seed": 910142, "loss": false, "held": 0, "eq_level": 1.2242000000000002, "sync": 7115}
+{"kind": "det", "p": 0.1, "seed": 910143, "loss": true, "held": 21293, "eq_level": 1.8748666666666667, "sync": 21396}
+{"kind": "det", "p": 0.1, "seed": 910144, "loss": false, "held": 0, "eq_level": 1.2446, "sync": 12303}
+{"kind": "det", "p": 0.1, "seed": 910145, "loss": false, "held": 0, "eq_level": 1.6738666666666668, "sync": 9381}
+{"kind": "det", "p": 0.1, "seed": 910146, "loss": false, "held": 0, "eq_level": 1.8698, "sync": 8537}
+{"kind": "det", "p": 0.1, "seed": 910147, "loss": false, "held": 0, "eq_level": 1.7527, "sync": 7234}
+{"kind": "det", "p": 0.1, "seed": 910148, "loss": false, "held": 0, "eq_level": 1.0081666666666664, "sync": 4211}
+{"kind": "det", "p": 0.1, "seed": 910149, "loss": false, "held": 0, "eq_level": 1.1602333333333334, "sync": 11492}
+{"kind": "det", "p": 0.2, "seed": 910000, "loss": false, "held": 0, "eq_level": 1.6269666666666667, "sync": 5430}
+{"kind": "det", "p": 0.2, "seed": 910001, "loss": true, "held": 12149, "eq_level": 1.1518999999999997, "sync": 13479}
+{"kind": "det", "p": 0.2, "seed": 910002, "loss": true, "held": 12388, "eq_level": 1.3326333333333331, "sync": 29643}
+{"kind": "det", "p": 0.2, "seed": 910003, "loss": false, "held": 0, "eq_level": 1.3291666666666666, "sync": 8419}
+{"kind": "det", "p": 0.2, "seed": 910004, "loss": false, "held": 0, "eq_level": 1.7903999999999995, "sync": 9220}
+{"kind": "det", "p": 0.2, "seed": 910005, "loss": false, "held": 0, "eq_level": 1.6051, "sync": 9005}
+{"kind": "det", "p": 0.2, "seed": 910006, "loss": false, "held": 0, "eq_level": 1.4925333333333333, "sync": 11433}
+{"kind": "det", "p": 0.2, "seed": 910007, "loss": false, "held": 0, "eq_level": 1.6012333333333333, "sync": 14551}
+{"kind": "det", "p": 0.2, "seed": 910008, "loss": false, "held": 0, "eq_level": 1.1643666666666668, "sync": 11249}
+{"kind": "det", "p": 0.2, "seed": 910009, "loss": false, "held": 0, "eq_level": 1.3318333333333334, "sync": 12026}
+{"kind": "det", "p": 0.2, "seed": 910010, "loss": false, "held": 0, "eq_level": 1.4862, "sync": 8771}
+{"kind": "det", "p": 0.2, "seed": 910011, "loss": false, "held": 0, "eq_level": 1.6358666666666664, "sync": 8307}
+{"kind": "det", "p": 0.2, "seed": 910012, "loss": false, "held": 0, "eq_level": 1.612066666666667, "sync": 13270}
+{"kind": "det", "p": 0.2, "seed": 910013, "loss": false, "held": 0, "eq_level": 1.2751666666666668, "sync": 8114}
+{"kind": "det", "p": 0.2, "seed": 910014, "loss": false, "held": 0, "eq_level": 1.338466666666667, "sync": 6945}
+{"kind": "det", "p": 0.2, "seed": 910015, "loss": false, "held": 0, "eq_level": 1.723066666666667, "sync": 9983}
+{"kind": "det", "p": 0.2, "seed": 910017, "loss": true, "held": 6406, "eq_level": 1.2938, "sync": 17965}
+{"kind": "det", "p": 0.2, "seed": 910016, "loss": false, "held": 0, "eq_level": 1.5760666666666667, "sync": 10914}
+{"kind": "det", "p": 0.2, "seed": 910018, "loss": true, "held": 12792, "eq_level": 1.3337666666666665, "sync": 24680}
+{"kind": "det", "p": 0.2, "seed": 910020, "loss": false, "held": 0, "eq_level": 1.3974666666666666, "sync": 7245}
+{"kind": "det", "p": 0.2, "seed": 910019, "loss": false, "held": 0, "eq_level": 1.7889333333333333, "sync": 7706}
+{"kind": "det", "p": 0.2, "seed": 910021, "loss": false, "held": 0, "eq_level": 1.2594333333333334, "sync": 9352}
+{"kind": "det", "p": 0.2, "seed": 910022, "loss": false, "held": 0, "eq_level": 1.3118333333333334, "sync": 13348}
+{"kind": "det", "p": 0.2, "seed": 910023, "loss": false, "held": 0, "eq_level": 1.5147666666666666, "sync": 13626}
+{"kind": "det", "p": 0.2, "seed": 910024, "loss": false, "held": 0, "eq_level": 1.2054666666666667, "sync": 10287}
+{"kind": "det", "p": 0.2, "seed": 910025, "loss": false, "held": 0, "eq_level": 1.4461333333333333, "sync": 7728}
+{"kind": "det", "p": 0.2, "seed": 910026, "loss": false, "held": 0, "eq_level": 1.5149000000000001, "sync": 9107}
+{"kind": "det", "p": 0.2, "seed": 910027, "loss": false, "held": 0, "eq_level": 1.7617999999999998, "sync": 7886}
+{"kind": "det", "p": 0.2, "seed": 910028, "loss": false, "held": 0, "eq_level": 1.7232333333333338, "sync": 11393}
+{"kind": "det", "p": 0.2, "seed": 910029, "loss": false, "held": 0, "eq_level": 1.3657000000000001, "sync": 10978}
+{"kind": "det", "p": 0.2, "seed": 910030, "loss": false, "held": 0, "eq_level": 1.5173, "sync": 7525}
+{"kind": "det", "p": 0.2, "seed": 910031, "loss": false, "held": 0, "eq_level": 1.8495666666666664, "sync": 7111}
+{"kind": "det", "p": 0.2, "seed": 910032, "loss": false, "held": 0, "eq_level": 1.1983, "sync": 8375}
+{"kind": "det", "p": 0.2, "seed": 910033, "loss": false, "held": 0, "eq_level": 1.7301666666666669, "sync": 8170}
+{"kind": "det", "p": 0.2, "seed": 910034, "loss": false, "held": 0, "eq_level": 1.3515666666666668, "sync": 14460}
+{"kind": "det", "p": 0.2, "seed": 910035, "loss": false, "held": 0, "eq_level": 1.4124, "sync": 8473}
+{"kind": "det", "p": 0.2, "seed": 910036, "loss": false, "held": 0, "eq_level": 1.5845000000000002, "sync": 8559}
+{"kind": "det", "p": 0.2, "seed": 910037, "loss": false, "held": 0, "eq_level": 1.2721, "sync": 15054}
+{"kind": "det", "p": 0.2, "seed": 910038, "loss": false, "held": 0, "eq_level": 1.5164666666666669, "sync": 7380}
+{"kind": "det", "p": 0.2, "seed": 910039, "loss": false, "held": 0, "eq_level": 1.8413666666666666, "sync": 9999}
+{"kind": "det", "p": 0.2, "seed": 910040, "loss": false, "held": 0, "eq_level": 1.6124333333333334, "sync": 5718}
+{"kind": "det", "p": 0.2, "seed": 910041, "loss": false, "held": 0, "eq_level": 1.554266666666667, "sync": 11249}
+{"kind": "det", "p": 0.2, "seed": 910042, "loss": false, "held": 0, "eq_level": 1.2164, "sync": 9229}
+{"kind": "det", "p": 0.2, "seed": 910043, "loss": false, "held": 0, "eq_level": 1.3926666666666665, "sync": 12386}
+{"kind": "det", "p": 0.2, "seed": 910044, "loss": false, "held": 0, "eq_level": 1.6065333333333334, "sync": 14454}
+{"kind": "det", "p": 0.2, "seed": 910045, "loss": false, "held": 0, "eq_level": 1.3839666666666666, "sync": 10127}
+{"kind": "det", "p": 0.2, "seed": 910046, "loss": false, "held": 0, "eq_level": 1.5357, "sync": 8659}
+{"kind": "det", "p": 0.2, "seed": 910047, "loss": false, "held": 0, "eq_level": 1.692333333333333, "sync": 9573}
+{"kind": "det", "p": 0.2, "seed": 910048, "loss": false, "held": 0, "eq_level": 1.3886, "sync": 7933}
+{"kind": "det", "p": 0.2, "seed": 910049, "loss": false, "held": 0, "eq_level": 1.4799, "sync": 12257}
+{"kind": "det", "p": 0.2, "seed": 910051, "loss": false, "held": 0, "eq_level": 1.2641333333333333, "sync": 12060}
+{"kind": "det", "p": 0.2, "seed": 910050, "loss": false, "held": 0, "eq_level": 1.8131666666666668, "sync": 9129}
+{"kind": "det", "p": 0.2, "seed": 910052, "loss": false, "held": 0, "eq_level": 1.357, "sync": 7904}
+{"kind": "det", "p": 0.2, "seed": 910053, "loss": false, "held": 0, "eq_level": 1.1697666666666668, "sync": 9922}
+{"kind": "det", "p": 0.2, "seed": 910054, "loss": false, "held": 0, "eq_level": 1.3376666666666668, "sync": 6028}
+{"kind": "det", "p": 0.2, "seed": 910055, "loss": false, "held": 0, "eq_level": 1.667733333333333, "sync": 8341}
+{"kind": "det", "p": 0.2, "seed": 910056, "loss": false, "held": 0, "eq_level": 1.4685333333333335, "sync": 6825}
+{"kind": "det", "p": 0.2, "seed": 910057, "loss": false, "held": 0, "eq_level": 1.5363333333333333, "sync": 10706}
+{"kind": "det", "p": 0.2, "seed": 910058, "loss": true, "held": 13433, "eq_level": 1.4308, "sync": 19306}
+{"kind": "det", "p": 0.2, "seed": 910059, "loss": false, "held": 0, "eq_level": 1.3842999999999999, "sync": 6873}
+{"kind": "det", "p": 0.2, "seed": 910060, "loss": false, "held": 0, "eq_level": 1.6767, "sync": 6888}
+{"kind": "det", "p": 0.2, "seed": 910061, "loss": false, "held": 0, "eq_level": 1.2056, "sync": 7875}
+{"kind": "det", "p": 0.2, "seed": 910062, "loss": true, "held": 33348, "eq_level": 1.5068000000000004, "sync": 22389}
+{"kind": "det", "p": 0.2, "seed": 910063, "loss": false, "held": 0, "eq_level": 1.5636, "sync": 7392}
+{"kind": "det", "p": 0.2, "seed": 910064, "loss": true, "held": 5889, "eq_level": 1.8402666666666667, "sync": 24992}
+{"kind": "det", "p": 0.2, "seed": 910065, "loss": false, "held": 0, "eq_level": 1.4918333333333331, "sync": 12938}
+{"kind": "det", "p": 0.2, "seed": 910066, "loss": false, "held": 0, "eq_level": 1.5886333333333333, "sync": 8372}
+{"kind": "det", "p": 0.2, "seed": 910067, "loss": false, "held": 0, "eq_level": 1.5991333333333333, "sync": 8558}
+{"kind": "det", "p": 0.2, "seed": 910068, "loss": false, "held": 0, "eq_level": 1.4585666666666668, "sync": 9786}
+{"kind": "det", "p": 0.2, "seed": 910069, "loss": false, "held": 0, "eq_level": 1.2124666666666668, "sync": 6767}
+{"kind": "det", "p": 0.2, "seed": 910070, "loss": false, "held": 0, "eq_level": 1.8298333333333332, "sync": 25002}
+{"kind": "det", "p": 0.2, "seed": 910071, "loss": false, "held": 0, "eq_level": 1.8715000000000002, "sync": 14775}
+{"kind": "det", "p": 0.2, "seed": 910072, "loss": false, "held": 0, "eq_level": 1.1646, "sync": 13700}
+{"kind": "det", "p": 0.2, "seed": 910073, "loss": false, "held": 0, "eq_level": 1.4381666666666666, "sync": 8210}
+{"kind": "det", "p": 0.2, "seed": 910074, "loss": true, "held": 10313, "eq_level": 1.4996000000000003, "sync": 18830}
+{"kind": "det", "p": 0.2, "seed": 910075, "loss": false, "held": 0, "eq_level": 1.6374333333333333, "sync": 6087}
+{"kind": "det", "p": 0.2, "seed": 910077, "loss": false, "held": 0, "eq_level": 1.7858, "sync": 21826}
+{"kind": "det", "p": 0.2, "seed": 910076, "loss": false, "held": 0, "eq_level": 1.6063, "sync": 5970}
+{"kind": "det", "p": 0.2, "seed": 910078, "loss": false, "held": 0, "eq_level": 1.515, "sync": 6092}
+{"kind": "det", "p": 0.2, "seed": 910079, "loss": false, "held": 0, "eq_level": 1.3876666666666666, "sync": 12124}
+{"kind": "det", "p": 0.2, "seed": 910080, "loss": false, "held": 0, "eq_level": 1.4053333333333333, "sync": 10925}
+{"kind": "det", "p": 0.2, "seed": 910081, "loss": false, "held": 0, "eq_level": 2.011066666666667, "sync": 9376}
+{"kind": "det", "p": 0.2, "seed": 910082, "loss": false, "held": 0, "eq_level": 1.3718333333333332, "sync": 10335}
+{"kind": "det", "p": 0.2, "seed": 910083, "loss": false, "held": 0, "eq_level": 1.0501, "sync": 7014}
+{"kind": "det", "p": 0.2, "seed": 910084, "loss": false, "held": 0, "eq_level": 1.6713999999999998, "sync": 10365}
+{"kind": "det", "p": 0.2, "seed": 910085, "loss": false, "held": 0, "eq_level": 1.7441, "sync": 22564}
+{"kind": "det", "p": 0.2, "seed": 910086, "loss": false, "held": 0, "eq_level": 1.7094333333333331, "sync": 18947}
+{"kind": "det", "p": 0.2, "seed": 910087, "loss": false, "held": 0, "eq_level": 1.7550666666666666, "sync": 7026}
+{"kind": "det", "p": 0.2, "seed": 910088, "loss": false, "held": 0, "eq_level": 1.4530999999999998, "sync": 9730}
+{"kind": "det", "p": 0.2, "seed": 910089, "loss": false, "held": 0, "eq_level": 1.4744333333333335, "sync": 12812}
+{"kind": "det", "p": 0.2, "seed": 910090, "loss": false, "held": 0, "eq_level": 1.3052333333333335, "sync": 9877}
+{"kind": "det", "p": 0.2, "seed": 910091, "loss": false, "held": 0, "eq_level": 1.4666000000000001, "sync": 8715}
+{"kind": "det", "p": 0.2, "seed": 910092, "loss": false, "held": 0, "eq_level": 1.5430666666666668, "sync": 9047}
+{"kind": "det", "p": 0.2, "seed": 910093, "loss": false, "held": 0, "eq_level": 1.5995000000000004, "sync": 13102}
+{"kind": "det", "p": 0.2, "seed": 910094, "loss": false, "held": 0, "eq_level": 1.3912, "sync": 10035}
+{"kind": "det", "p": 0.2, "seed": 910095, "loss": false, "held": 0, "eq_level": 1.2085000000000001, "sync": 11196}
+{"kind": "det", "p": 0.2, "seed": 910096, "loss": false, "held": 0, "eq_level": 1.6726666666666667, "sync": 6908}
+{"kind": "det", "p": 0.2, "seed": 910097, "loss": false, "held": 0, "eq_level": 1.2110999999999998, "sync": 8114}
+{"kind": "det", "p": 0.2, "seed": 910098, "loss": false, "held": 0, "eq_level": 1.2492666666666667, "sync": 15402}
+{"kind": "det", "p": 0.2, "seed": 910099, "loss": false, "held": 0, "eq_level": 1.8818333333333332, "sync": 4948}
+{"kind": "det", "p": 0.2, "seed": 910100, "loss": true, "held": 12346, "eq_level": 1.3827666666666667, "sync": 18635}
+{"kind": "det", "p": 0.2, "seed": 910101, "loss": false, "held": 0, "eq_level": 1.4362000000000001, "sync": 14052}
+{"kind": "det", "p": 0.2, "seed": 910102, "loss": false, "held": 0, "eq_level": 1.2378666666666667, "sync": 13818}
+{"kind": "det", "p": 0.2, "seed": 910103, "loss": false, "held": 0, "eq_level": 1.3878333333333335, "sync": 8263}
+{"kind": "det", "p": 0.2, "seed": 910104, "loss": false, "held": 0, "eq_level": 1.5610666666666668, "sync": 6557}
+{"kind": "det", "p": 0.2, "seed": 910105, "loss": false, "held": 0, "eq_level": 1.6873000000000002, "sync": 7127}
+{"kind": "det", "p": 0.2, "seed": 910106, "loss": false, "held": 0, "eq_level": 1.6076000000000001, "sync": 12927}
+{"kind": "det", "p": 0.2, "seed": 910107, "loss": true, "held": 14967, "eq_level": 1.2759666666666665, "sync": 19304}
+{"kind": "det", "p": 0.2, "seed": 910108, "loss": false, "held": 0, "eq_level": 1.3188, "sync": 10461}
+{"kind": "det", "p": 0.2, "seed": 910109, "loss": false, "held": 0, "eq_level": 1.5558999999999998, "sync": 12883}
+{"kind": "det", "p": 0.2, "seed": 910110, "loss": false, "held": 0, "eq_level": 1.797833333333333, "sync": 6830}
+{"kind": "det", "p": 0.2, "seed": 910111, "loss": false, "held": 0, "eq_level": 1.6257000000000001, "sync": 10926}
+{"kind": "det", "p": 0.2, "seed": 910112, "loss": false, "held": 0, "eq_level": 1.4222333333333335, "sync": 9079}
+{"kind": "det", "p": 0.2, "seed": 910113, "loss": false, "held": 0, "eq_level": 1.8758000000000001, "sync": 8417}
+{"kind": "det", "p": 0.2, "seed": 910114, "loss": false, "held": 0, "eq_level": 1.7004666666666663, "sync": 9472}
+{"kind": "det", "p": 0.2, "seed": 910115, "loss": false, "held": 0, "eq_level": 1.4460666666666668, "sync": 14939}
+{"kind": "det", "p": 0.2, "seed": 910116, "loss": false, "held": 0, "eq_level": 1.1521, "sync": 9514}
+{"kind": "det", "p": 0.2, "seed": 910117, "loss": false, "held": 0, "eq_level": 1.5104333333333333, "sync": 11454}
+{"kind": "det", "p": 0.2, "seed": 910118, "loss": false, "held": 0, "eq_level": 1.2207, "sync": 14046}
+{"kind": "det", "p": 0.2, "seed": 910119, "loss": false, "held": 0, "eq_level": 1.1314333333333333, "sync": 12216}
+{"kind": "det", "p": 0.2, "seed": 910120, "loss": false, "held": 0, "eq_level": 1.1589666666666665, "sync": 10803}
+{"kind": "det", "p": 0.2, "seed": 910121, "loss": false, "held": 0, "eq_level": 1.4891666666666667, "sync": 6920}
+{"kind": "det", "p": 0.2, "seed": 910122, "loss": false, "held": 0, "eq_level": 1.6615666666666669, "sync": 8097}
+{"kind": "det", "p": 0.2, "seed": 910123, "loss": false, "held": 0, "eq_level": 1.4976666666666667, "sync": 6665}
+{"kind": "det", "p": 0.2, "seed": 910124, "loss": false, "held": 0, "eq_level": 1.2522999999999997, "sync": 10751}
+{"kind": "det", "p": 0.2, "seed": 910125, "loss": true, "held": 12076, "eq_level": 1.5724, "sync": 15811}
+{"kind": "det", "p": 0.2, "seed": 910126, "loss": false, "held": 0, "eq_level": 1.2773666666666668, "sync": 15476}
+{"kind": "det", "p": 0.2, "seed": 910127, "loss": false, "held": 0, "eq_level": 1.5088000000000001, "sync": 8658}
+{"kind": "det", "p": 0.2, "seed": 910128, "loss": false, "held": 0, "eq_level": 1.8629666666666667, "sync": 9438}
+{"kind": "det", "p": 0.2, "seed": 910129, "loss": false, "held": 0, "eq_level": 1.5085, "sync": 10614}
+{"kind": "det", "p": 0.2, "seed": 910130, "loss": false, "held": 0, "eq_level": 1.7740333333333334, "sync": 9859}
+{"kind": "det", "p": 0.2, "seed": 910131, "loss": true, "held": 17330, "eq_level": 1.6985333333333335, "sync": 18872}
+{"kind": "det", "p": 0.2, "seed": 910132, "loss": true, "held": 16453, "eq_level": 2.116566666666667, "sync": 26926}
+{"kind": "det", "p": 0.2, "seed": 910133, "loss": false, "held": 0, "eq_level": 1.3971333333333336, "sync": 8262}
+{"kind": "det", "p": 0.2, "seed": 910134, "loss": false, "held": 0, "eq_level": 0.9808, "sync": 11144}
+{"kind": "det", "p": 0.2, "seed": 910135, "loss": false, "held": 0, "eq_level": 1.2798666666666665, "sync": 10145}
+{"kind": "det", "p": 0.2, "seed": 910136, "loss": false, "held": 0, "eq_level": 1.3614333333333335, "sync": 8503}
+{"kind": "det", "p": 0.2, "seed": 910137, "loss": false, "held": 0, "eq_level": 1.8047333333333333, "sync": 6122}
+{"kind": "det", "p": 0.2, "seed": 910138, "loss": false, "held": 0, "eq_level": 1.5427, "sync": 9389}
+{"kind": "det", "p": 0.2, "seed": 910139, "loss": false, "held": 0, "eq_level": 1.5414666666666665, "sync": 8845}
+{"kind": "det", "p": 0.2, "seed": 910140, "loss": false, "held": 0, "eq_level": 1.5380666666666667, "sync": 15888}
+{"kind": "det", "p": 0.2, "seed": 910141, "loss": false, "held": 0, "eq_level": 1.537666666666667, "sync": 7654}
+{"kind": "det", "p": 0.2, "seed": 910142, "loss": false, "held": 0, "eq_level": 1.6891999999999996, "sync": 13296}
+{"kind": "det", "p": 0.2, "seed": 910143, "loss": false, "held": 0, "eq_level": 1.5457, "sync": 14865}
+{"kind": "det", "p": 0.2, "seed": 910144, "loss": false, "held": 0, "eq_level": 1.769666666666667, "sync": 21076}
+{"kind": "det", "p": 0.2, "seed": 910145, "loss": false, "held": 0, "eq_level": 1.5870666666666668, "sync": 8688}
+{"kind": "det", "p": 0.2, "seed": 910146, "loss": false, "held": 0, "eq_level": 1.4380333333333335, "sync": 14565}
+{"kind": "det", "p": 0.2, "seed": 910147, "loss": false, "held": 0, "eq_level": 1.3729, "sync": 5773}
+{"kind": "det", "p": 0.2, "seed": 910148, "loss": false, "held": 0, "eq_level": 1.5355, "sync": 11772}
+{"kind": "det", "p": 0.2, "seed": 910149, "loss": false, "held": 0, "eq_level": 1.7621333333333338, "sync": 6980}
+{"kind": "det", "p": 0.4, "seed": 910001, "loss": false, "held": 0, "eq_level": 1.9815000000000003, "sync": 28759}
+{"kind": "det", "p": 0.4, "seed": 910000, "loss": true, "held": 376, "eq_level": 2.3575333333333335, "sync": 30320}
+{"kind": "det", "p": 0.4, "seed": 910002, "loss": true, "held": 15322, "eq_level": 2.457266666666667, "sync": 44249}
+{"kind": "det", "p": 0.4, "seed": 910003, "loss": false, "held": 0, "eq_level": 2.0210333333333335, "sync": 49454}
+{"kind": "det", "p": 0.4, "seed": 910004, "loss": false, "held": 0, "eq_level": 2.6017333333333332, "sync": 43623}
+{"kind": "det", "p": 0.4, "seed": 910005, "loss": false, "held": 0, "eq_level": 2.0867000000000004, "sync": 17085}
+{"kind": "det", "p": 0.4, "seed": 910006, "loss": false, "held": 0, "eq_level": 2.1233, "sync": 48446}
+{"kind": "det", "p": 0.4, "seed": 910007, "loss": false, "held": 0, "eq_level": 2.243733333333333, "sync": 16704}
+{"kind": "det", "p": 0.4, "seed": 910008, "loss": false, "held": 0, "eq_level": 1.7654999999999998, "sync": 27481}
+{"kind": "det", "p": 0.4, "seed": 910009, "loss": false, "held": 0, "eq_level": 1.8199666666666667, "sync": 37608}
+{"kind": "det", "p": 0.4, "seed": 910010, "loss": true, "held": 8934, "eq_level": 1.9456666666666664, "sync": 24487}
+{"kind": "det", "p": 0.4, "seed": 910011, "loss": false, "held": 0, "eq_level": 2.1972, "sync": 44548}
+{"kind": "det", "p": 0.4, "seed": 910012, "loss": false, "held": 0, "eq_level": 1.8623333333333334, "sync": 36659}
+{"kind": "det", "p": 0.4, "seed": 910013, "loss": false, "held": 0, "eq_level": 1.9396666666666669, "sync": 42587}
+{"kind": "det", "p": 0.4, "seed": 910014, "loss": false, "held": 0, "eq_level": 2.1900666666666666, "sync": 24817}
+{"kind": "det", "p": 0.4, "seed": 910015, "loss": false, "held": 0, "eq_level": 2.3647333333333336, "sync": 36006}
+{"kind": "det", "p": 0.4, "seed": 910016, "loss": false, "held": 0, "eq_level": 2.5460999999999996, "sync": 51074}
+{"kind": "det", "p": 0.4, "seed": 910017, "loss": false, "held": 0, "eq_level": 2.3545000000000003, "sync": 32329}
+{"kind": "det", "p": 0.4, "seed": 910018, "loss": false, "held": 0, "eq_level": 1.8974666666666666, "sync": 26748}
+{"kind": "det", "p": 0.4, "seed": 910019, "loss": false, "held": 0, "eq_level": 1.8614333333333333, "sync": 26325}
+{"kind": "det", "p": 0.4, "seed": 910020, "loss": false, "held": 0, "eq_level": 2.1776, "sync": 44348}
+{"kind": "det", "p": 0.4, "seed": 910021, "loss": false, "held": 0, "eq_level": 1.7763333333333333, "sync": 38448}
+{"kind": "det", "p": 0.4, "seed": 910022, "loss": false, "held": 0, "eq_level": 1.8760999999999997, "sync": 30049}
+{"kind": "det", "p": 0.4, "seed": 910023, "loss": false, "held": 0, "eq_level": 2.0094999999999996, "sync": 53047}
+{"kind": "det", "p": 0.4, "seed": 910024, "loss": false, "held": 0, "eq_level": 1.9105333333333336, "sync": 21877}
+{"kind": "det", "p": 0.4, "seed": 910025, "loss": false, "held": 0, "eq_level": 2.3502666666666667, "sync": 57912}
+{"kind": "det", "p": 0.4, "seed": 910026, "loss": false, "held": 0, "eq_level": 1.7676333333333332, "sync": 28667}
+{"kind": "det", "p": 0.4, "seed": 910027, "loss": false, "held": 0, "eq_level": 2.1134, "sync": 33906}
+{"kind": "det", "p": 0.4, "seed": 910028, "loss": false, "held": 0, "eq_level": 2.0050333333333334, "sync": 24998}
+{"kind": "det", "p": 0.4, "seed": 910029, "loss": false, "held": 0, "eq_level": 2.2002333333333337, "sync": 30414}
+{"kind": "det", "p": 0.4, "seed": 910030, "loss": true, "held": 3926, "eq_level": 2.1544, "sync": 48100}
+{"kind": "det", "p": 0.4, "seed": 910031, "loss": false, "held": 0, "eq_level": 2.4743333333333335, "sync": 40347}
+{"kind": "det", "p": 0.4, "seed": 910032, "loss": false, "held": 0, "eq_level": 2.1841666666666666, "sync": 31079}
+{"kind": "det", "p": 0.4, "seed": 910033, "loss": false, "held": 0, "eq_level": 2.077366666666667, "sync": 20424}
+{"kind": "det", "p": 0.4, "seed": 910034, "loss": false, "held": 0, "eq_level": 2.2253000000000003, "sync": 49792}
+{"kind": "det", "p": 0.4, "seed": 910036, "loss": false, "held": 0, "eq_level": 1.8544333333333338, "sync": 25618}
+{"kind": "det", "p": 0.4, "seed": 910035, "loss": false, "held": 0, "eq_level": 1.8346000000000005, "sync": 14371}
+{"kind": "det", "p": 0.4, "seed": 910037, "loss": false, "held": 0, "eq_level": 1.8126999999999998, "sync": 35759}
+{"kind": "det", "p": 0.4, "seed": 910038, "loss": false, "held": 0, "eq_level": 1.9783666666666666, "sync": 14919}
+{"kind": "det", "p": 0.4, "seed": 910039, "loss": true, "held": 672, "eq_level": 2.2618000000000005, "sync": 40873}
+{"kind": "det", "p": 0.4, "seed": 910040, "loss": false, "held": 0, "eq_level": 2.3674, "sync": 47637}
+{"kind": "det", "p": 0.4, "seed": 910041, "loss": true, "held": 7357, "eq_level": 2.5539, "sync": 62765}
+{"kind": "det", "p": 0.4, "seed": 910042, "loss": true, "held": 1892, "eq_level": 1.8966666666666667, "sync": 38488}
+{"kind": "det", "p": 0.4, "seed": 910043, "loss": false, "held": 0, "eq_level": 1.9510666666666665, "sync": 25202}
+{"kind": "det", "p": 0.4, "seed": 910044, "loss": false, "held": 0, "eq_level": 1.7934666666666665, "sync": 26544}
+{"kind": "det", "p": 0.4, "seed": 910046, "loss": false, "held": 0, "eq_level": 2.0366, "sync": 35187}
+{"kind": "det", "p": 0.4, "seed": 910045, "loss": false, "held": 0, "eq_level": 1.8360333333333336, "sync": 29707}
+{"kind": "det", "p": 0.4, "seed": 910047, "loss": false, "held": 0, "eq_level": 2.003433333333333, "sync": 33937}
+{"kind": "det", "p": 0.4, "seed": 910048, "loss": false, "held": 0, "eq_level": 2.1036666666666664, "sync": 47361}
+{"kind": "det", "p": 0.4, "seed": 910049, "loss": false, "held": 0, "eq_level": 1.7197333333333336, "sync": 25625}
+{"kind": "det", "p": 0.4, "seed": 910051, "loss": true, "held": 4044, "eq_level": 2.615433333333333, "sync": 58510}
+{"kind": "det", "p": 0.4, "seed": 910050, "loss": false, "held": 0, "eq_level": 1.954766666666667, "sync": 16878}
+{"kind": "det", "p": 0.4, "seed": 910052, "loss": true, "held": 4974, "eq_level": 2.3479333333333336, "sync": 39799}
+{"kind": "det", "p": 0.4, "seed": 910054, "loss": false, "held": 0, "eq_level": 1.997533333333333, "sync": 42332}
+{"kind": "det", "p": 0.4, "seed": 910053, "loss": false, "held": 0, "eq_level": 2.0080000000000005, "sync": 26750}
+{"kind": "det", "p": 0.4, "seed": 910055, "loss": false, "held": 0, "eq_level": 2.1277, "sync": 26560}
+{"kind": "det", "p": 0.4, "seed": 910057, "loss": false, "held": 0, "eq_level": 2.5114666666666667, "sync": 55037}
+{"kind": "det", "p": 0.4, "seed": 910056, "loss": false, "held": 0, "eq_level": 2.0441333333333334, "sync": 28405}
+{"kind": "det", "p": 0.4, "seed": 910058, "loss": false, "held": 0, "eq_level": 2.293633333333333, "sync": 39672}
+{"kind": "det", "p": 0.4, "seed": 910059, "loss": false, "held": 0, "eq_level": 2.1194999999999995, "sync": 26721}
+{"kind": "det", "p": 0.4, "seed": 910060, "loss": false, "held": 0, "eq_level": 2.0963, "sync": 43353}
+{"kind": "det", "p": 0.4, "seed": 910061, "loss": false, "held": 0, "eq_level": 1.9076333333333333, "sync": 24999}
+{"kind": "det", "p": 0.4, "seed": 910062, "loss": false, "held": 0, "eq_level": 2.207933333333333, "sync": 48462}
+{"kind": "det", "p": 0.4, "seed": 910063, "loss": false, "held": 0, "eq_level": 1.8928333333333334, "sync": 26370}
+{"kind": "det", "p": 0.4, "seed": 910064, "loss": false, "held": 0, "eq_level": 2.1306333333333334, "sync": 42403}
+{"kind": "det", "p": 0.4, "seed": 910065, "loss": true, "held": 12700, "eq_level": 1.9441666666666666, "sync": 31482}
+{"kind": "det", "p": 0.4, "seed": 910066, "loss": false, "held": 0, "eq_level": 2.424566666666667, "sync": 41600}
+{"kind": "det", "p": 0.4, "seed": 910067, "loss": false, "held": 0, "eq_level": 2.902366666666667, "sync": 56717}
+{"kind": "det", "p": 0.4, "seed": 910068, "loss": false, "held": 0, "eq_level": 1.7883666666666667, "sync": 31512}
+{"kind": "det", "p": 0.4, "seed": 910069, "loss": false, "held": 0, "eq_level": 1.8491666666666666, "sync": 25730}
+{"kind": "det", "p": 0.4, "seed": 910070, "loss": false, "held": 0, "eq_level": 1.9928999999999997, "sync": 36479}
+{"kind": "det", "p": 0.4, "seed": 910071, "loss": false, "held": 0, "eq_level": 1.9963333333333333, "sync": 29192}
+{"kind": "det", "p": 0.4, "seed": 910072, "loss": true, "held": 1233, "eq_level": 1.8971000000000005, "sync": 31958}
+{"kind": "det", "p": 0.4, "seed": 910073, "loss": false, "held": 0, "eq_level": 2.3287999999999998, "sync": 32216}
+{"kind": "det", "p": 0.4, "seed": 910074, "loss": false, "held": 0, "eq_level": 2.1564666666666668, "sync": 30692}
+{"kind": "det", "p": 0.4, "seed": 910075, "loss": false, "held": 0, "eq_level": 1.9342333333333332, "sync": 38192}
+{"kind": "det", "p": 0.4, "seed": 910076, "loss": false, "held": 0, "eq_level": 1.8471333333333337, "sync": 31211}
+{"kind": "det", "p": 0.4, "seed": 910077, "loss": false, "held": 0, "eq_level": 2.0701666666666667, "sync": 36438}
+{"kind": "det", "p": 0.4, "seed": 910078, "loss": false, "held": 0, "eq_level": 2.0394666666666663, "sync": 10683}
+{"kind": "det", "p": 0.4, "seed": 910079, "loss": false, "held": 0, "eq_level": 2.1963333333333335, "sync": 43237}
+{"kind": "det", "p": 0.4, "seed": 910080, "loss": false, "held": 0, "eq_level": 2.170266666666667, "sync": 45713}
+{"kind": "det", "p": 0.4, "seed": 910081, "loss": true, "held": 2877, "eq_level": 2.656933333333333, "sync": 55656}
+{"kind": "det", "p": 0.4, "seed": 910082, "loss": false, "held": 0, "eq_level": 1.7401666666666669, "sync": 37591}
+{"kind": "det", "p": 0.4, "seed": 910083, "loss": false, "held": 0, "eq_level": 2.030566666666667, "sync": 49864}
+{"kind": "det", "p": 0.4, "seed": 910084, "loss": false, "held": 0, "eq_level": 1.7871333333333337, "sync": 40763}
+{"kind": "det", "p": 0.4, "seed": 910085, "loss": false, "held": 0, "eq_level": 2.0757333333333334, "sync": 39085}
+{"kind": "det", "p": 0.4, "seed": 910086, "loss": false, "held": 0, "eq_level": 2.790333333333333, "sync": 35900}
+{"kind": "det", "p": 0.4, "seed": 910087, "loss": false, "held": 0, "eq_level": 2.2071000000000005, "sync": 36894}
+{"kind": "det", "p": 0.4, "seed": 910088, "loss": false, "held": 0, "eq_level": 2.1208666666666667, "sync": 42055}
+{"kind": "det", "p": 0.4, "seed": 910089, "loss": false, "held": 0, "eq_level": 2.1022, "sync": 42594}
+{"kind": "det", "p": 0.4, "seed": 910090, "loss": false, "held": 0, "eq_level": 1.7484333333333337, "sync": 35448}
+{"kind": "det", "p": 0.4, "seed": 910091, "loss": false, "held": 0, "eq_level": 2.005633333333333, "sync": 30224}
+{"kind": "det", "p": 0.4, "seed": 910092, "loss": false, "held": 0, "eq_level": 1.6057000000000001, "sync": 24193}
+{"kind": "det", "p": 0.4, "seed": 910093, "loss": false, "held": 0, "eq_level": 2.3013999999999997, "sync": 28996}
+{"kind": "det", "p": 0.4, "seed": 910094, "loss": false, "held": 0, "eq_level": 1.8927999999999998, "sync": 29161}
+{"kind": "det", "p": 0.4, "seed": 910095, "loss": false, "held": 0, "eq_level": 2.330333333333333, "sync": 43805}
+{"kind": "det", "p": 0.4, "seed": 910096, "loss": false, "held": 0, "eq_level": 1.9542, "sync": 31196}
+{"kind": "det", "p": 0.4, "seed": 910097, "loss": false, "held": 0, "eq_level": 2.0943666666666663, "sync": 39754}
+{"kind": "det", "p": 0.4, "seed": 910098, "loss": false, "held": 0, "eq_level": 2.638533333333333, "sync": 49949}
+{"kind": "det", "p": 0.4, "seed": 910099, "loss": false, "held": 0, "eq_level": 2.1843, "sync": 21318}
+{"kind": "det", "p": 0.4, "seed": 910100, "loss": false, "held": 0, "eq_level": 2.1719333333333335, "sync": 39766}
+{"kind": "det", "p": 0.4, "seed": 910101, "loss": false, "held": 0, "eq_level": 1.9122000000000003, "sync": 30401}
+{"kind": "det", "p": 0.4, "seed": 910102, "loss": false, "held": 0, "eq_level": 2.0508333333333333, "sync": 27899}
+{"kind": "det", "p": 0.4, "seed": 910103, "loss": true, "held": 1059, "eq_level": 2.5578333333333334, "sync": 47189}
+{"kind": "det", "p": 0.4, "seed": 910104, "loss": false, "held": 0, "eq_level": 1.7772666666666666, "sync": 35812}
+{"kind": "det", "p": 0.4, "seed": 910105, "loss": true, "held": 7337, "eq_level": 2.5068333333333332, "sync": 41023}
+{"kind": "det", "p": 0.4, "seed": 910106, "loss": false, "held": 0, "eq_level": 2.2821, "sync": 27883}
+{"kind": "det", "p": 0.4, "seed": 910107, "loss": false, "held": 0, "eq_level": 2.1987666666666668, "sync": 26103}
+{"kind": "det", "p": 0.4, "seed": 910108, "loss": false, "held": 0, "eq_level": 2.512833333333333, "sync": 53743}
+{"kind": "det", "p": 0.4, "seed": 910109, "loss": true, "held": 2356, "eq_level": 2.3965666666666667, "sync": 42770}
+{"kind": "det", "p": 0.4, "seed": 910110, "loss": false, "held": 0, "eq_level": 1.818933333333333, "sync": 30595}
+{"kind": "det", "p": 0.4, "seed": 910111, "loss": false, "held": 0, "eq_level": 1.9278666666666664, "sync": 37258}
+{"kind": "det", "p": 0.4, "seed": 910112, "loss": false, "held": 0, "eq_level": 2.1401999999999997, "sync": 61239}
+{"kind": "det", "p": 0.4, "seed": 910113, "loss": false, "held": 0, "eq_level": 1.9648999999999996, "sync": 15089}
+{"kind": "det", "p": 0.4, "seed": 910114, "loss": true, "held": 3643, "eq_level": 2.1217, "sync": 33263}
+{"kind": "det", "p": 0.4, "seed": 910115, "loss": true, "held": 5040, "eq_level": 2.193866666666667, "sync": 37537}
+{"kind": "det", "p": 0.4, "seed": 910117, "loss": false, "held": 0, "eq_level": 2.006333333333333, "sync": 37837}
+{"kind": "det", "p": 0.4, "seed": 910116, "loss": false, "held": 0, "eq_level": 1.9308666666666667, "sync": 39644}
+{"kind": "det", "p": 0.4, "seed": 910118, "loss": false, "held": 0, "eq_level": 1.9923333333333335, "sync": 28155}
+{"kind": "det", "p": 0.4, "seed": 910119, "loss": false, "held": 0, "eq_level": 2.3983333333333334, "sync": 42220}
+{"kind": "det", "p": 0.4, "seed": 910120, "loss": false, "held": 0, "eq_level": 2.0083333333333333, "sync": 29790}
+{"kind": "det", "p": 0.4, "seed": 910121, "loss": false, "held": 0, "eq_level": 2.5736000000000003, "sync": 31725}
+{"kind": "det", "p": 0.4, "seed": 910122, "loss": false, "held": 0, "eq_level": 1.8957999999999997, "sync": 26986}
+{"kind": "det", "p": 0.4, "seed": 910123, "loss": true, "held": 2720, "eq_level": 1.876133333333333, "sync": 35994}
+{"kind": "det", "p": 0.4, "seed": 910124, "loss": true, "held": 12551, "eq_level": 2.7248666666666668, "sync": 43929}
+{"kind": "det", "p": 0.4, "seed": 910126, "loss": true, "held": 4038, "eq_level": 2.681033333333333, "sync": 71491}
+{"kind": "det", "p": 0.4, "seed": 910125, "loss": false, "held": 0, "eq_level": 1.9857666666666665, "sync": 30293}
+{"kind": "det", "p": 0.4, "seed": 910127, "loss": false, "held": 0, "eq_level": 1.8026666666666664, "sync": 26481}
+{"kind": "det", "p": 0.4, "seed": 910128, "loss": false, "held": 0, "eq_level": 1.9074666666666666, "sync": 30079}
+{"kind": "det", "p": 0.4, "seed": 910129, "loss": false, "held": 0, "eq_level": 1.7549666666666668, "sync": 30080}
+{"kind": "det", "p": 0.4, "seed": 910130, "loss": false, "held": 0, "eq_level": 1.9048666666666667, "sync": 21366}
+{"kind": "det", "p": 0.4, "seed": 910131, "loss": false, "held": 0, "eq_level": 2.1194333333333333, "sync": 33667}
+{"kind": "det", "p": 0.4, "seed": 910132, "loss": false, "held": 0, "eq_level": 1.9107666666666667, "sync": 33595}
+{"kind": "det", "p": 0.4, "seed": 910133, "loss": true, "held": 7954, "eq_level": 2.7926333333333333, "sync": 53183}
+{"kind": "det", "p": 0.4, "seed": 910134, "loss": false, "held": 0, "eq_level": 1.9148666666666667, "sync": 37578}
+{"kind": "det", "p": 0.4, "seed": 910135, "loss": true, "held": 1403, "eq_level": 2.275266666666667, "sync": 28258}
+{"kind": "det", "p": 0.4, "seed": 910136, "loss": false, "held": 0, "eq_level": 1.8263, "sync": 34089}
+{"kind": "det", "p": 0.4, "seed": 910137, "loss": false, "held": 0, "eq_level": 1.8918, "sync": 23127}
+{"kind": "det", "p": 0.4, "seed": 910138, "loss": false, "held": 0, "eq_level": 2.0123, "sync": 23818}
+{"kind": "det", "p": 0.4, "seed": 910139, "loss": false, "held": 0, "eq_level": 2.0196666666666663, "sync": 23568}
+{"kind": "det", "p": 0.4, "seed": 910140, "loss": false, "held": 0, "eq_level": 2.2834, "sync": 43888}
+{"kind": "det", "p": 0.4, "seed": 910141, "loss": false, "held": 0, "eq_level": 2.1330000000000005, "sync": 23693}
+{"kind": "det", "p": 0.4, "seed": 910142, "loss": false, "held": 0, "eq_level": 2.1160666666666663, "sync": 41522}
+{"kind": "det", "p": 0.4, "seed": 910143, "loss": false, "held": 0, "eq_level": 1.9085666666666665, "sync": 18248}
+{"kind": "det", "p": 0.4, "seed": 910144, "loss": true, "held": 5549, "eq_level": 2.5255000000000005, "sync": 41321}
+{"kind": "det", "p": 0.4, "seed": 910145, "loss": false, "held": 0, "eq_level": 1.8076999999999999, "sync": 36472}
+{"kind": "det", "p": 0.4, "seed": 910146, "loss": false, "held": 0, "eq_level": 2.1432666666666673, "sync": 27955}
+{"kind": "det", "p": 0.4, "seed": 910147, "loss": false, "held": 0, "eq_level": 2.219533333333333, "sync": 24362}
+{"kind": "det", "p": 0.4, "seed": 910148, "loss": false, "held": 0, "eq_level": 2.4501, "sync": 33451}
+{"kind": "det", "p": 0.4, "seed": 910149, "loss": false, "held": 0, "eq_level": 1.8787666666666671, "sync": 23151}
