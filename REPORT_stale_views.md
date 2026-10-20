@@ -293,14 +293,28 @@ stands, for a different reason.
 [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6) (rebased onto kitsune2 `main`, October 2026) as
 `K2ShardingConfig::patient_lowest`, and it is the default there. It uses the
 existing `ShrinkIntent` channel, which already carries the "intending to leave"
-signal. Eight unit tests mirror the model-checked cases (lowest waits, middle
-and higher racers stand down, all racers proceed when the margin is wide, no
+signal. Unit tests mirror the model-checked cases (lowest waits, middle and
+higher racers stand down, all racers proceed when the margin is wide, no
 waiting without a racer), and the 8-node storm test passes under V6 and V3.
 One addition the model did not need: a waiting node re-broadcasts its intent
 before it expires, so peers keep counting it gone for as long as it may still
-act. Not yet shown: the wait step firing between real nodes. Two nodes rarely
-race for the same sectors in 8-node runs, so that needs a test built to force
-the race.
+act.
+
+Two further tests ([results/rust_fork_v6.md](results/rust_fork_v6.md)):
+
+- **This report's model check, run on the Rust code.** `timed_check.py` ported
+  to Rust, with the decisions made by the controller's own re-check functions.
+  It reproduces the V3 failure counts above exactly and finds V6 safe in every
+  schedule, including all 14,054,400 with a death at any tick. With deaths the
+  Rust code is slightly more cautious than this model (2,820 V3 failures to
+  2,856): a dead node's intent outlives the detection of its death and is
+  counted as gone twice.
+- **A forced simultaneous race on a real network** (8 agents, target 6, no
+  deaths). V6's wait fires as designed and every waiter goes on to leave. Over
+  12 runs per rule, both are safe; V6 settles in about 2–3 seconds with no
+  re-growing, while V3 announces about 5× as often and re-grows a median of
+  10 times per run before settling. The views there are fresh, so this
+  measures churn, not V3's stale-view failure.
 
 ## 8. Limitations
 
