@@ -332,6 +332,18 @@ Two further tests ([results/rust_fork_v6.md](results/rust_fork_v6.md)):
   stood-down intent is gone from the next view). Withdrawing them when a node
   stands down removes V3's re-grows in the forced race entirely.
 
+## 7b. The same result in TLA+
+
+`spec/StaleShrink.tla` restates the timed model of section 2 in TLA+, so the
+result no longer rests on one checker. TLC finds the staggered cascade under V3
+by itself: nodes 4, 3, 2, 1 announce a tick apart, all two ticks stale, and the
+last copy goes at tick 7. That is the same schedule `timed_check.py` reports,
+and the one the Rust functional test forces. TLC checks V6 safe and live at a
+wait of one and two lags, and it fails V6, as it must, when the wait is shorter
+than the staleness. Every verdict tried matches the Python checker. The TLA+
+spec has no deaths; the death results remain those of section 5. Details:
+[spec/README.md](spec/README.md#stale-views-in-tla).
+
 ## 8. Limitations
 
 - Exhaustive only for small networks (N ≤ 5; ~5–14 million schedules per
@@ -362,6 +374,8 @@ python timed_check.py --n 5 --r 1 --lag 2 --wait 5 --rule all  # V5: safe
 python timed_check.py --n 4 --r 2 --lag 2 --wait 5 --rule tb  --crash --detect 0
 python timed_check.py --n 4 --r 2 --lag 2 --wait 5 --rule patient --crash --detect 0  # V6: safe
 python hybrid_check.py --table          # safety + progress for every candidate
+java -cp tla2tools.jar tlc2.TLC -deadlock -config StaleShrinkV3Cascade.cfg StaleShrink.tla  # TLC finds the cascade
+java -cp tla2tools.jar tlc2.TLC -deadlock StaleShrink.tla                                   # TLC: V6 safe and live
 cd .. && python v6_study.py             # V6 vs V3 vs V5 at N = 200
 ```
 
