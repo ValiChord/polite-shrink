@@ -413,7 +413,7 @@ with staleness injected rather than real; at most 14 nodes; kills that would
 remove a sector's last holder are excluded by design. Log:
 `results/chaos_v6_seed1_1h.log`.
 
-## 12. Enforcing the timing assumptions (branch `feat/sharding-v6-failsafe`, 2026-10-21)
+## 12. Enforcing the timing assumptions (2026-10-21; merged into `feat/sharding-v6`)
 
 Sections 8–11 test V6 while its assumptions hold, and measure what happens
 when they do not. The code itself trusted two of them:
@@ -462,7 +462,8 @@ dead node's last message", **enforced by the rule itself** instead of
 depending on the transport, but not removed. Intents are not covered: a
 missing intent still relies on delivery within the wait (A1 for intents).
 
-Status: on its own branch until reviewed; `feat/sharding-v6` is unchanged.
+Status: developed on `feat/sharding-v6-failsafe`, CI green, then merged into
+`feat/sharding-v6` (fork commit `2d57117`), where it is on by default.
 
 ## Reproduce
 
@@ -481,7 +482,7 @@ cargo test -p kitsune2_gossip --features sharding --test sharding_iroh          
 IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
 cargo test -p kitsune2_gossip --features sharding --test sharding_upgrade           # 10, rollout (about 2.5 min)
 CHAOS_SECS=3600 cargo test -p kitsune2_gossip --features sharding --test sharding_chaos -- --ignored --nocapture   # 11 (CHAOS_WAIT_MS=300 for the control)
-# 12, on feat/sharding-v6-failsafe: SHARDING_RECENT_CONTACT=0 turns the change off; CHAOS_UNDETECTED=1 simulates undetected deaths
+# 12: SHARDING_RECENT_CONTACT=0 turns the change off; CHAOS_UNDETECTED=1 simulates undetected deaths
 ```
 For 8.3, in this repo: `python byz_v6.py --seeds 6`.
 For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).
