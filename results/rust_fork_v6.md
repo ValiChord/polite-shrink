@@ -343,6 +343,45 @@ by a tool such as `cargo-mutants`, so they cover what a reviewer would guess,
 not every possible edit. Raw results: `results/mutation_round1.json`,
 `results/mutation_round2.json`.
 
+## 10. A real rollout (2026-10-21)
+
+No live network runs an earlier version of this controller (V3 exists only
+on our fork), so a real rollout does not start from V3. It starts from nodes
+without dynamic sharding: they keep a fixed arc and never shrink. Such a
+node does not have the sharding module at all, and kitsune2's transport
+silently drops messages for a module that is not registered
+(`crates/api/src/transport.rs`, the `K2WireType::Module` branch), so V6's
+intent messages cost it nothing and cannot break its connections. In the
+tests it is modelled as a node whose clamp is never reached: full arc,
+never shrinks, never announces.
+
+`tests/sharding_upgrade.rs` (fork commit `6dcb333`), in-memory transport,
+each test run three times:
+
+| scenario | what is asserted | result (3 runs) |
+|---|---|---|
+| 2 fixed-arc nodes + 6 V6 nodes, target 4, no deaths | once every sector reaches the target, none drops below it; fixed nodes keep a full arc and never announce; at the end no V6 agent could still shrink safely | pass every run; 6–8 shrinks, final 2,432–2,560 of 4,096 sector-copies |
+| 6 fixed-arc nodes replaced one at a time by V6 nodes (join, 10 s side by side, then an old node goes away), target 3 | no sector ever without a declared holder (outside the 1 s death-detection window, as in the storm test); once only V6 remains every sector returns to the target and stays there | pass every run; no hole ever, even inside the detection window; 8–13 shrinks, at most 1 re-grow |
+| 8 V6 nodes, half with the default timing, half with a slower set (check every 250 ms, persistence 2, wait 4x lag, lag ceiling 3 s), target 4, no deaths | as the first row | pass every run |
+
+The first version of the mixed-settings test failed its progress check: it
+declared the network settled after 15 s of no change, shorter than the slower
+nodes' decision cycle (about 18 s), so two agents were still on their way.
+The settle window is now computed from each configuration; it then passed
+five runs out of five. Safety held in every run, including that one.
+
+Not covered: different `target_redundancy` values on different nodes (a
+policy mismatch; the network then only guarantees the smallest R any node
+uses), a node restarting with its old agent and data rather than a new
+node joining, and more than 8 nodes.
+
+*Aside, not evidence for a rollout:* the exhaustive model check was also run
+with every assignment of V3 or V6 to the nodes. A V6 node's shrink never
+broke safety whatever its neighbours ran, and losses fell as more nodes ran
+V6, but a mix is not strictly better than all-V3: V6's wait can move a
+departure into a V3 node's blind window (520 of about a million N=4, R=2
+cases). Since nobody runs V3, this test was dropped from the fork.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -358,6 +397,7 @@ CASCADE_RUNS=3 cargo test -p kitsune2_gossip --features sharding --test sharding
 cargo test --release -p kitsune2_gossip --features sharding --lib sweep_ -- --ignored --nocapture --test-threads 1   # 8.1, 8.2
 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh               # 8.4, 8 nodes over iroh
 IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
+cargo test -p kitsune2_gossip --features sharding --test sharding_upgrade           # 10, rollout (about 2.5 min)
 ```
 For 8.3, in this repo: `python byz_v6.py --seeds 6`.
 For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).
