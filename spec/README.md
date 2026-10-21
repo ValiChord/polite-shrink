@@ -124,25 +124,35 @@ reachable states — for every configuration tried:
 ## Stale views in TLA+
 
 `StaleShrink.tla` is `timed_check.py` written in TLA+, so that the stale-view
-result rests on TLC as well as on the Python checker and its Rust port. Time
-advances in ticks; each node reads the state published `Lag[n]` ticks ago
-(per node, any value in 1..L); any holder may announce at any tick and
-re-checks `D` ticks later; same-tick decisions cannot see each other. `Rule`
-selects V3 (`"tb"`) or V6 (`"patient"`). There are no deaths in this spec, so
+result rests on TLC as well as on the Python checker and its Rust port. Each
+node acts alone, in its own steps (`Announce(n)`, `Recheck(n)`), reading only
+its own variables and a snapshot of the system published 1 to L ticks earlier,
+the age chosen afresh at every re-check. Time is an explicit clock advanced by
+`AdvanceTime` once every due re-check has happened (Abadi–Lamport style);
+nodes never read it. It stands for two assumptions: information is at most L
+ticks old (a known bound, so a synchronous timing assumption), and a node's
+timer fires after D ticks. Any holder may announce at any tick and re-checks
+`D` ticks later. `Rule` selects V3 (`"tb"`) or V6 (`"patient"`). The spec was
+restructured this way in response to Stephan Merz's review of
+[tlaplus/Examples#243](https://github.com/tlaplus/Examples/pull/243); the
+first version used one global `Tick` and a lag fixed per node. There are no deaths in this spec, so
 `Safety` is "never fewer than R holders". `Progress` says that if anyone
 announced and a copy could be spared, someone left.
 
 | model (`.cfg`) | rule | N | R | lag | wait | TLC result | distinct states |
 |---|---|---|---|---|---|---|---|
-| `StaleShrink` | V6 | 4 | 1 | 2 | 2 (1x) | **no error** (Safety and Progress) | 65,001 |
-| `StaleShrinkV6Wait2x` | V6 | 4 | 1 | 2 | 4 (2x) | **no error** | 245,146 |
+| `StaleShrink` | V6 | 4 | 1 | 2 | 2 (1x) | **no error** (Safety and Progress) | 16,848 |
+| `StaleShrinkV6Wait2x` | V6 | 4 | 1 | 2 | 4 (2x) | **no error** | 43,348 |
 | `StaleShrinkV3Cascade` | V3 | 4 | 1 | 2 | 4 (2x) | **Safety violated**: nodes 4, 3, 2, 1 announce a tick apart, all 2 ticks stale; the last copy goes at tick 7 | (stops at the counterexample) |
 | `StaleShrinkV6TooShort` | V6 | 4 | 1 | 2 | 1 (0.5x) | **Safety violated**, as it must be: no rule is safe when the wait is shorter than the staleness | (stops) |
 
 Further runs with the same spec (TLC 2.19, October 2026), each 1-10 s: V3 at
 N=3, R=1, lag 2, wait 2 violated; V3 at N=5, R=2, lag 1, wait 1 no error; V6 no
 error at N=3 R=1 (lag 2, wait 2), N=4 R=2 (lag 2, wait 2), N=5 R=2 and N=5 R=3
-(lag 1, wait 1). Every verdict matches `timed_check.py`.
+(lag 1, wait 1). Every verdict matches `timed_check.py`. The restructured spec
+gives the same verdicts on all of these; its state counts are lower (16,848 and
+43,348, from 65,001 and 245,146) because view ages are no longer part of the
+state.
 
 **Limits.** No deaths (the Python checker and its Rust port cover a death at any
 tick); one sector; N <= 5. As with `PoliteShrink.tla`, this checks the gate, not

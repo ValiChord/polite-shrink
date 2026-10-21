@@ -341,7 +341,10 @@ last copy goes at tick 7. That is the same schedule `timed_check.py` reports,
 and the one the Rust functional test forces. TLC checks V6 safe and live at a
 wait of one and two lags, and it fails V6, as it must, when the wait is shorter
 than the staleness. Every verdict tried matches the Python checker. The TLA+
-spec has no deaths; the death results remain those of section 5. Details:
+spec has no deaths; the death results remain those of section 5. After review
+on tlaplus/Examples#243 the spec was restructured into per-node steps with an
+explicit clock, and a view age chosen afresh at every decision rather than
+fixed per node; every verdict is unchanged. Details:
 [spec/README.md](spec/README.md#stale-views-in-tla).
 
 ## 8. Limitations
