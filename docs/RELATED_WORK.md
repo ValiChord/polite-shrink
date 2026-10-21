@@ -2,7 +2,7 @@
 
 *October 2026. A search of other fields for the mathematics of this problem,
 followed by experiments that each connection suggested. Read alongside
-[REPORT_stale_views.md](REPORT_stale_views.md), which several of these feed.*
+[REPORT_stale_views.md](../reports/REPORT_stale_views.md), which several of these feed.*
 
 The problem splits into three parts that the repo already showed are separable:
 **the race** (two nodes leave at once), **the oscillation** (the hallway dance),
@@ -32,7 +32,7 @@ describing these protocols; the 2002 full text was not read.
 
 **What it adds.** This repo's ablation explains why that field's holes
 persisted: desynchronising by *timing* (V2 jitter, back-off) does not close the
-race. And [REPORT_stale_views.md](REPORT_stale_views.md) now shows formally that
+race. And [REPORT_stale_views.md](../reports/REPORT_stale_views.md) now shows formally that
 a bare wait-and-re-check — the "withdraw timer" pattern, rule `none` there —
 fails in every configuration at every wait. Polite shrink is best positioned not
 as "a fix for Holochain" but as **the formally analysed version of a pattern a
@@ -54,7 +54,7 @@ every announcement that could race you is visible, then decide — famous for be
 correct even with stale reads. A k-exclusion version exists (Danek, *k-Bakery*).
 
 **What testing it found.** Following the bakery structure literally is what led
-to [REPORT_stale_views.md](REPORT_stale_views.md): the published TLA+ proof gave
+to [REPORT_stale_views.md](../reports/REPORT_stale_views.md): the published TLA+ proof gave
 nodes atomic reads and so never exercised the tie-break; modelling the stale read
 properly shows the ID tie-break (V3) is necessary but not sufficient, while
 discounting *every* visible announcer (V5) is safe for any N. In bakery terms,
@@ -136,7 +136,7 @@ experiment: hysteresis scaled to each node's *own* measured lag.
 The theory makes two falsifiable predictions for this controller.
 `oscillation_sweep.py` tests both (activation, N=200, R=5, 12 seeds/cell,
 resizing measured over the last 2,000 of 5,000 ticks; full table in
-[results/oscillation_summary.md](results/oscillation_summary.md)):
+[results/oscillation_summary.md](../results/oscillation_summary.md)):
 
 | prediction | result |
 |---|---|
@@ -175,7 +175,7 @@ reading, not as a next experiment.
 The audit found two detection-side headlines the committed data could not
 support. `detector_replication.py` re-tested both on **fresh seeds** (910000+,
 disjoint from every earlier study), storm 50%, pure V3, with exact 95% intervals.
-Full table: [results/detector_replication_summary.md](results/detector_replication_summary.md).
+Full table: [results/detector_replication_summary.md](../results/detector_replication_summary.md).
 
 **A spread of detection speeds — direction confirmed, number corrected.**
 
@@ -211,8 +211,8 @@ matplotlib 3.11.0 (library pins match; the Python pin of 3.12.1 does not).*
 ## Reproduce
 
 ```bash
-python oscillation_sweep.py          # ~12 min on 4 cores
-python detector_replication.py       # ~45 min on 3 cores
+python sim/oscillation_sweep.py          # ~12 min on 4 cores
+python sim/detector_replication.py       # ~45 min on 3 cores
 cd spec && python timed_check.py --sweep
 ```
 

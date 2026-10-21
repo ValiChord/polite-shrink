@@ -1,6 +1,6 @@
 # Polite-Shrink: The Core Idea
 
-*A one-page on-ramp for the Holochain dev team. Depth is in [README.md](README.md); this is just the idea.*
+*A one-page on-ramp for the Holochain dev team. Depth is in [README.md](../README.md); this is just the idea.*
 
 ## In a sentence or two
 
@@ -16,9 +16,9 @@ What closes it is that **a node about to vacate must stop counting toward the re
 | V5 — the AgentInfo encoding | counts *every* announcer as gone | ✓ proven for any number of nodes | ✗ — identical nodes can cancel each other forever |
 | **V6 — "patient lowest" (recommended)** | counts every announcer as gone; if that fails only because of higher-ID announcers, the lowest **waits** instead of cancelling, and nobody announces while a lower ID is racing them | **✓ — V5's proof applies unchanged** | **✓** |
 
-V6 keeps the TCAS ordering, but only for deciding **who goes next** when the margin is thin — never for assuming **who stays**. At 200 nodes its arcs stay close to V3's, with about a third of the sync traffic and several times less time below R ([results/v6_summary.md](results/v6_summary.md)). One cost: like V3, it must *see* who is announcing, so it needs a dedicated message or one explicit bit on `AgentInfo` — a narrowed arc claim alone cannot tell an announcer from a node that has already left.
+V6 keeps the TCAS ordering, but only for deciding **who goes next** when the margin is thin — never for assuming **who stays**. At 200 nodes its arcs stay close to V3's, with about a third of the sync traffic and several times less time below R ([results/v6_summary.md](../results/v6_summary.md)). One cost: like V3, it must *see* who is announcing, so it needs a dedicated message or one explicit bit on `AgentInfo` — a narrowed arc claim alone cannot tell an announcer from a node that has already left.
 
-The original TLA+ proof could not tell any of these apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe. The stale-view checks, the cascade, the proof and the five candidate hybrids tried on the way to V6 are in [REPORT_stale_views.md](REPORT_stale_views.md).
+The original TLA+ proof could not tell any of these apart: it gave every node a perfectly fresh view, under which even a bare re-check is safe. The stale-view checks, the cascade, the proof and the five candidate hybrids tried on the way to V6 are in [REPORT_stale_views.md](../reports/REPORT_stale_views.md).
 
 ## The problem it addresses
 
@@ -48,7 +48,7 @@ Polite-shrink applies that cure to shrinking: when nodes contend to vacate the s
 
 ## The mechanism (≈30 lines)
 
-Two phases, in [`polite_shrink.py`](polite_shrink.py):
+Two phases, in [`polite_shrink.py`](../sim/polite_shrink.py):
 
 1. **Announce**, don't drop. A node that wants to shrink publishes a *vacate intent* for those sectors — unless it can see a lower ID already racing it for them, in which case it waits.
 2. **Wait, re-check, then act.** After waiting out gossip staleness, it re-reads holders and intents, counts **every** announced rival as already gone, and drops **only if ≥ R copies remain**.
@@ -62,10 +62,10 @@ Across the honest-node tests — a 1,248-run sweep, an evolutionary adversary, p
 
 Stated plainly, because the distinction matters:
 
-- **Checked exhaustively, with stale views** ([REPORT_stale_views.md](REPORT_stale_views.md); every announce schedule, per-node lag and death time, N ≤ 5): a bare re-check fails in every configuration; V3 fails a staggered cascade (R = 1) and one-death schedules (R = 2); V5 is safe but can stall forever; **V6 is safe in all of them at a 1× wait and always makes progress.**
-- **Proven for any N:** the V5/V6 safety rule under stale views, given prompt death detection (proof in [REPORT_stale_views.md](REPORT_stale_views.md) §4 — V6's waiting never counts an announcer as present, so the proof applies unchanged). Progress for V6 is checked exhaustively for N ≤ 5 and argued, not proven, beyond that. Also proven: *guessing* which un-declared peers have really left fails on one wrong guess (`spec/AgentInfoAgeGated.tla`).
+- **Checked exhaustively, with stale views** ([REPORT_stale_views.md](../reports/REPORT_stale_views.md); every announce schedule, per-node lag and death time, N ≤ 5): a bare re-check fails in every configuration; V3 fails a staggered cascade (R = 1) and one-death schedules (R = 2); V5 is safe but can stall forever; **V6 is safe in all of them at a 1× wait and always makes progress.**
+- **Proven for any N:** the V5/V6 safety rule under stale views, given prompt death detection (proof in [REPORT_stale_views.md](../reports/REPORT_stale_views.md) §4 — V6's waiting never counts an announcer as present, so the proof applies unchanged). Progress for V6 is checked exhaustively for N ≤ 5 and argued, not proven, beyond that. Also proven: *guessing* which un-declared peers have really left fails on one wrong guess (`spec/AgentInfoAgeGated.tla`).
 - **What the original TLA+ proof shows** (five configurations, N = 6–8): re-checking against a perfectly fresh view is safe — true, but close to trivial, and it does not exercise the tie-break.
-- **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](README.md#for-a-maintainer-what-any-policy-must-respect).
+- **Engineering judgement, evidenced by simulation** (not proven): the surrounding **policy** — what R should be, hysteresis constants, the growth rule, the small-network clamp. The repo deliberately does **not** propose the policy; it establishes the [constraints any policy must respect](policy-constraints.md).
 - **Known gap:** nodes that *lie* about what they store are a sensor problem no controller can out-think. Past K = R false declarations, data is lost invisibly; a proof-gated "verified coverage" extension removes that ceiling **in simulation** but isn't deployed yet.
 
 ## The one lever outside the gate: how fast deaths are noticed
@@ -76,7 +76,7 @@ The V5 gate is proven safe provided a death is noticed before anyone acts on a v
 - **Decide which way the detector should be wrong, and cap it.** Convicting a live peer costs storage; missing a dead one costs data. Erring toward conviction takes `P(any loss)` from **36% to 2.7%** at a false-conviction rate near 0.10 — then *worsens* again (15% at 0.40), replicated on fresh seeds with non-overlapping intervals. Nodes at 0.40 hold more data and still lose more, so this is not plain caution; the mechanism is open. Getting one global threshold roughly right is a 38-point effect; tuning it per peer adds ≤4 and is not distinguishable from noise, so a self-calibrating detector is not where the first effort goes.
 - **A spread of detection speeds is protective, not hazardous.** Replicated on fresh seeds: a uniformly slow network loses data in 35% of runs, a 50/50 mix with twice-as-fast nodes in 18% — close to an all-fast network's 15%. A mixed network tracks its *faster* half — so homogenising node behaviour can remove a margin nobody knew was there. (The same trap as flattening the arc distribution, which is also load-bearing.)
 
-Detail: [REPORT_mz_decomposition.md](REPORT_mz_decomposition.md), [RELATED_WORK.md](RELATED_WORK.md) §5, and constraint 6b in [REPORT_stage3.md](REPORT_stage3.md).
+Detail: [REPORT_mz_decomposition.md](../reports/REPORT_mz_decomposition.md), [RELATED_WORK.md](RELATED_WORK.md) §5, and constraint 6b in [REPORT_stage3.md](../reports/REPORT_stage3.md).
 
 ## Related fields
 
@@ -90,8 +90,8 @@ Sensor networks met this exact race twenty years ago ("blind points" when neighb
 
 ## Where to look next
 
-- **The mechanism, simulated and model-checked:** [`polite_shrink.py`](polite_shrink.py) (`V6`) + [`spec/`](spec/) + [REPORT_stale_views.md](REPORT_stale_views.md).
+- **The mechanism, simulated and model-checked:** [`polite_shrink.py`](../sim/polite_shrink.py) (`V6`) + [`spec/`](../spec/) + [REPORT_stale_views.md](../reports/REPORT_stale_views.md).
 - **The mechanism, deployable — and the one to test:** V6 as a Rust module on the kitsune2 fork, branch [`feat/sharding-v6`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6/crates/gossip/src/sharding), behind the existing `sharding` flag. V6 is the default there; `patient_lowest: false` gives V3 for comparison.
-- **Everything it was tested against:** [TEST_LEDGER.md](TEST_LEDGER.md).
+- **Everything it was tested against:** [TEST_LEDGER.md](../TEST_LEDGER.md).
 
 *Research directed by Ceri John; design, implementation, and analysis with AI assistance (Claude, Anthropic); all results human-reviewed.*

@@ -12,13 +12,13 @@ Three commitments, each of which a reader can verify without trusting anyone.
 
 The load-bearing claim in this repository — that a node obeying the gate cannot
 take a sector below R — was first **model-checked by TLC** in five
-configurations ([`spec/`](spec/)). In October 2026 that check was found to give
+configurations ([`spec/`](../spec/)). In October 2026 that check was found to give
 every node a perfectly fresh view, under which the tie-break is never exercised;
-it was re-done with real stale views ([REPORT_stale_views.md](REPORT_stale_views.md)),
+it was re-done with real stale views ([REPORT_stale_views.md](../reports/REPORT_stale_views.md)),
 which separated the two encodings: the ID tie-break fails specific schedules,
 discounting every announcer is proven safe for any N. That correction is itself
 an instance of commitment 3 below. So does the plausible-looking middle option of inferring
-which un-declared peers have really left ([`spec/AgentInfoAgeGated.tla`](spec/):
+which un-declared peers have really left ([`spec/AgentInfoAgeGated.tla`](../spec/):
 verifies at `Budget = 0`, violated at `Budget = 1`).
 
 Once a rule is machine-checked, the provenance of the *proposal* stops mattering.
@@ -91,15 +91,15 @@ residual. That is a weaker-sounding claim and a truer one.
 **Corrections are published in place, not quietly dropped.** Worked examples in
 this repository:
 
-- [`REPORT_agentinfo_encoding.md`](REPORT_agentinfo_encoding.md) §4.9 retracts
+- [`REPORT_agentinfo_encoding.md`](../reports/REPORT_agentinfo_encoding.md) §4.9 retracts
   its own §4.1: *"durability untouched" was an artefact of testing four seeds*.
   Going from 4 seeds to 100 changed the answer, and the section says so.
 - §4.8 of the same report opens *"a hypothesis of mine that was wrong"* — the
   predicted effect went in the opposite direction.
-- [`REPORT_mz_decomposition.md`](REPORT_mz_decomposition.md) §3 records that its
+- [`REPORT_mz_decomposition.md`](../reports/REPORT_mz_decomposition.md) §3 records that its
   first positive control was too weak to detect the effect it existed to detect,
   and was replaced before the result was taken.
-- [`REPORT_stage3.md`](REPORT_stage3.md) constraint 7 reports that the intuitive
+- [`REPORT_stage3.md`](../reports/REPORT_stage3.md) constraint 7 reports that the intuitive
   culprit for storage skew was wrong and the fix built for it did not work.
 
 A repository where nothing was ever wrong would be the less trustworthy one.
@@ -123,7 +123,7 @@ Stated plainly so it can be aimed at:
   from "safe" to "unimplementable" without touching the proof.
 
 The third is the live one, and it is why
-[constraint 6](REPORT_stage3.md#constraints-on-any-sizing-policy) is stated in
+[constraint 6](../reports/REPORT_stage3.md#constraints-on-any-sizing-policy) is stated in
 terms of death-detection latency rather than gossip timing.
 
 ---

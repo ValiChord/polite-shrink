@@ -11,7 +11,7 @@ different routes, which is mild independent evidence that the corrective is the 
 It is stated here in the same spirit as the wireless-sensor coverage-scheduling precedent noted
 in the README (Tian & Georganas, 2002): **as convergence, not as prior art reinvented, and not as
 a claim of contribution to statistics.** The safety property is established by the TLA+ model
-check in [`spec/`](spec/), independently and completely. Delete this file and nothing is weakened.
+check in [`spec/`](../spec/), independently and completely. Delete this file and nothing is weakened.
 
 ---
 

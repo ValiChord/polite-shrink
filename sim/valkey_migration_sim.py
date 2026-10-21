@@ -69,7 +69,7 @@ from dataclasses import dataclass, field, asdict
 from multiprocessing import Pool
 
 DELAY = 50            # CLUSTER_REPLICA_MIGRATION_DELAY, 5000 ms
-RESULTS = os.path.join(os.path.dirname(__file__), "results")
+RESULTS = os.path.join(os.path.dirname(__file__), "..", "results")
 
 
 @dataclass

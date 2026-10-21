@@ -1,6 +1,6 @@
 # Formal safety proof (TLA+ / TLC)
 
-> **October 2026 — read [../REPORT_stale_views.md](../REPORT_stale_views.md) first.**
+> **October 2026 — read [../REPORT_stale_views.md](../reports/REPORT_stale_views.md) first.**
 > The specs here let `Execute` read the *current* holder set atomically. Under
 > that assumption a bare re-check is already safe, so the tie-break is never
 > exercised — `stale_check.py --fresh --no-tb` reproduces TLC's state counts

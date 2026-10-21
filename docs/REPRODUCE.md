@@ -24,16 +24,16 @@ bash run_all.sh          # ~17 min total on 2 cores
 Or piecemeal:
 
 ```bash
-python3 check_determinism.py   # must print ALL DETERMINISTIC (~30 s)
-python3 run_experiments.py     # scenario study -> results/*.png + summary.md (~1 min)
-python3 check_seeds.py         # seed-robustness spot check
-python3 adversary.py           # learning adversary -> results/adversary.* (~15 min)
+python3 sim/check_determinism.py   # must print ALL DETERMINISTIC (~30 s)
+python3 sim/run_experiments.py     # scenario study -> results/*.png + summary.md (~1 min)
+python3 sim/check_seeds.py         # seed-robustness spot check
+python3 sim/adversary.py           # learning adversary -> results/adversary.* (~15 min)
 ```
 
 ### The AgentInfo-only encoding (2026-07-25)
 
 Announcement carried on the gossiped arc claim rather than a dedicated message;
-write-up in [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
+write-up in [REPORT_agentinfo_encoding.md](../reports/REPORT_agentinfo_encoding.md).
 
 ```bash
 # formal: safe without a tie-break, and the two falsifications that pin down why
@@ -42,15 +42,15 @@ java -cp tla2tools.jar tlc2.TLC spec/AgentInfoOptimistic.tla    # -> violated
 java -cp tla2tools.jar tlc2.TLC spec/AgentInfoAgeGated.tla      # Budget=0 clean, 1 violated
 
 # the battery, re-run under the encoding
-python3 partition_sim.py            # netsplit + heal, now includes V5
-python3 scale_sim.py                # to N = 5,000, now includes V5
-RACE_VARIANT=V5 python3 race_quantify.py   # -> results/race_v5.* (leaves the V3 grid alone)
-python3 agentinfo_message_loss.py   # lossy gossip, both encodings (~20 min)
-python3 agentinfo_repair.py         # V4 repair, clamp = 0
-python3 agentinfo_liars.py          # false-coverage threshold
-python3 agentinfo_fairness.py       # storage concentration
-python3 agentinfo_decoupled.py      # decoupled death-clock (~30 min)
-python3 agentinfo_byzantine_defences.py    # verified coverage + partial liars (~45 min)
+python3 sim/partition_sim.py            # netsplit + heal, now includes V5
+python3 sim/scale_sim.py                # to N = 5,000, now includes V5
+RACE_VARIANT=V5 python3 sim/race_quantify.py   # -> results/race_v5.* (leaves the V3 grid alone)
+python3 sim/agentinfo_message_loss.py   # lossy gossip, both encodings (~20 min)
+python3 sim/agentinfo_repair.py         # V4 repair, clamp = 0
+python3 sim/agentinfo_liars.py          # false-coverage threshold
+python3 sim/agentinfo_fairness.py       # storage concentration
+python3 sim/agentinfo_decoupled.py      # decoupled death-clock (~30 min)
+python3 sim/agentinfo_byzantine_defences.py    # verified coverage + partial liars (~45 min)
 ```
 
 The three `validate_*.py` guards and `check_determinism.py` must still pass after

@@ -48,7 +48,7 @@ keywords:
 references:
   - type: report
     title: "Main study report"
-    url: "https://github.com/ValiChord/polite-shrink/blob/main/REPORT_stage1.md"
+    url: "https://github.com/ValiChord/polite-shrink/blob/main/reports/REPORT_stage1.md"
   - type: software
     title: "Reference implementation, V6 patient lowest (kitsune2 fork, feat/sharding-v6)"
     url: "https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v6"

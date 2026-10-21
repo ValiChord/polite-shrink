@@ -2,7 +2,7 @@
 # Self-relaunching driver for the robustness sweep. sweep.py checkpoints every
 # completed cell and resumes on restart, so if the environment kills the run
 # (this box SIGTERMs long jobs ~1.5h in), we just relaunch and continue.
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # run from the repository root; scripts are in sim/
 SEEDS=312
 
 for attempt in $(seq 1 30); do
@@ -17,7 +17,7 @@ print(len(target - set(done)))
     break
   fi
   echo "=== attempt $attempt: $remaining cells remaining, launching sweep ==="
-  python3 -u sweep.py --seeds "$SEEDS" || echo "sweep exited non-zero (attempt $attempt)"
+  python3 -u sim/sweep.py --seeds "$SEEDS" || echo "sweep exited non-zero (attempt $attempt)"
   sleep 3
 done
 echo "=== driver finished ==="

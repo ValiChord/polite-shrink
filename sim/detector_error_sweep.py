@@ -37,7 +37,7 @@ from polite_shrink import Config, make_world
 from rolling_upgrade_sim import assign_initial_variants
 from detector_error_sim import DetectorErrorSim
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "detector_error_cells.jsonl")
 
 TICKS = 3000

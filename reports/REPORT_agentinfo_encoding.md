@@ -36,7 +36,7 @@ removable without touching the controller.
 ## 2. Safety first: the proof
 
 Three TLA+ specs, model-checked exhaustively at N ≤ 8, R from 1 to 7
-([`spec/`](spec/), full table in [`spec/README.md`](spec/README.md)):
+([`spec/`](../spec/), full table in [`spec/README.md`](../spec/README.md)):
 
 | Encoding | Result |
 |---|---|
@@ -424,7 +424,7 @@ away.
 > lower ID is racing them. Encoding A alone cannot tell an announcer from a
 > departed node, and can stall. At 200 nodes V6 avoids encoding A's costs —
 > no phantom reachability holes, arcs close to V3's, and 0/100 storm-40%
-> losses against encoding A's 11/100 ([results/v6_summary.md](results/v6_summary.md)).
+> losses against encoding A's 11/100 ([results/v6_summary.md](../results/v6_summary.md)).
 
 **The new wire message is not needed. One bit is.**
 
@@ -493,8 +493,8 @@ showing the reachability dip does not materialise, or an operator for whom
 ## Reproduce
 
 ```bash
-python3 run_experiments.py   # table above -> results/summary.md
-python3 check_seeds.py       # seed robustness, held= column for V5
+python3 sim/run_experiments.py   # table above -> results/summary.md
+python3 sim/check_seeds.py       # seed robustness, held= column for V5
 java -cp tla2tools.jar tlc2.TLC spec/AgentInfoConservative.tla  # -> No error
 java -cp tla2tools.jar tlc2.TLC spec/AgentInfoOptimistic.tla    # -> violated
 ```

@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-RES = os.path.join(os.path.dirname(__file__), "results")
+RES = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RES, "rolling_upgrade_cells.jsonl")
 
 rows = [json.loads(l) for l in open(CELLS)]

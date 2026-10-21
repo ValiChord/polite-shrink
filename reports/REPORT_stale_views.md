@@ -44,7 +44,7 @@ same picture; each decides on the truth as left by the last one.
 
 `spec/stale_check.py --fresh` reproduces TLC's published state counts exactly —
 656, 2,172, 5,984, 6,560 and 1,280 for the five configurations in
-[spec/README.md](spec/README.md) — and with `--no-tb` (tie-break deleted) it
+[spec/README.md](../spec/README.md) — and with `--no-tb` (tie-break deleted) it
 gives **the same 656, still no error**. `AgentInfoConservative.tla`, which has no
 tie-break at all, also passes for the same reason.
 
@@ -260,7 +260,7 @@ with a death at any tick when it is noticed before the next decision
 for longer; and **always reaches R** in all eight progress configurations, where
 V5 stalls in 35–87% of schedules.
 
-**At N = 200** ([results/v6_summary.md](results/v6_summary.md); fresh seeds,
+**At N = 200** ([results/v6_summary.md](../results/v6_summary.md); fresh seeds,
 exact 95% intervals):
 
 | | V3 | V5 | **V6** |
@@ -300,7 +300,7 @@ One addition the model did not need: a waiting node re-broadcasts its intent
 before it expires, so peers keep counting it gone for as long as it may still
 act.
 
-Two further tests ([results/rust_fork_v6.md](results/rust_fork_v6.md)):
+Two further tests ([results/rust_fork_v6.md](../results/rust_fork_v6.md)):
 
 - **This report's model check, run on the Rust code.** `timed_check.py` ported
   to Rust, with the decisions made by the controller's own re-check functions.
@@ -345,7 +345,7 @@ spec has no deaths; the death results remain those of section 5. After review
 on tlaplus/Examples#243 the spec was restructured into per-node steps with an
 explicit clock, and a view age chosen afresh at every decision rather than
 fixed per node; every verdict is unchanged. Details:
-[spec/README.md](spec/README.md#stale-views-in-tla).
+[spec/README.md](../spec/README.md#stale-views-in-tla).
 
 ## 8. Limitations
 
@@ -380,7 +380,7 @@ python timed_check.py --n 4 --r 2 --lag 2 --wait 5 --rule patient --crash --dete
 python hybrid_check.py --table          # safety + progress for every candidate
 java -cp tla2tools.jar tlc2.TLC -deadlock -config StaleShrinkV3Cascade.cfg StaleShrink.tla  # TLC finds the cascade
 java -cp tla2tools.jar tlc2.TLC -deadlock StaleShrink.tla                                   # TLC: V6 safe and live
-cd .. && python v6_study.py             # V6 vs V3 vs V5 at N = 200
+cd .. && python sim/v6_study.py             # V6 vs V3 vs V5 at N = 200
 ```
 
 *Research directed by Ceri John; design, implementation, and analysis with AI

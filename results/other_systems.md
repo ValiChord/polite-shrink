@@ -16,7 +16,7 @@ other way round in the third.
 
 ## 1. Valkey replica migration
 
-Model: [`valkey_migration_sim.py`](../valkey_migration_sim.py), a port of
+Model: [`valkey_migration_sim.py`](../sim/valkey_migration_sim.py), a port of
 `clusterCron` and `clusterHandleReplicaMigration` (valkey-io/valkey, unstable).
 Summary: [valkey_migration_summary.md](valkey_migration_summary.md). 3,600 random
 clusters, with orphaned primaries and with a live replica wrongly seen as failed:
@@ -47,7 +47,7 @@ on an unpatched and a patched build.
 
 ## 2. One-at-a-time departures
 
-[`spacing_vs_v6.py`](../spacing_vs_v6.py), results in
+[`spacing_vs_v6.py`](../sim/spacing_vs_v6.py), results in
 [spacing_vs_v6.md](spacing_vs_v6.md). One sector; every holder wants to leave
 while a copy can be spared; view lag up to 0.2 or 1 s; 40 runs per cell. All
 rules stayed at or above R in every run.
@@ -64,7 +64,7 @@ number of contenders; that is what is reported here.
 
 ## 3. Swarm Bee storage radius
 
-[`bee_radius_sim.py`](../bee_radius_sim.py), results in
+[`bee_radius_sim.py`](../sim/bee_radius_sim.py), results in
 [bee_radius_sim.md](bee_radius_sim.md). One node, modelling the mechanism
 described in ethersphere/bee#5659 (radius flipping every wakeup). Bee lowers the
 radius when the chunks within it are under 50% of capacity, and raises it when
@@ -84,7 +84,7 @@ mechanism, not Bee's whole storer.
 
 ## 4. Thread router downgrade (OpenThread)
 
-[`thread_downgrade_sim.py`](../thread_downgrade_sim.py), results in
+[`thread_downgrade_sim.py`](../sim/thread_downgrade_sim.py), results in
 [thread_downgrade_sim.md](thread_downgrade_sim.md). A port of
 `Mle::RoleTransitioner::DecideWhetherToDowngrade` and `HandleTimeTick`
 (openthread/openthread, src/core/thread/mle_ftd.cpp). A router starts a random

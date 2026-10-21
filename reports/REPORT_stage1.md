@@ -7,7 +7,7 @@
 > [REPORT_agentinfo_encoding.md](REPORT_agentinfo_encoding.md).
 
 
-**Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic) — roles in §9 Provenance; citation record in [`CITATION.cff`](CITATION.cff)
+**Author:** Ceri John ([topeuph-ai](https://github.com/topeuph-ai)), with AI assistance (Claude, Anthropic) — roles in §9 Provenance; citation record in [`CITATION.cff`](../CITATION.cff)
 **Study period:** 2026-07-11 → 2026-07-12
 **Status:** complete (Stages 1, 1c, 2); design note published on [holochain/kitsune2#160](https://github.com/holochain/kitsune2/issues/160#issuecomment-4949241059)
 **Reference implementation:** [`topeuph-ai/kitsune2`, branch `feat/sharding-module-v3`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-module-v3)
@@ -82,7 +82,7 @@ lower-id intender as already gone, and proceed only if at least R remain. It
 answers one question — *is this particular drop permitted?* — and it is the whole
 of the safety argument. It is what the TLA+ specification models and what
 `SafeCoverage` is checked over (§9 of [REPORT_stage3.md](REPORT_stage3.md),
-[`spec/`](spec/)); the naive rule fails that same check precisely because it has
+[`spec/`](../spec/)); the naive rule fails that same check precisely because it has
 no gate.
 
 Everything else here is *policy*: the redundancy target, the hysteresis dwell

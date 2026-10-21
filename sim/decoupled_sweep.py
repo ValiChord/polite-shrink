@@ -25,7 +25,7 @@ from polite_shrink import Config, make_world
 from rolling_upgrade_sim import assign_initial_variants
 from decoupled_sim import DecoupledSim
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "decoupled_cells.jsonl")
 KW = dict(storm_at=1500, storm_frac=0.30)
 TICKS = 3000

@@ -33,7 +33,7 @@ from multiprocessing import Pool
 from detector_error_sweep import run_cell as det_cell
 from hetero_detector_sweep import run_cell as het_cell
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "detector_replication_cells.jsonl")
 SEED_BASE = 910000
 

@@ -1,7 +1,7 @@
 # V6 "patient lowest" — the rule, its assumptions, and what backs each claim
 
 One page for a reviewer. Details and history are in
-[REPORT_stale_views.md](REPORT_stale_views.md) and
+[REPORT_stale_views.md](reports/REPORT_stale_views.md) and
 [results/rust_fork_v6.md](results/rust_fork_v6.md).
 
 ## Problem

@@ -27,7 +27,7 @@ import numpy as np
 from polite_shrink import Config, make_world
 from rolling_upgrade_sim import assign_initial_variants, MixedSim
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "rolling_upgrade_cells.jsonl")
 
 SCENARIOS = {

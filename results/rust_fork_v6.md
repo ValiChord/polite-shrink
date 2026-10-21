@@ -158,7 +158,7 @@ simply replaced that agent's previous one, whoever sent it. So anyone could send
 a short-lived forged notice in a leaving node's name. It would replace the
 genuine notice, expire quickly, and leave other nodes counting a node that is
 really leaving as staying. That is the unsafe direction.
-[REPORT_stage3.md](../REPORT_stage3.md) §2a judged forged notices "fail-safe",
+[REPORT_stage3.md](../reports/REPORT_stage3.md) §2a judged forged notices "fail-safe",
 but it only considered forgeries *added* to the table, which can only make
 coverage look lower. It listed checking the sender's identity as a defence;
 the fork had not implemented it.
@@ -269,8 +269,8 @@ than that measurement is the case to watch.
 
 ### 8.3 Nodes that lie about what they store
 
-[`byz_v6.py`](../byz_v6.py) reruns the Stage-3 Byzantine studies
-([REPORT_stage3.md §2](../REPORT_stage3.md)) with V6 as well as V3: six seeds
+[`byz_v6.py`](../sim/byz_v6.py) reruns the Stage-3 Byzantine studies
+([REPORT_stage3.md §2](../reports/REPORT_stage3.md)) with V6 as well as V3: six seeds
 each, N = 200, R = 5. Summary: [byz_v6_summary.md](byz_v6_summary.md).
 
 - **Full-arc liars:** the same threshold for both rules. Below K = R liars, no
@@ -484,5 +484,5 @@ cargo test -p kitsune2_gossip --features sharding --test sharding_upgrade       
 CHAOS_SECS=3600 cargo test -p kitsune2_gossip --features sharding --test sharding_chaos -- --ignored --nocapture   # 11 (CHAOS_WAIT_MS=300 for the control)
 # 12: SHARDING_RECENT_CONTACT=0 turns the change off; CHAOS_UNDETECTED=1 simulates undetected deaths
 ```
-For 8.3, in this repo: `python byz_v6.py --seeds 6`.
-For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).
+For 8.3, in this repo: `python sim/byz_v6.py --seeds 6`.
+For 9, in this repo: `python sim/mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).

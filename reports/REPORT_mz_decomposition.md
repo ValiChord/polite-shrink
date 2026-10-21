@@ -13,7 +13,7 @@ drives the failure mode up **29×** while the fraction of it recoverable from an
 agent's own history does not grow at all — so §11's claim survives, and it now
 has a measurement behind it rather than an argument.
 
-**Companion study:** [`mz_attribution.py`](mz_attribution.py) asks the next
+**Companion study:** [`mz_attribution.py`](../sim/mz_attribution.py) asks the next
 question — of the information that *is* available locally, which observables
 carry it (`results/mz_attribution_summary.md`).
 
@@ -179,7 +179,7 @@ over-count well from what it currently sees, and the gate does not use this.
 
 That is not a licence to build a bias correction, for a reason the repo already
 proved. The residual after the best available predictor is **≈ 2.0 copies against
-R = 5** — 40% of the redundancy target. And [`spec/AgentInfoAgeGated.tla`](spec/)
+R = 5** — 40% of the redundancy target. And [`spec/AgentInfoAgeGated.tla`](../spec/)
 settles what happens next: recovering a missing bit by inference verifies at
 `Budget = 0` (perfect classification) and is **violated at `Budget = 1`** — one
 misclassification loses a copy. A predictor with ±2 copies of residual error is
@@ -194,7 +194,7 @@ against the effort of carrying history.
 
 - **The finding is about these features, and that is the binding limitation —
   more binding than "seven features" makes it sound.** The companion attribution
-  study ([`mz_attribution.py`](mz_attribution.py)) measured how far each
+  study ([`mz_attribution.py`](../sim/mz_attribution.py)) measured how far each
   observable gets on its own, and the answer is: almost all the way. *Any one*
   of six observables scores R² ≈ 0.87–0.89 against 0.92 for all seven together.
 
@@ -261,8 +261,8 @@ of work keeps returning to: information and safety are different questions.
 ## Reproduce
 
 ```bash
-python3 mz_probe.py --seeds 72        # -> results/mz_summary.md, results/mz_cells.jsonl
-python3 mz_attribution.py --seeds 24  # -> results/mz_attribution_summary.md
+python3 sim/mz_probe.py --seeds 72        # -> results/mz_summary.md, results/mz_cells.jsonl
+python3 sim/mz_attribution.py --seeds 24  # -> results/mz_attribution_summary.md
 ```
 
 *Research directed by Ceri John; design, implementation, and analysis with AI

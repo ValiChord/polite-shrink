@@ -9,7 +9,7 @@
 # Every study takes --seeds / --procs if you need to trim; bare invocation
 # reproduces the published configuration.
 set -u
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # run from the repository root; scripts are in sim/
 
 # ---------------------------------------------------------------- interpreter
 # Resolve a working Python 3 rather than assuming `python3` is on PATH and
@@ -18,7 +18,7 @@ cd "$(dirname "$0")"
 # "Python was not found". Candidates are therefore *executed*, not just located.
 #
 # Override with PYTHON=... to point at a virtualenv holding the pinned versions:
-#   PYTHON=/path/to/venv/bin/python ./run_stage3.sh
+#   PYTHON=/path/to/venv/bin/python ./sim/run_stage3.sh
 PY=""
 for cand in ${PYTHON:-} python3 python py; do
     [ -n "$cand" ] || continue
@@ -71,9 +71,9 @@ echo
 # where the failure is visible rather than buried mid-log.
 for guard in validate_decoupled validate_message_loss validate_rolling_upgrade \
              validate_detector_error validate_hetero_detector; do
-    [ -f "$guard.py" ] || continue
+    [ -f "sim/$guard.py" ] || continue
     echo "=== GUARD $guard START $(date -u +%F' '%T) ==="
-    if "$PY" "$guard.py"; then
+    if "$PY" "sim/$guard.py"; then
         echo "=== GUARD $guard PASS $(date -u +%F' '%T) ==="
     else
         echo "=== GUARD $guard FAILED (exit $?) $(date -u +%F' '%T) ==="
@@ -84,7 +84,7 @@ done
 for study in partition_sim byzantine_sim scale_sim race_quantify repair_sim \
              defense_sim fairness_sim verified_coverage_sim partial_liar_sim; do
     echo "=== $study START $(date -u +%F' '%T) ==="
-    if "$PY" "$study.py"; then
+    if "$PY" "sim/$study.py"; then
         echo "=== $study DONE $(date -u +%F' '%T) ==="
     else
         echo "=== $study FAILED (exit $?) $(date -u +%F' '%T) ==="
@@ -98,7 +98,7 @@ done
 for study in mz_probe mz_attribution detector_error_sweep diag_detector_bias \
              hetero_detector_sweep detector_replication oscillation_sweep v6_study; do
     echo "=== $study START $(date -u +%F' '%T) ==="
-    if "$PY" "$study.py"; then
+    if "$PY" "sim/$study.py"; then
         echo "=== $study DONE $(date -u +%F' '%T) ==="
     else
         echo "=== $study FAILED (exit $?) $(date -u +%F' '%T) ==="

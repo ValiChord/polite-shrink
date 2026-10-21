@@ -20,7 +20,7 @@ from polite_shrink import Config, make_world
 from rolling_upgrade_sim import assign_initial_variants
 from message_loss_sim import MessageLossSim
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "message_loss_cells.jsonl")
 SCENARIOS = {"activation": (2200, {}),
              "storm": (3000, dict(storm_at=1500, storm_frac=0.30))}

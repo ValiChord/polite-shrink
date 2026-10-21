@@ -30,7 +30,7 @@ from polite_shrink import V6, VARIANTS, Config, Sim, make_world
 from decoupled_sim import DecoupledSim
 from detector_replication import clopper_pearson
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "v6_cells.jsonl")
 SEED_BASE = 920000
 RULES = {"V3": VARIANTS[3], "V5": VARIANTS[4], "V6": V6}

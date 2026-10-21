@@ -46,7 +46,7 @@ import numpy as np
 
 from polite_shrink import VARIANTS, Config, Sim, make_world
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 CELLS = os.path.join(RESULTS_DIR, "oscillation_cells.jsonl")
 
 TICKS = 5000

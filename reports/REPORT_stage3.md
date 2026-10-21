@@ -98,7 +98,7 @@ Defense (i) is now measured and implemented — see item 2 of the §6 addendum.
 > leaving as staying, which is the unsafe direction. Defense (ii) closes it,
 > and is now implemented on branch `feat/sharding-v6`: intents are keyed by
 > sending peer and only the one from the agent's own declared URL is consumed.
-> See [results/rust_fork_v6.md §6](results/rust_fork_v6.md).
+> See [results/rust_fork_v6.md §6](../results/rust_fork_v6.md).
 
 ### 2b. False coverage — the real Byzantine gap, threshold at K = R
 
@@ -613,7 +613,7 @@ not by the shrink rule.**
 >   more strongly where it exists. A node cannot *learn* which peers have died
 >   before detection tells it: there is no precursor in the history.
 > - **But it is reducible by a deliberately *biased* rule.**
->   [`detector_error_sweep.py`](detector_error_sweep.py) adds a false-conviction
+>   [`detector_error_sweep.py`](../sim/detector_error_sweep.py) adds a false-conviction
 >   rate — the viewer wrongly drops live peers from its coverage — and
 >   `P(any loss)` falls from **40% to 2%** in the slow-detection stress regime.
 >   That is a local rule, and it reduces the residual.
@@ -632,7 +632,7 @@ not by the shrink rule.**
 > **Amendment (October 2026).** Two parts of the paragraph above did not survive
 > scrutiny. (1) The curve's optimum is nearer p ≈ 0.10 than 0.05: a replication
 > on fresh seeds (150 per point) gives 36% → 2.7% at p = 0.10 → 15.3% at p = 0.40,
-> non-overlapping intervals ([RELATED_WORK.md](RELATED_WORK.md) §5). (2) "Error
+> non-overlapping intervals ([RELATED_WORK.md](../docs/RELATED_WORK.md) §5). (2) "Error
 > cancellation, not inference" is one reading, not an established mechanism: at
 > p = 0.40 nodes hold markedly more data and still lose more, which fits
 > thrashing as well. The robust part is the direction and the ceiling.
@@ -761,10 +761,10 @@ rather than arbitrary fractions.
    Convicting a live peer makes a viewer under-count (it holds more: costs
    storage); missing a dead one makes it over-count (it shrinks wrongly: costs
    data). Sweeping a false-conviction rate `p`
-   ([`detector_error_sweep.py`](detector_error_sweep.py), 48 seeds, storm 50%),
+   ([`detector_error_sweep.py`](../sim/detector_error_sweep.py), 48 seeds, storm 50%),
    `P(any loss)` falls **40% → 2%** as `p` goes 0 → 0.10, then *rises again* to
    10% at p = 0.40. The curve is explained by
-   [`diag_detector_bias.py`](diag_detector_bias.py): the viewer's mean coverage
+   [`diag_detector_bias.py`](../sim/diag_detector_bias.py): the viewer's mean coverage
    error crosses zero near p ≈ 0.05, and that is where loss bottoms out. So the
    optimum is **where the false-positive rate offsets the false-negative rate**,
    which moves with detection latency. Two consequences for a policy: "err
@@ -776,7 +776,7 @@ rather than arbitrary fractions.
    magnitude lower, so only the left end of that sweep is an operating regime.
    *October 2026:* the ceiling is replicated on fresh seeds and the optimum sits
    nearer p ≈ 0.10; the error-cancellation mechanism is not established (see
-   the amendment in §11 and [RELATED_WORK.md](RELATED_WORK.md) §5).
+   the amendment in §11 and [RELATED_WORK.md](../docs/RELATED_WORK.md) §5).
 
 7. **Do not flatten the arc distribution without replacing the reach it
    provides.** The equilibrium is extremely unequal — the top decile of agents
@@ -828,11 +828,11 @@ results say where to look next, not that the search is over.
 | tie-break fairness study | `fairness_sim.py` → `results/fairness.png`, `fairness_summary.md`, `fairness.json` |
 | intent range-validation (Rust) | kitsune2 fork `feat/sharding-module-v3` commit `5224d37` (`crates/gossip/src/sharding/intents.rs`) |
 | §6.1 race study | `race_quantify.py` → `results/race.png`, `race_summary.md`, `race.json` |
-| rolling-upgrade study | `rolling_upgrade_sim.py` + `brake_sim.py` → `results/rolling_upgrade_{summary.md,cells.jsonl,png}` + `rolling_upgrade_brake_storm_summary.md`; guard `validate_rolling_upgrade.py`; diagnostics `diag_{rolling_upgrade,margin,attribute_all_storm,trace_post_death,brake_reruns}.py`; full write-up `REPORT_rolling_upgrade.md`. Run separately (long): `python3 rolling_upgrade_sweep.py --seeds 312` (≈2–3 h) + `python3 brake_storm_sweep.py --seeds 312` |
-| decoupled-clock study (§11) | `decoupled_sim.py` → `results/decoupled_{summary.md,cells.jsonl}`; guard `validate_decoupled.py`; sweep `python3 decoupled_sweep.py --seeds 312` (storm, ≈30 min) |
-| lossy-gossip study (§12) | `message_loss_sim.py` → `results/message_loss_{summary.md,cells.jsonl}`; guard `validate_message_loss.py`; sweep `python3 message_loss_sweep.py --seeds 100` (6,000 cells, resumable — checkpoints to `message_loss_cells.jsonl`) |
+| rolling-upgrade study | `rolling_upgrade_sim.py` + `brake_sim.py` → `results/rolling_upgrade_{summary.md,cells.jsonl,png}` + `rolling_upgrade_brake_storm_summary.md`; guard `validate_rolling_upgrade.py`; diagnostics `diag_{rolling_upgrade,margin,attribute_all_storm,trace_post_death,brake_reruns}.py`; full write-up `REPORT_rolling_upgrade.md`. Run separately (long): `python3 sim/rolling_upgrade_sweep.py --seeds 312` (≈2–3 h) + `python3 sim/brake_storm_sweep.py --seeds 312` |
+| decoupled-clock study (§11) | `decoupled_sim.py` → `results/decoupled_{summary.md,cells.jsonl}`; guard `validate_decoupled.py`; sweep `python3 sim/decoupled_sweep.py --seeds 312` (storm, ≈30 min) |
+| lossy-gossip study (§12) | `message_loss_sim.py` → `results/message_loss_{summary.md,cells.jsonl}`; guard `validate_message_loss.py`; sweep `python3 sim/message_loss_sweep.py --seeds 100` (6,000 cells, resumable — checkpoints to `message_loss_cells.jsonl`) |
 | shared style/helpers | `ext_common.py` |
-| one-command runner | `./run_stage3.sh` (guards, the nine studies and the detection-side group, ≈ 3 h on 8 cores; log → `results/stage3_run.log`) |
+| one-command runner | `./sim/run_stage3.sh` (guards, the nine studies and the detection-side group, ≈ 3 h on 8 cores; log → `results/stage3_run.log`) |
 
 Same environment as Stage 1 (`REPRODUCE.md`): Python 3.12, numpy 2.5.1,
 matplotlib 3.11.0. All seeds fixed; `polite_shrink.py` unmodified.
