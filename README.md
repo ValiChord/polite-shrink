@@ -26,7 +26,7 @@
 > cargo test -p kitsune2_gossip --features sharding --test sharding_cascade # the staggered cascade, forced: V3 fails, V6 holds
 > cargo test -p kitsune2_gossip --features sharding --test sharding_storm # 8-node storm, V6 and V3
 > ```
-> The cascade test *passes* when V3 loses its copy and V6 keeps one; each command's "a pass means" is in the fork's [SHARDING_V6.md](https://github.com/topeuph-ai/kitsune2/blob/feat/sharding-v6/SHARDING_V6.md). What these tests found: [results/rust_fork_v6.md](results/rust_fork_v6.md).
+> The cascade test *passes* when V3 loses its copy and V6 keeps one; each command's "a pass means" is in the fork's [SHARDING_V6.md](https://github.com/topeuph-ai/kitsune2/blob/feat/sharding-v6/SHARDING_V6.md). What these tests found: [results/rust_fork_v6.md](results/rust_fork_v6.md). The rule, its assumptions and what backs each claim, on one page: [SPEC_V6.md](SPEC_V6.md). Whether the tests can fail at all: 18 planted bugs, all caught ([§9](results/rust_fork_v6.md)).
 > Older branches (`feat/sharding-module-v3`, `feat/sharding-agentinfo-encoding`) are kept only because the earlier reports measured them. In the Python simulator the same rule is `polite_shrink.V6`.
 
 > ### 👉 The contribution is two files

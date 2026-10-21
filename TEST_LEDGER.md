@@ -70,6 +70,12 @@ whole battery was re-run against it.
 | **Lossy gossip** | drop up to 90% of messages, so each node's view is incomplete *and* inconsistent | **data-loss rate stays flat** across 6,000 runs — no loss attributable to the drops. The re-check never needs a complete view ([REPORT_stage3 §12](REPORT_stage3.md)) |
 | **Sparse-network deadlock** | (found by pushing V3 to its limit) | a real deadlock exists in sparse networks; the V4 expanding-ring repair rule fixes it — **120/120 recovery** while still sharding ([REPORT_stage3 §4](REPORT_stage3.md)) |
 
+## Can the tests fail? (2026-10-21)
+
+| | | |
+|---|---|---|
+| **Mutation testing** on the Rust fork | 18 hand-written realistic bugs, each planted alone, against the unit, model-check, race, cascade, stale-view and storm tests | **Round 1: 11/18 caught**, including every bug that breaks safety. The 7 survivors were glue code and defaults (wait wiring, withdrawal sending, announce-time yield, default settings, edge cases). Tests added for each: **18/18 caught** ([results/rust_fork_v6.md](results/rust_fork_v6.md) §9) |
+
 ## Formal proof — not tested, *proven*
 
 | | | |

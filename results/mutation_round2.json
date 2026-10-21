@@ -1,0 +1,41 @@
+[
+ {
+  "mutant": "adjacent ranges counted as overlapping",
+  "stage1": "fail",
+  "secs": 55
+ },
+ {
+  "mutant": "no announce-time yield",
+  "stage1": "pass",
+  "stage2": "higher_ids_yield (fail)",
+  "secs": 189
+ },
+ {
+  "mutant": "waiting drops the pending shrink (wait becomes give-up)",
+  "stage1": "pass",
+  "stage2": "forced_race_patient_lowest (fail)",
+  "secs": 69
+ },
+ {
+  "mutant": "no withdrawal sent on stand-down",
+  "stage1": "pass",
+  "stage2": "forced_race_patient_lowest (fail)",
+  "secs": 79
+ },
+ {
+  "mutant": "default re-check is V3",
+  "stage1": "fail",
+  "secs": 172
+ },
+ {
+  "mutant": "default has no withdrawal",
+  "stage1": "fail",
+  "secs": 18
+ },
+ {
+  "mutant": "intent still live at its expiry instant",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 344
+ }
+]

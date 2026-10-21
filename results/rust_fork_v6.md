@@ -308,6 +308,41 @@ there. Limits: one machine, so latency is local; the relay is local; 32 nodes
 is about the most this PC runs comfortably. It tests V6 and its wiring over a
 real network stack, not over a wide-area network.
 
+## 9. Can the tests fail? Mutation testing (2026-10-21)
+
+A test suite that passes proves little unless it would fail on broken code.
+`mutate_v6.py` (in this repo) plants 18 realistic bugs in the fork's sharding
+code, one at a time, and runs the tests against each: first the unit and
+model-check tests, then, for any bug that survives, the forced race, the
+forced cascade, the stale-view and storm tests.
+
+**Round 1: 11 of 18 caught.** Every bug that breaks *safety* was caught:
+counting only lower-ID announcers (V6 turned into V3), leaving one copy short,
+a middle racer waiting, yielding to the wrong side, an intent that lapses
+early, a forged sender, a withdrawal that removes the wrong intent.
+
+The 7 that got through were all in glue code or defaults, not the safety rule:
+
+| bug that survived round 1 | test added (fork commit `10af77e`) | round 2 |
+|---|---|---|
+| ranges that only touch counted as overlapping | unit test: adjacent ranges neither overlap nor block a re-check | caught |
+| no yield at announce time | new cascade test: fresh views, lowest ID first; nobody else may announce while it is announcing | caught |
+| waiting silently drops the shrink | race test: an agent that waited must go on to execute that intent | caught |
+| no withdrawal sent on stand-down | race test: a stand-down must be applied by the other node (new log line on receipt) | caught |
+| default rule is V3 | unit test on the defaults | caught |
+| default has no withdrawal | unit test on the defaults | caught |
+| intent still live at its exact expiry instant | unit test on expiry | caught* |
+
+\*Round 2 ran before this unit test existed and the bug survived; the test
+was then added and checked by hand against that bug (passes on the real code,
+fails with the bug). This one is close to harmless in practice: it keeps an
+intent alive a microsecond longer, which errs on the safe side.
+
+**Result: 18 of 18 caught.** Limits: the bugs are hand-picked, not generated
+by a tool such as `cargo-mutants`, so they cover what a reviewer would guess,
+not every possible edit. Raw results: `results/mutation_round1.json`,
+`results/mutation_round2.json`.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -325,3 +360,4 @@ cargo test -p kitsune2_gossip --features sharding --test sharding_iroh          
 IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
 ```
 For 8.3, in this repo: `python byz_v6.py --seeds 6`.
+For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).

@@ -1,0 +1,99 @@
+[
+ {
+  "mutant": "count only lower-ID intenders (V6 becomes V3's count)",
+  "stage1": "fail",
+  "secs": 175
+ },
+ {
+  "mutant": "proceed with one copy fewer than the target",
+  "stage1": "fail",
+  "secs": 20
+ },
+ {
+  "mutant": "demand one copy more than the target",
+  "stage1": "fail",
+  "secs": 18
+ },
+ {
+  "mutant": "a middle racer waits too",
+  "stage1": "fail",
+  "secs": 17
+ },
+ {
+  "mutant": "wait even with no higher racer",
+  "stage1": "fail",
+  "secs": 18
+ },
+ {
+  "mutant": "adjacent ranges counted as overlapping",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 386
+ },
+ {
+  "mutant": "yield to HIGHER ids instead of lower",
+  "stage1": "fail",
+  "secs": 112
+ },
+ {
+  "mutant": "refreshed intent expires too soon",
+  "stage1": "fail",
+  "secs": 25
+ },
+ {
+  "mutant": "refresh only after the intent has already lapsed",
+  "stage1": "fail",
+  "secs": 18
+ },
+ {
+  "mutant": "V3 re-check counts the agent's own intent",
+  "stage1": "fail",
+  "secs": 23
+ },
+ {
+  "mutant": "no announce-time yield",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 399
+ },
+ {
+  "mutant": "waiting drops the pending shrink (wait becomes give-up)",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 391
+ },
+ {
+  "mutant": "no withdrawal sent on stand-down",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 363
+ },
+ {
+  "mutant": "default re-check is V3",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 525
+ },
+ {
+  "mutant": "default has no withdrawal",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 339
+ },
+ {
+  "mutant": "sender address not checked",
+  "stage1": "fail",
+  "secs": 46
+ },
+ {
+  "mutant": "withdrawal ignores which intent it names",
+  "stage1": "fail",
+  "secs": 19
+ },
+ {
+  "mutant": "intent still live at its expiry instant",
+  "stage1": "pass",
+  "stage2": "SURVIVED",
+  "secs": 307
+ }
+]
