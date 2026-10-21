@@ -72,6 +72,7 @@ a node acts, never what it counts.
 | G1 needs A3 | sweep: 0% failing while a death is noticed within 1 tick (wait 2); 6.5% at 2 ticks, 36% at 6 |
 | G1 on a real network stack | storms over the in-memory and iroh transports, 8–32 nodes: never an orphaned sector; forced staggered cascade: V3 orphans a range, V6 does not |
 | rollout | V6 alongside nodes that never shrink, a one-by-one replacement of such nodes, and mixed V6 timing settings: never below target, never a part with no holder ([rust_fork_v6.md §10](results/rust_fork_v6.md)) |
+| G1 under churn | an hour of random kills, joins and staleness changes, 7–14 nodes: no shrink below target, no part without a holder; the short-wait control fails ([rust_fork_v6.md §11](results/rust_fork_v6.md)) |
 | G2 | model: no stalls in any schedule (up to 6 nodes); forced simultaneous race: the lowest waits, then leaves; no node left able to shrink |
 | G3 | 200-node simulation: arcs close to V3's with about a third of the sync traffic |
 | A5 | unit tests: a forged intent cannot displace a genuine one; withdrawals remove only the intent they name |

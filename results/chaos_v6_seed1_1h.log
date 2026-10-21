@@ -1,0 +1,20 @@
+
+running 1 test
+chaos: 3600 s, seed 1, wait 2000 ms
+test chaos_soak_v6 has been running for over 60 seconds
+chaos 302 s: 11 nodes; Tally { kills: 19, joins: 20, staleness_changes: 21, dips_after_death: 0, holes_after_death: 0, announced: 285, waited: 44, executed: 224, stood_down: 19, grew: 112, min_nodes: 9, max_nodes: 14 }
+chaos 604 s: 8 nodes; Tally { kills: 40, joins: 38, staleness_changes: 38, dips_after_death: 0, holes_after_death: 0, announced: 561, waited: 178, executed: 366, stood_down: 108, grew: 187, min_nodes: 7, max_nodes: 14 }
+chaos 903 s: 8 nodes; Tally { kills: 52, joins: 50, staleness_changes: 59, dips_after_death: 0, holes_after_death: 0, announced: 644, waited: 207, executed: 427, stood_down: 117, grew: 232, min_nodes: 7, max_nodes: 14 }
+chaos 1200 s: 12 nodes; Tally { kills: 62, joins: 64, staleness_changes: 81, dips_after_death: 0, holes_after_death: 0, announced: 899, waited: 298, executed: 595, stood_down: 178, grew: 317, min_nodes: 7, max_nodes: 14 }
+chaos 1501 s: 12 nodes; Tally { kills: 79, joins: 81, staleness_changes: 100, dips_after_death: 0, holes_after_death: 0, announced: 1049, waited: 313, executed: 699, stood_down: 185, grew: 380, min_nodes: 7, max_nodes: 14 }
+chaos 1802 s: 13 nodes; Tally { kills: 101, joins: 104, staleness_changes: 113, dips_after_death: 0, holes_after_death: 0, announced: 1353, waited: 340, executed: 884, stood_down: 225, grew: 454, min_nodes: 7, max_nodes: 14 }
+chaos 2101 s: 13 nodes; Tally { kills: 120, joins: 123, staleness_changes: 130, dips_after_death: 0, holes_after_death: 0, announced: 1545, waited: 393, executed: 1021, stood_down: 250, grew: 502, min_nodes: 7, max_nodes: 14 }
+chaos 2402 s: 8 nodes; Tally { kills: 144, joins: 142, staleness_changes: 140, dips_after_death: 0, holes_after_death: 0, announced: 1780, waited: 453, executed: 1139, stood_down: 314, grew: 553, min_nodes: 7, max_nodes: 14 }
+chaos 2703 s: 11 nodes; Tally { kills: 160, joins: 161, staleness_changes: 166, dips_after_death: 0, holes_after_death: 0, announced: 1872, waited: 484, executed: 1193, stood_down: 331, grew: 583, min_nodes: 7, max_nodes: 14 }
+chaos 3003 s: 10 nodes; Tally { kills: 175, joins: 175, staleness_changes: 190, dips_after_death: 0, holes_after_death: 0, announced: 2149, waited: 589, executed: 1365, stood_down: 402, grew: 671, min_nodes: 7, max_nodes: 14 }
+chaos 3301 s: 8 nodes; Tally { kills: 193, joins: 191, staleness_changes: 207, dips_after_death: 0, holes_after_death: 0, announced: 2387, waited: 675, executed: 1516, stood_down: 455, grew: 766, min_nodes: 7, max_nodes: 14 }
+chaos 3602 s: 7 nodes; Tally { kills: 210, joins: 207, staleness_changes: 224, dips_after_death: 0, holes_after_death: 0, announced: 2582, waited: 844, executed: 1627, stood_down: 492, grew: 819, min_nodes: 7, max_nodes: 14 }
+chaos done, seed 1: 7 nodes at the end; Tally { kills: 210, joins: 207, staleness_changes: 224, dips_after_death: 0, holes_after_death: 0, announced: 2583, waited: 844, executed: 1630, stood_down: 492, grew: 819, min_nodes: 7, max_nodes: 14 }
+.
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3618.65s
+

@@ -382,6 +382,37 @@ V6, but a mix is not strictly better than all-V3: V6's wait can move a
 departure into a V3 node's blind window (520 of about a million N=4, R=2
 cases). Since nobody runs V3, this test was dropped from the fork.
 
+## 11. An hour of chaos (2026-10-21)
+
+`tests/sharding_chaos.rs` (fork commit `e57d96d`) runs V6 on the in-memory
+transport under random churn. Every 2–6 s one of these happens, chosen by a
+seeded generator: a random node is killed (never one that is the last holder
+of some sector, since no rule survives losing the last copy), a new node
+joins with a full arc, every node's view becomes 0, 0.25, 0.5, 1 or 1.5 s
+stale, or nothing. The wait is a fixed 2 s, so assumption A1 holds. Between
+7 and 14 nodes, target 3.
+
+Every 50 ms the test reads every node's true declared arc and fails if a
+sector's count falls to below the target with no kill in the previous 5 s
+(a shrink did it), or if any sector has no holder outside that window.
+Inside the window such drops are counted rather than failed: a node cannot
+discount a death it has not noticed yet (assumption A3).
+
+| run | kills | joins | staleness changes | shrinks | waits | stand-downs | re-grows | failures | drops inside the 5 s windows |
+|---|---|---|---|---|---|---|---|---|---|
+| seed 1, 1 hour, wait 2 s | 210 | 207 | 224 | 1,630 | 844 | 492 | 819 | **0** | **0** |
+| control: wait 0.3 s, seeds 1–3 | | | | | | | | **fails each time**, after 5, 86 and 41 s | |
+
+The control is what makes the clean run mean something: with the wait
+shorter than the staleness, the same checker catches a shrink taking a
+sector below target on every seed. At the end of the hour the churn stopped
+and every sector returned to the target.
+
+Limits: one seed for the full hour; one machine and the in-memory transport,
+with staleness injected rather than real; at most 14 nodes; kills that would
+remove a sector's last holder are excluded by design. Log:
+`results/chaos_v6_seed1_1h.log`.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -398,6 +429,7 @@ cargo test --release -p kitsune2_gossip --features sharding --lib sweep_ -- --ig
 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh               # 8.4, 8 nodes over iroh
 IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
 cargo test -p kitsune2_gossip --features sharding --test sharding_upgrade           # 10, rollout (about 2.5 min)
+CHAOS_SECS=3600 cargo test -p kitsune2_gossip --features sharding --test sharding_chaos -- --ignored --nocapture   # 11 (CHAOS_WAIT_MS=300 for the control)
 ```
 For 8.3, in this repo: `python byz_v6.py --seeds 6`.
 For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).
