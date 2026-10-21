@@ -223,6 +223,91 @@ have the old data on disk; kitsune2 itself never deletes it, though the
 application on top may. So this is a hole in what the network promises, which
 the controller then has to repair, rather than proven permanent loss.
 
+## 8. The remaining risks, tested (2026-10-21)
+
+Four open questions about the world around the rule, each tested on the real
+Rust code or with the repo's simulator.
+
+### 8.1 Deaths that are not noticed promptly
+
+`stale_model::sweep_detection_delay`: every schedule for 4 nodes, R = 2, a
+gossip lag of 2 ticks, a wait of 2 ticks, one death at any tick, noticed
+`detect` ticks later (2,358,720 schedules per row).
+
+| death noticed after | V6 schedules failing | V3 schedules failing |
+|---|---|---|
+| 0 ticks | **0%** | 4.6% |
+| 1 tick | **0%** | 4.6% |
+| 2 ticks (= the wait) | 6.5% | 10.6% |
+| 3 ticks | 14.5% | 17.8% |
+| 4 ticks | 22.5% | 25.5% |
+| 6 ticks | 36.4% | 39.3% |
+
+V6 is safe while a death is noticed within less than its wait, and degrades
+steadily after that, always a little better than V3. The operational rule
+follows: death detection has to be faster than V6's wait.
+
+### 8.2 A wait shorter than the real staleness
+
+`stale_model::sweep_wait_against_lag`: every schedule for 4 nodes, R = 2,
+gossip lag up to 3 ticks, no deaths.
+
+| wait | V6 schedules failing | V3 schedules failing |
+|---|---|---|
+| 1/3 of the lag | 20.5% | 35.1% |
+| 2/3 of the lag | 1.9% | 19.2% |
+| **= the lag** | **0%** | 7.5% |
+| 4/3 | 0% | 1.9% |
+| 5/3 | 0% | 0.16% |
+| 2× | 0% | 0.02% |
+
+V6 has a sharp edge exactly at wait = lag; V3 is not fully safe even at twice
+the lag. On a real network (section 4) the too-short-wait control fell below
+target in every run. The Rust controller scales its wait from the measured
+gossip lag (90th percentile, clamped); a network that suddenly becomes slower
+than that measurement is the case to watch.
+
+### 8.3 Nodes that lie about what they store
+
+[`byz_v6.py`](../byz_v6.py) reruns the Stage-3 Byzantine studies
+([REPORT_stage3.md §2](../REPORT_stage3.md)) with V6 as well as V3: six seeds
+each, N = 200, R = 5. Summary: [byz_v6_summary.md](byz_v6_summary.md).
+
+- **Full-arc liars:** the same threshold for both rules. Below K = R liars, no
+  sector loses its last real copy; from K = R (5) up, some do. V6 leaves
+  slightly fewer uncovered sectors (93 against 120 at K = 5; 329 against 352 at
+  K = 10), which is not a defence. No timing rule can see that a declaration is
+  false. The defence is verified coverage (Stage 3 §6–7), which is simulated,
+  not built into the fork.
+- **Forged leaving-notices:** neither rule lost a copy. V6 answers by keeping
+  arcs wide (mean arc level 3.00 against V3's 2.11), but without churn: about
+  9,900 sync units against V3's 80,000. On the fork, intents are also checked
+  against their sender's own address (section 6), so a forged notice from
+  another peer is not counted at all.
+- **Trojan exit** (liars vanish after the network thins around them):
+  identical for both rules.
+
+### 8.4 A real network stack, at larger sizes
+
+`tests/sharding_iroh.rs` runs the storm over kitsune2's **iroh** transport
+(QUIC, with a local relay from the test bootstrap server) instead of the
+in-memory one, using V6 with withdrawal. Each node starts at full arc and
+shards down; a quarter of the nodes are then killed at once, chosen to push
+sectors below target without killing the last holder of any sector.
+
+| nodes | declared copies before the storm (of full replication) | killed | sectors pushed below target | ever orphaned | back to target |
+|---|---|---|---|---|---|
+| 8 | 2,048 of 4,096 (50%) | 2 | 256 | **never** | within ~2.4 s |
+| 16 | 1,536 of 8,192 (19%) | 4 | 288 | **never** | ~2.4 s |
+| 24 | 1,520 of 12,288 (12%) | 6 | 128 | **never** | ~2.4 s |
+| 32 | 1,569 of 16,384 (10%) | 8 | 0 (no such kill existed) | **never** | not needed |
+
+At 32 nodes the network had sharded so deeply that no set of 8 victims could
+push a sector below target without orphaning it, so recovery was not exercised
+there. Limits: one machine, so latency is local; the relay is local; 32 nodes
+is about the most this PC runs comfortably. It tests V6 and its wiring over a
+real network stack, not over a wide-area network.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -235,4 +320,8 @@ RACE_RUNS=6 cargo test -p kitsune2_gossip --features sharding --test sharding_ra
 STALE_RUNS=4 cargo test -p kitsune2_gossip --features sharding --test sharding_stale stale_views_compare -- --ignored --nocapture
 cargo test -p kitsune2_gossip --features sharding --test sharding_cascade           # forced cascade: V3 fails, V6 holds, two controls
 CASCADE_RUNS=3 cargo test -p kitsune2_gossip --features sharding --test sharding_cascade forced_cascade_regrow_sweep -- --ignored --nocapture
+cargo test --release -p kitsune2_gossip --features sharding --lib sweep_ -- --ignored --nocapture --test-threads 1   # 8.1, 8.2
+cargo test -p kitsune2_gossip --features sharding --test sharding_iroh               # 8.4, 8 nodes over iroh
+IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
 ```
+For 8.3, in this repo: `python byz_v6.py --seeds 6`.
