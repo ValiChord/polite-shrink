@@ -41,7 +41,11 @@ re-check (at the set time, on n's current view):
   one `wait` after its re-check, and a waiting node refreshes it; this holds
   while A1 holds.)
 - **A3. Deaths are noticed in time.** A node that dies is noticed by everyone
-  before anyone acts on a view that still counts it.
+  before anyone acts on a view that still counts it. (Branch
+  `feat/sharding-v6-failsafe` enforces A1 for holders and bounds A3 locally:
+  a shrink counts only holders heard from within the wait, so a silent holder
+  stops counting one wait after its last message. See
+  [rust_fork_v6.md §12](results/rust_fork_v6.md).)
 - **A4. Honest declarations.** A node that says it holds a range does hold it.
 - **A5. Authentic intents.** An intent comes from the node it names. (Rust: only
   intents arriving from the node's own declared address are counted.)

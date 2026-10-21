@@ -1,0 +1,22 @@
+== 1. suite with recent contact ON
+sharding_race: test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 56.23s 
+sharding_stale: test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 92.56s 
+sharding_cascade: test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 121.39s 
+sharding_storm: test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.98s 
+sharding_upgrade: test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 144.42s 
+sharding_iroh: test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 43.49s 
+== 2. undetected deaths, contact OFF
+seed 1: thread 'chaos_soak_v6' (26552) panicked at crates\gossip\tests\sharding_chaos.rs:292:21: seed 1, 76 s: a shrink took sector 256 from 3 to 2 (target 3), no kill in the last 5s 
+seed 2: thread 'chaos_soak_v6' (19336) panicked at crates\gossip\tests\sharding_chaos.rs:292:21: seed 2, 21 s: a shrink took sector 160 from 3 to 2 (target 3), no kill in the last 5s 
+seed 3: thread 'chaos_soak_v6' (1404) panicked at crates\gossip\tests\sharding_chaos.rs:292:21: seed 3, 12 s: a shrink took sector 320 from 3 to 2 (target 3), no kill in the last 5s 
+== 3. undetected deaths, contact ON
+seed 1: chaos done (undetected deaths), seed 1: 11 nodes; min              coverage 3; Tally { kills: 19, joins: 20, staleness_changes: 21, dips_after_death: 2, holes_after_death: 0, announced: 212, waited: 63, executed: 178, stood_down: 31, grew: 26, min_nodes: 9, max_nodes: 14 } 
+seed 2: chaos done (undetected deaths), seed 2: 13 nodes; min              coverage 5; Tally { kills: 13, joins: 16, staleness_changes: 22, dips_after_death: 0, holes_after_death: 0, announced: 152, waited: 23, executed: 130, stood_down: 20, grew: 0, min_nodes: 7, max_nodes: 14 } 
+seed 3: chaos done (undetected deaths), seed 3: 12 nodes; min              coverage 3; Tally { kills: 20, joins: 22, staleness_changes: 15, dips_after_death: 128, holes_after_death: 0, announced: 130, waited: 22, executed: 117, stood_down: 13, grew: 0, min_nodes: 7, max_nodes: 14 } 
+== 4. control wait 300 ms, contact ON
+seed 1: chaos done, seed 1: 11 nodes at the end; Tally { kills: 19, joins: 20, staleness_changes: 21, dips_after_death: 0, holes_after_death: 0, announced: 0, waited: 0, executed: 0, stood_down: 0, grew: 0, min_nodes: 9, max_nodes: 14 } 
+seed 2: chaos done, seed 2: 13 nodes at the end; Tally { kills: 13, joins: 16, staleness_changes: 22, dips_after_death: 0, holes_after_death: 0, announced: 0, waited: 0, executed: 0, stood_down: 0, grew: 0, min_nodes: 7, max_nodes: 14 } 
+seed 3: chaos done, seed 3: 12 nodes at the end; Tally { kills: 20, joins: 22, staleness_changes: 15, dips_after_death: 0, holes_after_death: 0, announced: 0, waited: 0, executed: 0, stood_down: 0, grew: 0, min_nodes: 7, max_nodes: 14 } 
+== 5. normal 20 min, contact ON
+seed 1: chaos done, seed 1: 12 nodes at the end; Tally { kills: 62, joins: 64, staleness_changes: 81, dips_after_death: 8, holes_after_death: 0, announced: 814, waited: 141, executed: 577, stood_down: 108, grew: 284, min_nodes: 7, max_nodes: 14 } 
+== DONE

@@ -413,6 +413,57 @@ with staleness injected rather than real; at most 14 nodes; kills that would
 remove a sector's last holder are excluded by design. Log:
 `results/chaos_v6_seed1_1h.log`.
 
+## 12. Enforcing the timing assumptions (branch `feat/sharding-v6-failsafe`, 2026-10-21)
+
+Sections 8–11 test V6 while its assumptions hold, and measure what happens
+when they do not. The code itself trusted two of them:
+
+- **A1, information no older than the wait.** The wait is 2.5 × the 90th
+  percentile of the per-peer "last gossip" age, capped at `lag_ceiling_ms`.
+  Nothing at decision time checked that what a node was relying on was
+  actually that fresh.
+- **A3, deaths noticed in time.** kitsune2 marks a peer unresponsive only
+  on an event: a closed connection, a connect timeout, a failed send. A node
+  that dies silently can be counted as a holder for as long as that takes.
+
+A finding along the way: kitsune2's per-peer last-gossip timestamp is set
+when a round is **attempted**, even if the peer never answers
+(`crates/gossip/src/gossip.rs`: "Even if this fails, we should still record
+that this peer has been selected"). So V6's measured "lag" is the time since
+each peer was last *tried*, not the age of what is known about it.
+
+**The change** (fork commit `2d57117`, setting `require_recent_contact`,
+default on in the branch): for shrink decisions only, a remote holder counts
+if this node has *heard from* it within the current wait. "Heard from" is
+kitsune2's per-peer completed-rounds counter going up, which happens only
+when a gossip message arrives from that peer, in either direction. A holder
+gone silent stops counting within one wait of its last message, whatever the
+transport does. A broken assumption then costs progress, not safety. Growth
+is unchanged.
+
+**Results** (chaos soak of §11; 5 min per seed unless stated;
+`results/failsafe_runs.txt`):
+
+| scenario | without the change | with it |
+|---|---|---|
+| existing suite (race, stale, cascade incl. V3 failing, storm, rollout, iroh) | pass | **pass**, progress checks included |
+| deaths never detected (`CHAOS_UNDETECTED=1`), seeds 1–3 | **fails every seed**, after 76, 21 and 12 s: a shrink counted a dead holder | **no failure** on any seed (13–20 undetected kills, 117–178 shrinks each) |
+| wait 0.3 s, far below the staleness (the old control), seeds 1–3 | fails every seed (§11) | **safe, but no shrink at all**: nothing is heard from within 0.3 s |
+| normal chaos, 20 min, seed 1 | 595 shrinks by 20 min (the §11 run) | 577 shrinks: **no measurable progress cost** |
+
+**What it does not close.** A holder that has died is still counted until
+one wait after its last message, because nothing local can tell "dead" from
+"slow" sooner. In the undetected-death runs, shrinks did take sectors below
+target inside that window: 2 and 128 sector-samples (50 ms samples × sectors)
+on seeds 1 and 3, all within 5 s of a kill, and never a sector with no
+holder. In the normal 20-minute run, 8 such sector-samples, also inside the
+post-kill windows. So A3 becomes "a death is noticed within one wait of the
+dead node's last message", **enforced by the rule itself** instead of
+depending on the transport, but not removed. Intents are not covered: a
+missing intent still relies on delivery within the wait (A1 for intents).
+
+Status: on its own branch until reviewed; `feat/sharding-v6` is unchanged.
+
 ## Reproduce
 
 In a checkout of the branch:
@@ -430,6 +481,7 @@ cargo test -p kitsune2_gossip --features sharding --test sharding_iroh          
 IROH_SIZES=8,16,24,32 cargo test -p kitsune2_gossip --features sharding --test sharding_iroh storm_over_iroh_larger -- --ignored --nocapture
 cargo test -p kitsune2_gossip --features sharding --test sharding_upgrade           # 10, rollout (about 2.5 min)
 CHAOS_SECS=3600 cargo test -p kitsune2_gossip --features sharding --test sharding_chaos -- --ignored --nocapture   # 11 (CHAOS_WAIT_MS=300 for the control)
+# 12, on feat/sharding-v6-failsafe: SHARDING_RECENT_CONTACT=0 turns the change off; CHAOS_UNDETECTED=1 simulates undetected deaths
 ```
 For 8.3, in this repo: `python byz_v6.py --seeds 6`.
 For 9, in this repo: `python mutate_v6.py <path to fork checkout>` (about 1–2 hours on 3 cores).
