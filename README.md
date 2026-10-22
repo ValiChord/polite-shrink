@@ -32,8 +32,9 @@ what backs each claim are on one page: **[SPEC_V6.md](SPEC_V6.md)**.
   behind kitsune2's existing `sharding` feature flag. V6 is the default there.
   CI runs every sharding test on each change.
 - **Formally specified** in TLA+ ([`spec/StaleShrink.tla`](spec/StaleShrink.tla)),
-  submitted to the TLA+ examples collection
-  ([tlaplus/Examples#243](https://github.com/tlaplus/Examples/pull/243)).
+  and accepted into the official TLA+ examples collection after review by
+  Stephan Merz ([tlaplus/Examples#243](https://github.com/tlaplus/Examples/pull/243),
+  merged 22 October 2026).
 - **Not merged upstream.** It is offered to the kitsune2 maintainers on
   [#160](https://github.com/holochain/kitsune2/issues/160).
 
