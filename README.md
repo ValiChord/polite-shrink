@@ -10,6 +10,16 @@ without any part ever dropping below **R** copies. There is no coordinator,
 and every node decides from its own view of the network, which may be out of
 date.
 
+> ### ✅ Accepted into the official TLA+ examples — 22 October 2026
+> The formal model of V6 is now part of
+> [**tlaplus/Examples**](https://github.com/tlaplus/Examples/tree/master/specifications/StaleViewShrink),
+> the TLA+ project's own collection of specifications, after review by
+> Stephan Merz, one of its maintainers ([the review](https://github.com/tlaplus/Examples/pull/243)).
+> There, TLC, the TLA+ model checker, explores every possible ordering of
+> events in the configurations checked: it confirms that V6 never lets a shrink
+> take a sector below R and always makes progress, and it finds by itself the
+> cascade that breaks the older rule.
+
 ## The rule: V6, "patient lowest"
 
 1. **Announce** that you intend to drop a range, unless a lower-ID node is
@@ -33,8 +43,8 @@ what backs each claim are on one page: **[SPEC_V6.md](SPEC_V6.md)**.
   CI runs every sharding test on each change.
 - **Formally specified** in TLA+ ([`spec/StaleShrink.tla`](spec/StaleShrink.tla)),
   and accepted into the official TLA+ examples collection after review by
-  Stephan Merz ([tlaplus/Examples#243](https://github.com/tlaplus/Examples/pull/243),
-  merged 22 October 2026).
+  Stephan Merz ([in the collection](https://github.com/tlaplus/Examples/tree/master/specifications/StaleViewShrink);
+  [the review](https://github.com/tlaplus/Examples/pull/243), merged 22 October 2026).
 - **Not merged upstream.** It is offered to the kitsune2 maintainers on
   [#160](https://github.com/holochain/kitsune2/issues/160).
 
