@@ -47,6 +47,10 @@ what backs each claim are on one page: **[SPEC_V6.md](SPEC_V6.md)**.
   [the review](https://github.com/tlaplus/Examples/pull/243), merged 22 October 2026).
 - **Not merged upstream.** It is offered to the kitsune2 maintainers on
   [#160](https://github.com/holochain/kitsune2/issues/160).
+- **Next: V7**, which adds a ceiling so that growing is coordinated as well as
+  shrinking. In simulation and TLA+ it keeps everything V6 does at under half
+  the storage, and fixes a start-up slowdown found in V6. It is not yet on the
+  fork. See [reports/REPORT_v7.md](reports/REPORT_v7.md).
 
 ## Try it
 

@@ -31,6 +31,8 @@ whole battery was re-run against it.
 | **Ablation** | add one ingredient at a time — hysteresis, jitter, two-phase shrink | hysteresis alone: 95.9% → 24%. Jitter: no help (24.3%). The **two-phase handshake** is what reaches zero ([REPORT_stage1](reports/REPORT_stage1.md)) |
 | **Scale** | grow the network to 5,000 agents on rings up to 16,384 sectors | polite shrink held the floor at R with **zero loss at every N**; the damped controller starts losing data at N ≥ 2,000 ([REPORT_stage3 §3](reports/REPORT_stage3.md)) |
 | **Partitions** | split the network, heal it, absorb the reconnection shrink storm | **no durability loss** in any of 3 geometries × 3 controllers (single seed; V1 and V2 also lose nothing, so this does not discriminate); V3's floor never left R. Flapping partitions defeat the damped controller, not this one ([REPORT_stage3 §1](reports/REPORT_stage3.md)) |
+| **Partitions, V6** (Oct 2026) | the same three split scenarios, V6 against V3 and V5, 48 fresh seeds each | **no data lost in 144 runs**, never below R; far more data reachable on each side during the split than V3; settles 4–8× faster after the heal ([REPORT_v7 §Splits](reports/REPORT_v7.md)) |
+| **Realistic splits** (Oct 2026) | as above, but a node cut off can only fetch data its own side holds | the large side never lacks anything; a small cut-off group lacks whatever it did not hold. One **pinned** node (keeps everything) in that group gives it full access, V6 or V7 ([REPORT_v7 §Splits](reports/REPORT_v7.md)) |
 
 ## Adversarial — can something *trying* to break it succeed?
 
@@ -139,6 +141,17 @@ whether the optimum *moves*, not any real detector's ability to track it. Two la
 classes at a 2:1 ratio is not a continuum. And `p` is a false-positive rate *per look*:
 real accrual detectors run orders of magnitude lower, so only the left end of those sweeps
 is an operating regime.
+
+## V7: a floor and a ceiling together (Oct 2026, simulation and TLA+ only)
+
+| | | |
+|---|---|---|
+| **TLA+**: floor and ceiling at once; + a split, deaths, recent contact | exhaustive, 4–5 nodes, up to 15 million states per run | both bounds kept; no breach through a split; after an undetected death, breaches only within one wait of it; controls fail ([results/v7_tla.md](results/v7_tla.md)) |
+| **V6's start-up speed** | 24 worlds sharding down from full arcs | **V6 is 1.7× slower than V3 typically, 3.5× in the worst world, and one world was still at 39 copies after 6,000 ticks.** The *alongside* repair restores V3's speed. The published V6 averages hid this ([REPORT_v7](reports/REPORT_v7.md)) |
+| **V7 against V6** | four standard scenarios, 24 worlds | at R = 6: no data lost, **43% of V6's storage, 21% of its bandwidth**, storage far more evenly spread. A hard ceiling refuses repairs and loses data: ruled out ([REPORT_v7](reports/REPORT_v7.md)) |
+| **V7 through splits** | three split scenarios, 48 worlds, plus the realistic version | no data lost in any run; a small cut-off group without a pinned node has more gaps than under V6; settles more slowly after the heal ([REPORT_v7 §Splits](reports/REPORT_v7.md)) |
+
+V7 is not yet on the fork; none of the Rust, real-network, chaos or mutation tests above apply to it yet.
 
 ## What we don't claim
 

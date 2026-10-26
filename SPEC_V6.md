@@ -84,6 +84,10 @@ a node acts, never what it counts.
 
 ## Not guaranteed
 
+- **Speed from full arcs:** G2 holds, but V6's yield makes nodes that share a
+  range announce one at a time, so sharding down from full arcs can be several
+  times slower than V3, and on some worlds very slow. The *alongside* repair
+  fixes this; see [REPORT_v7.md](reports/REPORT_v7.md).
 - **A4 violated (liars):** false declarations defeat every timing rule once
   liars reach R. The defence is verified coverage, simulated but not built.
 - **A1/A3 violated:** with a wait shorter than the staleness, or deaths noticed
