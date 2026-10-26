@@ -51,6 +51,7 @@ class Arm:
     multiwait: bool = False # several racers may wait at a failed re-check
     alongside: bool = False # announce alongside lower ids when there is room
     urgent: bool = False    # grow at once (no coordination) when 2+ copies short
+    critical: bool = False  # grow at once when a sector is down to 1 copy or none
 
 
 ARMS = [Arm("V6"),
@@ -98,10 +99,11 @@ class V7Mixin:
         # Urgent repair: two or more copies short somewhere in the half means
         # a real loss (deaths, a split), not drift; repair at once, as V6
         # does, and keep coordination for single-copy gaps.
-        if self.arm.urgent:
+        if self.arm.urgent or self.arm.critical:
             ws, we = sibling_half(a.home, a.level, self.cfg.log2s)
             eff = (_cov[ws:we] - _icov[ws:we]).astype(np.int32)
-            if int(eff.min()) < self.cfg.redundancy - 1:
+            limit = self.cfg.redundancy - 2 if self.arm.urgent else 1
+            if int(eff.min()) <= limit:
                 self.gint.pop(a.aid, None)
                 return super()._start_grow(a)
         if a.aid in self.gint:

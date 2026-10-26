@@ -29,7 +29,10 @@ CASES = [("V6", Arm("V6"), 5)] + [
     for r in (5, 6, 7, 8, 9)] + [
     (f"V7+urgent, R={r}", Arm("V7 soft+urgent", ceiling="soft", alongside=True,
                               urgent=True), r)
-    for r in (5, 6, 7)]
+    for r in (5, 6, 7)] + [
+    (f"V7+critical, R={r}", Arm("V7 soft+critical", ceiling="soft",
+                                alongside=True, critical=True), r)
+    for r in (6, 8)]
 SCEN = [s for s in SCENARIOS if s[0] in ("storm", "churn")]
 
 

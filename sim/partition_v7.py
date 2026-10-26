@@ -28,8 +28,13 @@ BASE_SEED = 500_000   # as partition_v6.py
 
 V7_ARM = Arm("V7 soft", ceiling="soft", alongside=True)
 V7U_ARM = Arm("V7 soft+urgent", ceiling="soft", alongside=True, urgent=True)
+V7C_ARM = Arm("V7 soft+critical", ceiling="soft", alongside=True, critical=True)
 CASES = [("V6", None, 5), ("V7, R=5", V7_ARM, 5), ("V7, R=6", V7_ARM, 6),
          ("V7+urgent, R=5", V7U_ARM, 5), ("V7+urgent, R=6", V7U_ARM, 6)]
+# Second round: a narrower urgent trigger, and V7 at more comparable storage.
+if "--round2" in __import__("sys").argv:
+    CASES = [("V6", None, 5), ("V7, R=8", V7_ARM, 8), ("V7, R=9", V7_ARM, 9),
+             ("V7+critical, R=6", V7C_ARM, 6), ("V7+critical, R=8", V7C_ARM, 8)]
 
 
 class PartitionV7Sim(V7Mixin, PartitionSim):
@@ -99,9 +104,10 @@ def main():
                 f"{np.mean([r['stored'] for r in rs]):.0f} | "
                 f"{np.mean([r['sync_cost'] for r in rs]):.0f} |")
     table = "\n".join(lines) + "\n"
-    with open("results/partition_v7_summary.md", "w", encoding="utf-8") as f:
+    tag = "_round2" if "--round2" in argv else ""
+    with open(f"results/partition_v7{tag}_summary.md", "w", encoding="utf-8") as f:
         f.write(table)
-    with open("results/partition_v7.json", "w") as f:
+    with open(f"results/partition_v7{tag}.json", "w") as f:
         json.dump(rows, f)
     print(table)
 
