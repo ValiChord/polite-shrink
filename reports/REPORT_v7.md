@@ -4,8 +4,10 @@
 fork** (branch
 [`feat/sharding-v7`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v7)),
 where it has passed the tests V6 passed ([below](#v7-on-the-kitsune2-code)).
-Coordinated growth is built but **off by default** there; V6 remains the
-default rule until that is decided.
+Merged into `feat/sharding-v6` on 27 October 2026. The default there is V6
+with the two fixes below (*alongside* and probes); coordinated growth is built
+but **off by default**, until a larger test shows its storage saving on the
+real code.
 
 ## What V7 is
 
