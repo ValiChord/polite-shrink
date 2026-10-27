@@ -254,7 +254,7 @@ Every test, run with coordinated growth off (V6 growth) and on:
   surviving bugs re-run against them: 20 of 21 are now caught. The one left: a
   grower that stands down does not withdraw its announcement, so another grower
   may hold back for one extra wait. It costs a delay, never data.
-- **CI** runs every sharding test on each change; CI_LINE
+- **CI** runs every sharding test on each change: all jobs pass on Linux, macOS and Windows ([run 40487480423](https://github.com/topeuph-ai/kitsune2/actions/runs/40487480423), commit `0cdcd8e`).
 
 ### Not shown on the code
 
