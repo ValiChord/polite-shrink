@@ -142,7 +142,7 @@ classes at a 2:1 ratio is not a continuum. And `p` is a false-positive rate *per
 real accrual detectors run orders of magnitude lower, so only the left end of those sweeps
 is an operating regime.
 
-## V7: a floor and a ceiling together (Oct 2026, simulation and TLA+ only)
+## V7: a floor and a ceiling together (Oct 2026)
 
 | | | |
 |---|---|---|
@@ -151,7 +151,10 @@ is an operating regime.
 | **V7 against V6** | four standard scenarios, 24 worlds | at R = 6: no data lost, **43% of V6's storage, 21% of its bandwidth**, storage far more evenly spread. A hard ceiling refuses repairs and loses data: ruled out ([REPORT_v7](reports/REPORT_v7.md)) |
 | **V7 through splits** | three split scenarios, 48 worlds, plus the realistic version | no data lost in any run; a small cut-off group without a pinned node has more gaps than under V6; settles more slowly after the heal ([REPORT_v7 §Splits](reports/REPORT_v7.md)) |
 
-V7 is not yet on the fork; none of the Rust, real-network, chaos or mutation tests above apply to it yet.
+| **Rust, the existing suite** | fork branch `feat/sharding-v7`, coordinated growth off and on | race, cascade, stale views, storms (in memory and iroh), rolling upgrade: all pass in both modes ([REPORT_v7 §Rust](reports/REPORT_v7.md#v7-on-the-kitsune2-code)) |
+| **Rust, deaths in the sibling half** | 12 nodes, sharded, peers killed | **a gap in V6 too**: kitsune2 notices a death only through a failed send, and sharded nodes rarely message their sibling half, so a death there went unnoticed for up to ~20 min. Fixed with probes; with them every reachable short range is repaired ([REPORT_v7 §Rust](reports/REPORT_v7.md#v7-on-the-kitsune2-code)) |
+| **Rust, chaos soak** | 1 h, coordinated growth on: 193 kills, 195 joins, 237 staleness changes | **no range below target, none without a holder**, back to target at the end; controls with recent contact off fail on every seed |
+| **Rust, planted bugs** | 21 hand-written V7 mutants | 12 caught at first, none of the rest unsafe; after new unit tests **20 of 21**. Survivor: no withdrawal on a grow stand-down (a delay of one wait) |
 
 ## What we don't claim
 

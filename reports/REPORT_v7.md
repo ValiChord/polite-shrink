@@ -1,8 +1,11 @@
 # V7: a floor and a ceiling together
 
-**October 2026. Status: tested in TLA+ and in the simulator; not yet implemented
-on the kitsune2 fork.** V6 remains the rule on the fork until V7 has passed the
-same Rust and real-network tests.
+**October 2026. Status: tested in TLA+, in the simulator, and on the kitsune2
+fork** (branch
+[`feat/sharding-v7`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v7)),
+where it has passed the tests V6 passed ([below](#v7-on-the-kitsune2-code)).
+Coordinated growth is built but **off by default** there; V6 remains the
+default rule until that is decided.
 
 ## What V7 is
 
@@ -183,6 +186,83 @@ own small network** (Holochain already supports separate networks per group):
 small networks sit under the clamp, every member holds everything, and the large
 shared network can shard freely.
 
+## V7 on the kitsune2 code
+
+Branch [`feat/sharding-v7`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v7)
+of the fork, built on `feat/sharding-v6`. Each part of V7 is a setting in
+`K2ShardingConfig`:
+
+| setting | default | what it does |
+|---|---|---|
+| `announce_alongside` | on | the start-up repair above |
+| `coordinated_growth` | **off** | announce a grow, wait, re-check (V7's ceiling) |
+| `critical_repair` | on | with coordinated growth, a range down to one copy or none grows at once |
+| `pinned` | off | this node keeps everything and never shrinks |
+| `probe_sibling_holders` | on | see the next section; it changes V6 too |
+
+Old nodes are unaffected by a grow announcement: it travels in the existing
+intent message with a new `grow` field, which an old node reads as a vacate of a
+range the sender does not hold and already discards.
+
+### A gap in V6 found on the way: deaths you are not told about
+
+kitsune2 marks a peer unresponsive only when a message to it fails, and it
+gossips only with peers whose arcs overlap its own. Once nodes have sharded, the
+holders of a node's **sibling half** (the only range it can grow into) are
+mostly peers it never gossips with. A death there was noticed only when the dead
+node's agent info expired: agent infos are valid for 20 minutes and re-signed
+when under 5 minutes remain, so **up to about 20 minutes**. Measured on the
+in-memory transport: with full arcs every killed peer was marked within 12 s;
+sharded, 20 of 27 (observer, victim) pairs were still unmarked after 70 s.
+
+Reading silence as absence for growth was tried and reverted: healthy peers in
+the sibling half are always "silent", so it set off three times as many grow announcements
+and a storm test never settled. The fix kept is **probes**: every 10 s
+(`probe_interval_ms`) a node sends an empty message to each holder of its
+sibling half; a failed send marks the peer unresponsive as usual. This applies
+to V6 as well, which had the same gap.
+
+### Results
+
+Every test, run with coordinated growth off (V6 growth) and on:
+
+- **The existing suite**: forced race and cascade, stale views, storms (in
+  memory and over iroh), rolling upgrade: all pass in both modes.
+- **Start-up (16 nodes from full arcs)**: with *alongside*, twice as many nodes
+  announce at once (16 against 8, in every run). Time to settle varied too much
+  between runs at this size to show the simulator's speed-up (43–128 s with it,
+  74–141 s without).
+- **Deaths and regrowth (12 nodes, 3 killed)**: every short range that some node
+  could grow into was repaired. With coordination, one run had 7 nodes announce a
+  grow into the gap: 6 stood down and 1 grew.
+- **A pinned node** keeps everything while the others shard.
+- **Chaos soak, one hour, coordinated growth on**: 193 kills, 195 joins, 237
+  changes of view staleness, 7–14 nodes, 2,234 shrink announcements (585 stood
+  down), 498 grows. **No range ever fell below the target or lost its last
+  holder**, not even inside the grace window after a kill, and every range
+  returned to target at the end.
+- **Controls, coordinated growth on**: with the recent-contact rule off, a wait
+  shorter than the staleness fails on all three seeds (in 5–27 s), as do
+  undetected deaths. With it on, undetected deaths dip only within the window
+  after a death and every run ends at or above target, as under V6. (With it on,
+  a too-short wait cannot fail: every peer then looks silent and nobody shrinks.
+  The same was true of V6.)
+- **Planted bugs** (hand-written mutants of the V7 code): the existing tests
+  caught 12 of 21. None of the 9 they missed could lose data; each wasted work
+  or broke coordination, which the tests were not measuring. The V7 decisions
+  were then made into small functions with their own unit tests, and the
+  surviving bugs re-run against them: 20 of 21 are now caught. The one left: a
+  grower that stands down does not withdraw its announcement, so another grower
+  may hold back for one extra wait. It costs a delay, never data.
+- **CI** runs every sharding test on each change; CI_LINE
+
+### Not shown on the code
+
+The Rust tests use 16 nodes or fewer, on one machine; the simulator's 200-node
+results, and the start-up speed-up, are not reproduced at that scale. There is
+no exhaustive model check of the V7 decision functions in Rust (V6 has one).
+Nothing has run on a real wide-area network.
+
 ## Verdict, and what is not yet shown
 
 For networks large enough to shard, V7 is better than V6 on storage, bandwidth,
@@ -190,10 +270,11 @@ fairness and start-up, with no data lost from R = 6 upwards in any storm, churn
 or split run, provided R includes a spare copy. V6 is better at settling after a
 split heals and leaves a cut-off group fewer gaps.
 
-Not yet shown: V7 on the real kitsune2 code (unit and model checks of the real
-decision functions, the forced race and cascade, stale views, storms over iroh,
-the chaos soak, the rollout tests, mutation testing); V7 at more than 200 nodes;
-a real wide-area network. Those are the next stage.
+On the kitsune2 code V7 has passed every test V6 passed, with no loss and no dip
+below target. Not yet shown: V7 at more than 200 nodes in simulation or more than
+16 on the code; an exhaustive model check of the V7 decision functions in Rust;
+a real wide-area network. Whether coordinated growth should become the default is
+open.
 
 ## Reproduce
 

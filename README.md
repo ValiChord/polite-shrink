@@ -49,8 +49,13 @@ what backs each claim are on one page: **[SPEC_V6.md](SPEC_V6.md)**.
   [#160](https://github.com/holochain/kitsune2/issues/160).
 - **Next: V7**, which adds a ceiling so that growing is coordinated as well as
   shrinking. In simulation and TLA+ it keeps everything V6 does at under half
-  the storage, and fixes a start-up slowdown found in V6. It is not yet on the
-  fork. See [reports/REPORT_v7.md](reports/REPORT_v7.md).
+  the storage, and fixes a start-up slowdown found in V6. On the fork
+  ([`feat/sharding-v7`](https://github.com/topeuph-ai/kitsune2/tree/feat/sharding-v7))
+  it has passed every test V6 passed, including a one-hour chaos soak and
+  planted bugs; coordinated growth is off by default there until that is
+  decided. Building it found a gap V6 shares (deaths in the range a node would
+  grow into could go unnoticed for up to ~20 minutes), now fixed. See
+  [reports/REPORT_v7.md](reports/REPORT_v7.md).
 
 ## Try it
 
