@@ -1,0 +1,431 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=33843 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+TLC2 Version 2026.10.28.014557 (rev: 56d37a9)
+Running breadth-first search Model-Checking with fp 42 and seed 2191845956385827402 with 4 workers on 4 cores with 3040MB heap and 64MB offheap memory [pid: 764] (Linux 6.18.44-fc-v180 amd64, Ubuntu 21.0.12.1 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/user/ValiChord/research/leo-admission/tla/StaleCapLEO.tla
+Parsing file /tmp/tlc-11826998953222918562/Naturals.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-11826998953222918562/FiniteSets.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-11826998953222918562/Sequences.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-11826998953222918562/_TLCTrace.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-11826998953222918562/TLC.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-11826998953222918562/TLCExt.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-11826998953222918562/Integers.tla (jar:file:/tmp/claude-0/-home-user-ValiChord/0662db71-8361-59ea-a562-724ba3d78e62/scratchpad/tlc/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module StaleCapLEO
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module StaleCapLEO
+Starting... (2026-10-28 17:33:06)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-10-28 17:33:06.
+Error: Invariant NoAvoidableRejection is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ now = 0
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<>>
+/\ announced = {}
+/\ intent = <<0, 0, 0, 0>>
+
+State 2: <Announce(1) line 81, col 5 to line 85, col 56 of module StaleCapLEO>
+/\ now = 0
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<>>
+/\ announced = {1}
+/\ intent = <<2, 0, 0, 0>>
+
+State 3: <Announce(3) line 81, col 5 to line 85, col 56 of module StaleCapLEO>
+/\ now = 0
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<>>
+/\ announced = {1, 3}
+/\ intent = <<2, 0, 2, 0>>
+
+State 4: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 1
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<<<{}, {1, 3}>>>>
+/\ announced = {1, 3}
+/\ intent = <<2, 0, 2, 0>>
+
+State 5: <Announce(2) line 81, col 5 to line 85, col 56 of module StaleCapLEO>
+/\ now = 1
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<<<{}, {1, 3}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<2, 3, 2, 0>>
+
+State 6: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 2
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {}
+/\ snapshots = <<<<{}, {1, 3}>>, <<{}, {1, 2, 3}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<2, 3, 2, 0>>
+
+State 7: <Recheck(1) line 88, col 5 to line 95, col 46 of module StaleCapLEO>
+/\ now = 2
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{}, {1, 3}>>, <<{}, {1, 2, 3}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 3, 2, 0>>
+
+State 8: <Recheck(3) line 88, col 5 to line 95, col 46 of module StaleCapLEO>
+/\ now = 2
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{}, {1, 3}>>, <<{}, {1, 2, 3}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 3, 0, 0>>
+
+State 9: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 3
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{}, {1, 2, 3}>>, <<{1}, {2}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 3, 0, 0>>
+
+State 10: <Recheck(2) line 88, col 5 to line 95, col 46 of module StaleCapLEO>
+/\ now = 3
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{}, {1, 2, 3}>>, <<{1}, {2}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 11: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 4
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {2}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 12: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 5
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 13: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 6
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 14: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 7
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 15: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 8
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 16: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 9
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 17: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 10
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 18: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 11
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 19: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 12
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 20: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 13
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 21: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 14
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 22: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 15
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 23: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 16
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 24: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 17
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 25: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 18
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 26: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 19
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 27: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 20
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 28: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 21
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 29: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 22
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 30: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 23
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 31: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 24
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 32: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 25
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 33: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 26
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 34: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 27
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 35: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 28
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 36: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 29
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 37: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 30
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 38: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 31
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 39: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 32
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 40: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 33
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 41: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 34
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 42: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 35
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 43: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 36
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 44: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 37
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 45: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 38
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 46: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 39
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 47: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 40
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 48: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 41
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 49: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 42
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+State 50: <AdvanceTime line 98, col 5 to line 103, col 59 of module StaleCapLEO>
+/\ now = 43
+/\ committedAt = <<0, 0, 0, 0>>
+/\ active = {1}
+/\ snapshots = <<<<{1}, {}>>, <<{1}, {}>>>>
+/\ announced = {1, 2, 3}
+/\ intent = <<0, 0, 0, 0>>
+
+69474 states generated, 19986 distinct states found, 21 states left on queue.
+The depth of the complete state graph search is 50.
+Finished in 01s at (2026-10-28 17:33:07)
+Trace exploration spec path: ./StaleCapLEO_TTrace_1793208785.tla
