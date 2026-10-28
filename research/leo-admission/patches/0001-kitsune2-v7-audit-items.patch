@@ -1,0 +1,453 @@
+From da080472c7fb3028f41885aa93b3fbb2d519175f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 28 Oct 2026 20:13:14 +0000
+Subject: [PATCH] sharding: relative intent TTLs, storm-brake withdrawals,
+ delay grows in test view
+
+- Intent messages carry a relative ttl_us; receivers count an intent for
+  that long from arrival, so clock skew cannot void it early. The sender's
+  expiry still identifies the intent for withdrawals. Lifetimes are capped
+  at one hour. Senders without the field keep the absolute expiry.
+- The storm brake withdraws the intents it cancels, as a stand-down does.
+- The test-only view delay now applies to grow intents as well.
+---
+ .../proto/gen/kitsune2.gossip.sharding.rs     |   9 +
+ crates/gossip/proto/sharding.proto            |   9 +
+ crates/gossip/src/sharding/controller.rs      | 184 +++++++++++++++---
+ crates/gossip/src/sharding/intents.rs         |  40 +++-
+ crates/gossip/src/sharding/protocol.rs        |   1 +
+ 5 files changed, 209 insertions(+), 34 deletions(-)
+
+diff --git a/crates/gossip/proto/gen/kitsune2.gossip.sharding.rs b/crates/gossip/proto/gen/kitsune2.gossip.sharding.rs
+index 963b198..8393d24 100644
+--- a/crates/gossip/proto/gen/kitsune2.gossip.sharding.rs
++++ b/crates/gossip/proto/gen/kitsune2.gossip.sharding.rs
+@@ -58,6 +58,15 @@ pub struct K2ShardingShrinkIntentMessage {
+     /// declared-range check already discards, so mixing versions is safe.
+     #[prost(bool, tag = "6")]
+     pub grow: bool,
++    /// How long, in microseconds from the moment of sending, this intent
++    /// stays live. When non-zero, receivers void the intent this long after
++    /// it ARRIVES, by their own clock, and `expires_at_us` serves only to
++    /// identify the intent for a withdrawal; that way a clock that disagrees
++    /// with the sender's cannot cut the intent short (unsafe: peers would
++    /// stop counting a node that is still leaving) or stretch it. Zero, from
++    /// senders that do not know this field, means use `expires_at_us`.
++    #[prost(int64, tag = "7")]
++    pub ttl_us: i64,
+ }
+ /// A liveness probe, with no content. An agent sends it to the holders of
+ /// the half it would grow into: gossip runs only between agents whose arcs
+diff --git a/crates/gossip/proto/sharding.proto b/crates/gossip/proto/sharding.proto
+index b033c89..0a28885 100644
+--- a/crates/gossip/proto/sharding.proto
++++ b/crates/gossip/proto/sharding.proto
+@@ -60,4 +60,13 @@ message K2ShardingShrinkIntentMessage {
+   // it as a vacate of a range the sender does not hold, which their
+   // declared-range check already discards, so mixing versions is safe.
+   bool grow = 6;
++
++  // How long, in microseconds from the moment of sending, this intent
++  // stays live. When non-zero, receivers void the intent this long after
++  // it ARRIVES, by their own clock, and `expires_at_us` serves only to
++  // identify the intent for a withdrawal; that way a clock that disagrees
++  // with the sender's cannot cut the intent short (unsafe: peers would
++  // stop counting a node that is still leaving) or stretch it. Zero, from
++  // senders that do not know this field, means use `expires_at_us`.
++  int64 ttl_us = 7;
+ }
+diff --git a/crates/gossip/src/sharding/controller.rs b/crates/gossip/src/sharding/controller.rs
+index 22daab1..7d694b9 100644
+--- a/crates/gossip/src/sharding/controller.rs
++++ b/crates/gossip/src/sharding/controller.rs
+@@ -164,13 +164,13 @@ impl K2Sharding {
+         let peers = self.peer_store.get_all().await?;
+         let now = Timestamp::now();
+         let live_intents = self.intents.live(now);
+-        let mut live_grows = self.grow_intents.live(now);
++        let live_grows = self.grow_intents.live(now);
+         // Tests can make this node act on a view of the peer store and
+         // the intent table that is a fixed time old, both from the same
+         // instant, to exercise the stale-view race on a fast transport.
+         #[cfg(any(test, feature = "test-utils"))]
+-        let (peers, live_intents) =
+-            self.view_delay.apply(now, peers, live_intents);
++        let (peers, live_intents, mut live_grows) =
++            self.view_delay.apply(now, peers, live_intents, live_grows);
+ 
+         let own_ids = local_agents
+             .iter()
+@@ -273,18 +273,40 @@ impl K2Sharding {
+         // sim gets this for free because a single lag parameter bounds
+         // both; the real system does not.
+         {
+-            let mut last_gone = self.last_gone.lock().expect("poisoned");
+-            let newly_gone = gone.difference(&last_gone).any(|a| {
+-                // Own agents appearing in `gone` initially is not a
+-                // departure.
+-                !own_ids.contains(a)
+-            });
+-            *last_gone = gone.clone();
++            // The guard is scoped so it is not held across the awaits below.
++            let newly_gone = {
++                let mut last_gone = self.last_gone.lock().expect("poisoned");
++                let newly_gone = gone.difference(&last_gone).any(|a| {
++                    // Own agents appearing in `gone` initially is not a
++                    // departure.
++                    !own_ids.contains(a)
++                });
++                *last_gone = gone.clone();
++                newly_gone
++            };
+             if newly_gone {
+                 for (agent_id, ctl) in states.iter_mut() {
+-                    if ctl.pending.take().is_some() {
++                    if let Some(pending) = ctl.pending.take() {
+                         ctl.shrink_acc = Duration::ZERO;
+                         self.intents.remove(agent_id);
++                        if self.config.withdraw_on_stand_down
++                            && !self.config.agentinfo_encoding
++                        {
++                            // Tell peers, as a stand-down does: otherwise
++                            // they keep counting the cancelled intent
++                            // until it expires.
++                            if let Some(agent) = local_agents
++                                .iter()
++                                .find(|a| a.agent() == agent_id)
++                            {
++                                self.withdraw_intent(
++                                    agent,
++                                    pending.vacate,
++                                    pending.expires_at,
++                                )
++                                .await;
++                            }
++                        }
+                         if self.config.agentinfo_encoding {
+                             // The announcement was a narrowed arc claim, so
+                             // cancelling it means widening the claim back.
+@@ -777,6 +799,14 @@ impl K2Sharding {
+         withdrawn: bool,
+         grow: bool,
+     ) {
++        // Lifetime relative to now, so receivers need not trust that their
++        // clock agrees with ours. A withdrawal has no lifetime.
++        let ttl_us = if withdrawn {
++            0
++        } else {
++            (expires_at - Timestamp::now())
++                .map_or(0, |d| i64::try_from(d.as_micros()).unwrap_or(i64::MAX))
++        };
+         let msg = serialize_sharding_message(K2ShardingMessage {
+             msg: Some(k2_sharding_message::Msg::ShrinkIntent(
+                 K2ShardingShrinkIntentMessage {
+@@ -786,6 +816,7 @@ impl K2Sharding {
+                     expires_at_us: expires_at.as_micros(),
+                     withdrawn,
+                     grow,
++                    ttl_us,
+                 },
+             )),
+         });
+@@ -1227,11 +1258,12 @@ fn receive_intent(
+     peer: Url,
+     intent: K2ShardingShrinkIntentMessage,
+ ) {
+-    let expires_at = Timestamp::from_micros(intent.expires_at_us);
++    // The sender's expiry identifies the intent for withdrawals.
++    let announced = Timestamp::from_micros(intent.expires_at_us);
+     let table = if intent.grow { grow_intents } else { intents };
+     if intent.withdrawn {
+         let agent = AgentId::from(intent.agent_id);
+-        if table.withdraw(agent.clone(), Some(peer), expires_at) {
++        if table.withdraw(agent.clone(), Some(peer), announced) {
+             if intent.grow {
+                 tracing::debug!(
+                     agent = ?agent,
+@@ -1246,7 +1278,19 @@ fn receive_intent(
+         }
+         return;
+     }
+-    if expires_at <= Timestamp::now() {
++    // How long we count it comes from the sender's relative TTL, started
++    // when it arrives, so that a clock that disagrees with the sender's
++    // cannot void the intent early (peers would stop counting a node that
++    // is still leaving) or keep it alive. Senders that predate the field
++    // send zero, and their absolute expiry is used. Either way the lifetime
++    // is capped, so a bogus far-future expiry cannot linger.
++    let now = Timestamp::now();
++    let expires_at = if intent.ttl_us > 0 {
++        now + Duration::from_micros(intent.ttl_us as u64).min(MAX_INTENT_TTL)
++    } else {
++        announced.min(now + MAX_INTENT_TTL)
++    };
++    if expires_at <= now {
+         return;
+     }
+     // Block halves never wrap the ring; ignore anything else.
+@@ -1266,16 +1310,20 @@ fn receive_intent(
+     if vacate.1 - vacate.0 > super::blocks::NUM_SECTORS / 2 {
+         return;
+     }
+-    table.insert(
++    table.insert_announced(
+         AgentId::from(intent.agent_id),
+         ShrinkIntent {
+             vacate,
+             expires_at,
+             from: Some(peer),
+         },
++        announced,
+     );
+ }
+ 
++/// The longest a received intent is counted, whatever it claims.
++const MAX_INTENT_TTL: Duration = Duration::from_secs(3600);
++
+ /// When an announced intent is re-checked, and when it lapses: one wait
+ /// after the re-check, so peers keep counting it while the outcome
+ /// propagates.
+@@ -1525,6 +1573,7 @@ pub(crate) mod view_delay {
+         Timestamp,
+         Vec<Arc<AgentInfoSigned>>,
+         Vec<(AgentId, ShrinkIntent)>,
++        Vec<(AgentId, ShrinkIntent)>,
+     );
+ 
+     #[derive(Debug, Default)]
+@@ -1538,18 +1587,23 @@ pub(crate) mod view_delay {
+             now: Timestamp,
+             peers: Vec<Arc<AgentInfoSigned>>,
+             intents: Vec<(AgentId, ShrinkIntent)>,
+-        ) -> (Vec<Arc<AgentInfoSigned>>, Vec<(AgentId, ShrinkIntent)>) {
++            grows: Vec<(AgentId, ShrinkIntent)>,
++        ) -> (
++            Vec<Arc<AgentInfoSigned>>,
++            Vec<(AgentId, ShrinkIntent)>,
++            Vec<(AgentId, ShrinkIntent)>,
++        ) {
+             let delay = Duration::from_millis(DELAY_MS.load(Ordering::Relaxed));
+             let mut history = self.history.lock().expect("poisoned");
+             if delay.is_zero() {
+                 history.clear();
+-                return (peers, intents);
++                return (peers, intents, grows);
+             }
+-            history.push_back((now, peers, intents));
++            history.push_back((now, peers, intents, grows));
+             let Ok(cutoff) = now - delay else {
+                 return history
+                     .back()
+-                    .map(|(_, p, i)| (p.clone(), i.clone()))
++                    .map(|(_, p, i, g)| (p.clone(), i.clone(), g.clone()))
+                     .expect("just pushed");
+             };
+             // Keep the newest snapshot at or before the cutoff at the
+@@ -1557,13 +1611,14 @@ pub(crate) mod view_delay {
+             while history.len() >= 2 && history[1].0 <= cutoff {
+                 history.pop_front();
+             }
+-            let (_, p, i) = &history[0];
+-            let live = i
+-                .iter()
+-                .filter(|(_, intent)| intent.expires_at > now)
+-                .cloned()
+-                .collect();
+-            (p.clone(), live)
++            let (_, p, i, g) = &history[0];
++            let live = |t: &[(AgentId, ShrinkIntent)]| {
++                t.iter()
++                    .filter(|(_, intent)| intent.expires_at > now)
++                    .cloned()
++                    .collect()
++            };
++            (p.clone(), live(i), live(g))
+         }
+     }
+ }
+@@ -1889,6 +1944,7 @@ mod tests {
+                 expires_at_us: expires.as_micros(),
+                 withdrawn,
+                 grow,
++                ttl_us: 0,
+             }
+         };
+         let (shrinks, grows) = (IntentTable::default(), IntentTable::default());
+@@ -1919,6 +1975,82 @@ mod tests {
+         assert!(ids(&shrinks).is_empty());
+     }
+ 
++    /// A receiver whose clock is ahead of the sender's must still count an
++    /// intent for its full lifetime: if it read the sender's absolute
++    /// expiry it would drop the intent at once and count a departing node
++    /// as staying. The relative TTL is what protects that; the legacy
++    /// absolute expiry (TTL zero) keeps its old behaviour.
++    #[test]
++    fn relative_ttl_survives_receiver_clock_ahead_of_sender() {
++        let peer = Url::from_str("ws://127.0.0.1:80").unwrap();
++        let now = Timestamp::now();
++        // The sender's clock reads five minutes behind ours.
++        let sender_expiry = (now - Duration::from_secs(300)).unwrap();
++        let msg = |id: &'static [u8], ttl_us, withdrawn| {
++            K2ShardingShrinkIntentMessage {
++                agent_id: bytes::Bytes::from_static(id),
++                vacate_start: 0,
++                vacate_end: 8 * SECTOR_SIZE - 1,
++                expires_at_us: sender_expiry.as_micros(),
++                withdrawn,
++                grow: false,
++                ttl_us,
++            }
++        };
++        let (shrinks, grows) = (IntentTable::default(), IntentTable::default());
++        receive_intent(
++            &shrinks,
++            &grows,
++            peer.clone(),
++            msg(b"new", 30_000_000, false),
++        );
++        receive_intent(&shrinks, &grows, peer.clone(), msg(b"old", 0, false));
++        let live = |t: &IntentTable| {
++            t.live(now).into_iter().map(|(a, _)| a).collect::<Vec<_>>()
++        };
++        // Only the sender with a relative TTL is counted.
++        assert_eq!(live(&shrinks), vec![agent(b"new")]);
++        // It lapses after its TTL, by our clock, and not before.
++        assert!(!shrinks.live(now + Duration::from_secs(29)).is_empty());
++        assert!(shrinks.live(now + Duration::from_secs(31)).is_empty());
++        // A withdrawal still finds it by the sender's expiry.
++        receive_intent(&shrinks, &grows, peer.clone(), msg(b"new", 0, false));
++        receive_intent(
++            &shrinks,
++            &grows,
++            peer.clone(),
++            msg(b"new", 30_000_000, false),
++        );
++        receive_intent(&shrinks, &grows, peer, msg(b"new", 0, true));
++        assert!(live(&shrinks).is_empty());
++    }
++
++    /// An announcement cannot make a receiver count it for longer than the
++    /// cap, whether it claims a far-future expiry or a huge TTL.
++    #[test]
++    fn received_intent_lifetime_is_capped() {
++        let peer = Url::from_str("ws://127.0.0.1:80").unwrap();
++        let now = Timestamp::now();
++        let msg = |id: &'static [u8], expiry: Timestamp, ttl_us| {
++            K2ShardingShrinkIntentMessage {
++                agent_id: bytes::Bytes::from_static(id),
++                vacate_start: 0,
++                vacate_end: 8 * SECTOR_SIZE - 1,
++                expires_at_us: expiry.as_micros(),
++                withdrawn: false,
++                grow: false,
++                ttl_us,
++            }
++        };
++        let (shrinks, grows) = (IntentTable::default(), IntentTable::default());
++        let far = now + Duration::from_secs(10 * 365 * 24 * 3600);
++        receive_intent(&shrinks, &grows, peer.clone(), msg(b"abs", far, 0));
++        receive_intent(&shrinks, &grows, peer, msg(b"ttl", now, i64::MAX));
++        assert_eq!(shrinks.live(now).len(), 2);
++        let later = now + MAX_INTENT_TTL + Duration::from_secs(5);
++        assert!(shrinks.live(later).is_empty());
++    }
++
+     /// Ranges that only touch neither overlap nor block a re-check.
+     #[test]
+     fn adjacent_ranges_do_not_overlap() {
+diff --git a/crates/gossip/src/sharding/intents.rs b/crates/gossip/src/sharding/intents.rs
+index 99992ba..380810c 100644
+--- a/crates/gossip/src/sharding/intents.rs
++++ b/crates/gossip/src/sharding/intents.rs
+@@ -38,15 +38,38 @@ pub(crate) struct ShrinkIntent {
+ ///
+ /// A later announcement from the same agent and peer replaces the earlier
+ /// one; an agent can only have one shrink in flight.
++///
++/// Each entry also remembers the announcer's own expiry, which is its
++/// identity for withdrawals. For a remote intent it can differ from the
++/// entry's `expires_at`, which is measured on this node's clock (see
++/// [`IntentTable::insert_announced`]).
+ #[derive(Debug, Default)]
+ pub(crate) struct IntentTable {
+-    inner: Mutex<HashMap<(AgentId, Option<Url>), ShrinkIntent>>,
++    inner: Mutex<HashMap<(AgentId, Option<Url>), (ShrinkIntent, Timestamp)>>,
+ }
+ 
+ impl IntentTable {
+     pub fn insert(&self, agent: AgentId, intent: ShrinkIntent) {
++        let id = intent.expires_at;
++        self.insert_announced(agent, intent, id);
++    }
++
++    /// Insert an intent whose identity for withdrawal is `id`, the expiry
++    /// the announcer attached, while `intent.expires_at` is when this node
++    /// stops counting it. They differ when the lifetime was taken from a
++    /// relative TTL, so that skew between the two clocks cannot shorten or
++    /// stretch it.
++    pub fn insert_announced(
++        &self,
++        agent: AgentId,
++        intent: ShrinkIntent,
++        id: Timestamp,
++    ) {
+         let key = (agent, intent.from.clone());
+-        self.inner.lock().expect("poisoned").insert(key, intent);
++        self.inner
++            .lock()
++            .expect("poisoned")
++            .insert(key, (intent, id));
+     }
+ 
+     /// Remove a local agent's own intent.
+@@ -58,9 +81,10 @@ impl IntentTable {
+     }
+ 
+     /// Apply a withdrawal: remove the intent `agent` announced from
+-    /// `from` only if it is the one being withdrawn, identified by its
+-    /// expiry. A withdrawal that arrives after a newer announcement (with
+-    /// a later expiry) leaves the newer one in place.
++    /// `from` only if it is the one being withdrawn, identified by the
++    /// expiry its announcer attached. A withdrawal that arrives after a
++    /// newer announcement (with a later expiry) leaves the newer one in
++    /// place.
+     pub fn withdraw(
+         &self,
+         agent: AgentId,
+@@ -69,7 +93,7 @@ impl IntentTable {
+     ) -> bool {
+         let mut lock = self.inner.lock().expect("poisoned");
+         let key = (agent, from);
+-        if lock.get(&key).is_some_and(|i| i.expires_at == expires_at) {
++        if lock.get(&key).is_some_and(|(_, id)| *id == expires_at) {
+             lock.remove(&key);
+             return true;
+         }
+@@ -79,9 +103,9 @@ impl IntentTable {
+     /// Drop expired intents and return the live ones.
+     pub fn live(&self, now: Timestamp) -> Vec<(AgentId, ShrinkIntent)> {
+         let mut lock = self.inner.lock().expect("poisoned");
+-        lock.retain(|_, i| i.expires_at > now);
++        lock.retain(|_, (i, _)| i.expires_at > now);
+         lock.iter()
+-            .map(|((a, _), i)| (a.clone(), i.clone()))
++            .map(|((a, _), (i, _))| (a.clone(), i.clone()))
+             .collect()
+     }
+ }
+diff --git a/crates/gossip/src/sharding/protocol.rs b/crates/gossip/src/sharding/protocol.rs
+index 52ac7ab..3ad06c3 100644
+--- a/crates/gossip/src/sharding/protocol.rs
++++ b/crates/gossip/src/sharding/protocol.rs
+@@ -40,6 +40,7 @@ mod tests {
+                     vacate_start: 7 << 23,
+                     vacate_end: (15 << 23) - 1,
+                     expires_at_us: 1_234_567,
++                    ttl_us: 0,
+                     withdrawn: false,
+                     grow: false,
+                 },
+-- 
+2.43.0
+
