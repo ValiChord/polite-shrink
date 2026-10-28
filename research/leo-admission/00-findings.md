@@ -163,3 +163,36 @@ Proceed to the baseline-comparison simulation only. Do not publish a crate, clai
 applicability, or contact anyone yet. Keep the framing the briefs share: admission supervision
 above independent hardware protection, never a safety interlock. Fix the three Rust items in §5
 only if coordinated growth is going to be enabled; I have not done so.
+
+## 8. Baseline comparison result (Stage 4 experiment, run 2026-10-28)
+
+`sim/baseline_compare.py`, output in `baseline_compare_output.txt`. One shared pool, C=16 unit
+slots, 8 nodes, L=3, D=3, mean hold 30 ticks, per-node FIFO queue with 60-tick patience,
+3 seeds, 6000 ticks. All parameters hypothetical. Lag is uniform 1..L, but with probability `p`
+(0, 0.02, 0.1) a lag is 4L, i.e. the delay bound is violated. Demand skew 0 (balanced) or
+1 (Zipf-like hotspot). **Suggested by simulation [sim], not a model-checked result.**
+
+| What | Observation |
+|---|---|
+| Ceiling breaches | Static and escrow: **0 everywhere**. StaleCap: 0 at p=0; breaches appear at p=0.02 and grow at p=0.1 (up to 35 breach-ticks, overshoot 1 unit) |
+| Utilisation and acceptance, load 0.8 | Escrow ≈ StaleCap (0.76–0.78 vs 0.75–0.77 util; 0.98–0.99 accept). Both beat static under skew (0.57 util, 0.74 accept) |
+| Same, overloaded (load 1.2) | **Escrow clearly ahead of StaleCap**: 0.95 vs 0.81–0.82 util; 0.80–0.82 vs 0.67–0.71 accept. StaleCap's conservative counting of competing announcers under contention costs real capacity |
+| Static quota, balanced demand | Not far behind (0.91 util at load 1.2), and loses badly only under skew |
+
+**Reading.** In this model StaleCap has no advantage on any metric: escrow equals or beats it on
+utilisation, acceptance and latency, and keeps a hard ceiling with no timing assumption.
+StaleCap alone breaches when the delay bound is violated. Gate 4 therefore fails on the evidence
+so far.
+
+**Caveats that favour escrow, so the comparison is not fair to StaleCap yet:**
+- Escrow here has reliable messages. If a transfer message or a node is lost, rights are
+  stranded (capacity leaks); this is not modelled and is escrow's real weakness. StaleCap needs
+  nothing transferred, so it degrades differently. Add message loss and crashes before concluding.
+- Escrow needs a rights-recovery story for crashed holders, which brings back a failure-detection
+  assumption; StaleCap's equivalent is the lease question in §6.
+- StaleCap here uses a consistent-cut view per observed pair (findings §3c is not exercised).
+
+**Decision.** Do not proceed to a crate or an LEO simulator. One more cheap experiment decides it:
+add message loss and node crash to the sim and measure stranded capacity for escrow against
+breaches for StaleCap. If StaleCap still has no regime where it wins, stop and keep the work as
+a research note on the V6/V7 rule (its value for the shrink problem is unaffected).
