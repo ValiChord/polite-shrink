@@ -1,0 +1,26 @@
+N=8 C=16 L=3 D=3 T=9000 skew=1; escrow_rec re-mints a dead node's rights at lease(40)+Td(8); a heartbeat spike (prob p per 10 ticks) falsely declares a live node dead
+rho  p     crash  perm  scheme      util_last  accept  breach_ticks  max_over  rights_stranded
+0.8  0     0      0     escrow      0.77       0.99         0        0        0.00
+0.8  0     0      0     escrow_rec  0.78       0.99         0        0        0.00
+0.8  0     0      0     stalecap    0.77       0.98         0        0        0.00
+0.8  0     0.0003 0.25  escrow      0.43       0.99         0        0        0.41
+0.8  0     0.0003 0.25  escrow_rec  0.46       1.00         0        0        0.00
+0.8  0     0.0003 0.25  stalecap    0.40       1.00         0        0        0.00
+0.8  0.05  0      0     escrow      0.77       0.98         0        0        0.00
+0.8  0.05  0      0     escrow_rec  0.77       0.98       496        7        0.00
+0.8  0.05  0      0     stalecap    0.78       0.98         7        1        0.00
+0.8  0.05  0.0003 0.25  escrow      0.41       0.94         0        0        0.50
+0.8  0.05  0.0003 0.25  escrow_rec  0.46       0.98       118        3        0.00
+0.8  0.05  0.0003 0.25  stalecap    0.45       0.99         6        1        0.00
+1.2  0     0      0     escrow      0.96       0.82         0        0        0.00
+1.2  0     0      0     escrow_rec  0.96       0.81         0        0        0.00
+1.2  0     0      0     stalecap    0.82       0.71         0        0        0.00
+1.2  0     0.0003 0.25  escrow      0.44       0.75         0        0        0.58
+1.2  0     0.0003 0.25  escrow_rec  0.72       0.93         0        0        0.00
+1.2  0     0.0003 0.25  stalecap    0.63       0.83         0        0        0.00
+1.2  0.05  0      0     escrow      0.95       0.81         0        0        0.00
+1.2  0.05  0      0     escrow_rec  0.97       0.82      2436        9        0.00
+1.2  0.05  0      0     stalecap    0.82       0.71        24        1        0.00
+1.2  0.05  0.0003 0.25  escrow      0.41       0.82         0        0        0.62
+1.2  0.05  0.0003 0.25  escrow_rec  0.56       0.91      1742        8        0.00
+1.2  0.05  0.0003 0.25  stalecap    0.76       0.86        12        1        0.00

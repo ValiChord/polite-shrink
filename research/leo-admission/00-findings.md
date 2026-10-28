@@ -235,3 +235,57 @@ constellation is **[?]**: satellites that fail permanently do happen, but whethe
 capacity is bound to the failed satellite, and whether recovery is already handled by existing
 network management, are unanswered. Next fair test: escrow-with-recovery in the same sim. Still
 no crate, LEO simulator or outreach.
+
+## 10. Escrow with recovery (run 2026-10-28)
+
+`sim/baseline_compare3.py`, output `baseline_compare3_output.txt`. `escrow_rec` re-mints a dead
+node's rights among live nodes at lease expiry (40 ticks) plus a detection margin Td=8, so units
+it held are already freed. A false suspicion (a heartbeat delayed beyond Td, probability p per
+10 ticks per live node) re-mints a *live* node's rights while it still holds units. Same pool and
+caveats as §9. **[sim], hypothetical, crude failure-detector model.**
+
+| Regime (load 1.2, 25% of crashes permanent) | `util_last` | accept | breach ticks (worst seed) | max overshoot |
+|---|---|---|---|---|
+| Plain escrow, any p | 0.41–0.44 | 0.75–0.82 | 0 | 0 |
+| Escrow + recovery, perfect detection (p=0) | **0.72** | **0.93** | 0 | 0 |
+| StaleCap, p=0 | 0.63 | 0.83 | 0 | 0 |
+| Escrow + recovery, p=0.05 | 0.56 | 0.91 | **1742** | **8** |
+| StaleCap, p=0.05 | **0.76** | 0.86 | 12 | 1 |
+
+At load 0.8 with no crashes and p=0.05, escrow + recovery breached for up to 496 ticks (overshoot 7)
+where StaleCap breached for up to 7 ticks (overshoot 1); at p=0 neither breached.
+
+**Reading.** The three schemes trade the same thing differently:
+
+| Scheme | Hard ceiling | Capacity after permanent node death | Needs a timing assumption |
+|---|---|---|---|
+| Static quota | Always | Lost for good | No |
+| Plain escrow | Always | Lost for good | No |
+| Escrow + recovery | Only if failure detection is right | Recovered | Yes (detection + lease) |
+| StaleCap | Only if message delay ≤ L | Never stranded | Yes (delay bound) |
+
+With a trustworthy detector, escrow + recovery beats StaleCap outright. When the timing
+assumption fails, both breach, but differently in this model: StaleCap's breaches are short races
+of about one unit, escrow + recovery's are large, long, and persist until the wrongly re-minted
+rights are reconciled. That graceful degradation is StaleCap's only edge left, and it is a
+property of how the failure looks, not of avoiding it. **Neither gives a hard ceiling under an
+unbounded delay or false suspicion; only plain escrow and static quota do, at the cost of
+stranded capacity.**
+
+**Limits of this result.** The false-suspicion model re-mints a node's entire rights, which a
+careful design would avoid (for example by re-minting only after the suspect acknowledges
+revocation, which needs a reachable node and so fails exactly when it matters). Overshoot size
+depends on that choice. I did not tune either side.
+
+## 11. Where this leaves the question
+
+- Gate 4 (a real advantage over existing approaches) is **not met**. The remaining case for
+  StaleCap is narrow: no pre-assigned rights, no recovery machinery, and small short-lived
+  overshoot when its delay bound is violated.
+- That case is worth something only to a buyer who can accept a breach of 1 unit under a delay
+  fault but cannot accept stranded capacity or a recovery protocol. No such buyer is evidenced.
+- The delay bound is the load-bearing assumption. For satellite links it would have to be
+  *measured*, with the exceedance rate known; if exceedances are frequent, plain escrow or static
+  allocation wins. This is the one quantity that would reopen the question.
+- Recommendation: stop LEO work here unless someone supplies a real exceedance rate for a
+  specific shared pool. Keep the V6/V7 rule's value for the shrink problem, which is unaffected.
