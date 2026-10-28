@@ -289,3 +289,52 @@ depends on that choice. I did not tune either side.
   allocation wins. This is the one quantity that would reopen the question.
 - Recommendation: stop LEO work here unless someone supplies a real exceedance rate for a
   specific shared pool. Keep the V6/V7 rule's value for the shrink problem, which is unaffected.
+
+## 12. V3 / V6 / V7 and the recent-contact rule, head to head (run 2026-10-28)
+
+`sim/baseline_compare4.py`, output `baseline_compare4_output.txt`. Same pool and caveats as §9–10.
+Version names follow polite-shrink `spec/v7`: **V3** = lowest-ID tie-break, **V6** = `patient`
+(only the lowest waits), **V7** = `patient_k` (multiwait: every waiter that still fits among
+lower IDs waits). "+ recent-contact" defers a decision while any peer's view is older than L
+(the ceiling-side rule from upstream `StaleBandNet`); a peer silent for ≥ lease + Td is
+ignored, so a dead node stalls admissions for about 48 ticks. **[sim]; hypothetical.**
+
+**The control works.** V3 breaches the ceiling in every scenario even with no delay spikes
+(81–233 breach-ticks, overshoot 1–2). V6 and V7 breach 0 ticks at p=0 in every scenario. So
+the sim can see a breach, and the V6/V7 result at p=0 is not an artefact of it being blind.
+
+| Scenario (load, p, crashes) | V6 | V7 | V6 + contact | V7 + contact | Escrow + recovery |
+|---|---|---|---|---|---|
+| 1.2, 0, none: `util_last` / accept | 0.82 / 0.71 | 0.82 / 0.69 | 0.82 / 0.71 | 0.82 / 0.69 | 0.96 / 0.81 |
+| 1.2, 0, perm deaths | 0.63 / 0.83 | **0.71 / 0.88** | 0.56 / 0.88 | 0.54 / 0.88 | 0.72 / 0.93 |
+| 1.2, 0.05, none: breach ticks | 24 | 3 | **0** | **0** | 2436 |
+| 1.2, 0.05, perm deaths: `util_last` / breach ticks | 0.76 / 12 | 0.65 / 3 | 0.61 / **0** | 0.57 / **0** | 0.56 / 1742 |
+| 0.8, 0.05, perm deaths: `util_last` / breach ticks | 0.45 / 6 | 0.48 / 14 | 0.51 / **0** | 0.59 / **0** | 0.46 / 118 |
+
+**Findings.**
+1. **V7 beats V6 mainly when capacity churns after deaths** (0.71 vs 0.63 utilisation, 0.88 vs
+   0.83 accepted, lower latency). With no deaths and plain overload the two are within noise;
+   V7 does not fix the overload cost against escrow (0.82 vs 0.96).
+2. **V7's multiwait also breaches less under spikes** (3 vs 24 and 12 vs 3 ticks), but at the
+   hardest cell it gave up utilisation (0.65 vs 0.76); one seed set, so treat that as noisy.
+3. **Recent-contact removes every breach** in all tested cells with spikes (0 ticks), at a price:
+   late-run utilisation falls (V6 0.76 → 0.61 in the hardest cell) and, with crashes but no
+   spikes, drops further (0.40 → 0.29 at load 0.8) because everyone waits out a dead node.
+4. **In the hardest cell** (load 1.2, spikes, permanent deaths) V7 + contact has utilisation
+   0.57 against escrow + recovery's 0.56 and **zero breaches against 1,742 ticks and overshoot 8**.
+   This is the first regime where a StaleCap variant is ahead of every baseline on both axes.
+
+**Why this is weaker than it looks.**
+- The contact rule is given an idealised sensor: any view older than L is detected as such, and
+  a dead peer is identified exactly after lease + Td. If staleness were sometimes undetected, the
+  rule would let breaches back in; I did not model that.
+- The escrow false-suspicion model is crude and harsh (§10). A more careful escrow recovery
+  could narrow the gap.
+- One topology, one skew, hypothetical numbers, 6 seeds. The cell above is the single regime
+  where the ordering flips.
+
+**Updated decision.** Gate 4 is open again, but only conditionally: V7 + recent-contact beats the
+baselines tried so far **if** staleness of a peer's view is reliably observable and permanent node
+loss with overload is a realistic regime. Neither condition is evidenced for LEO. The next
+fair test is to degrade the sensor: let a fraction of stale views go undetected and see how fast
+breaches return. If they return quickly, the advantage was the idealised detector.

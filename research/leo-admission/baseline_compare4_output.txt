@@ -1,0 +1,50 @@
+N=8 C=16 L=3 D=3 T=9000 skew=1, 6 seeds. V6 = patient, V7 = patient_k (multiwait), both as in polite-shrink spec/v7
+rho  p     crash  perm  scheme                  util_last  accept  latency  breach_ticks  max_over
+0.8  0     0      0     V3 (tie-break, control) 0.77       0.99      8.8       81        1
+0.8  0     0      0     V6 patient              0.77       0.98     11.9        0        0
+0.8  0     0      0     V7 patient_k            0.76       0.99      9.9        0        0
+0.8  0     0      0     V6 + recent-contact     0.77       0.98     11.9        0        0
+0.8  0     0      0     V7 + recent-contact     0.76       0.99      9.9        0        0
+0.8  0     0      0     escrow+recovery         0.78       0.99      8.7        0        0
+0.8  0     0.0003 0.25  V3 (tie-break, control) 0.41       1.00      5.3       20        1
+0.8  0     0.0003 0.25  V6 patient              0.40       1.00      6.0        0        0
+0.8  0     0.0003 0.25  V7 patient_k            0.38       1.00      6.7        0        0
+0.8  0     0.0003 0.25  V6 + recent-contact     0.29       0.99      9.8        0        0
+0.8  0     0.0003 0.25  V7 + recent-contact     0.33       0.99      7.9        0        0
+0.8  0     0.0003 0.25  escrow+recovery         0.46       1.00      4.6        0        0
+0.8  0.05  0      0     V3 (tie-break, control) 0.77       0.99      8.2       80        1
+0.8  0.05  0      0     V6 patient              0.78       0.98     11.3        7        1
+0.8  0.05  0      0     V7 patient_k            0.78       0.99     10.8       10        1
+0.8  0.05  0      0     V6 + recent-contact     0.77       0.97     13.9        0        0
+0.8  0.05  0      0     V7 + recent-contact     0.76       0.97     13.6        0        0
+0.8  0.05  0      0     escrow+recovery         0.77       0.98     12.1      496        7
+0.8  0.05  0.0003 0.25  V3 (tie-break, control) 0.46       1.00      6.0       62        2
+0.8  0.05  0.0003 0.25  V6 patient              0.45       0.99      6.4        6        1
+0.8  0.05  0.0003 0.25  V7 patient_k            0.48       1.00      6.0       14        1
+0.8  0.05  0.0003 0.25  V6 + recent-contact     0.51       0.98     12.0        0        0
+0.8  0.05  0.0003 0.25  V7 + recent-contact     0.59       0.98     12.0        0        0
+0.8  0.05  0.0003 0.25  escrow+recovery         0.46       0.98      9.4      118        3
+1.2  0     0      0     V3 (tie-break, control) 0.90       0.78     32.9      134        2
+1.2  0     0      0     V6 patient              0.82       0.71     37.3        0        0
+1.2  0     0      0     V7 patient_k            0.82       0.69     32.9        0        0
+1.2  0     0      0     V6 + recent-contact     0.82       0.71     37.3        0        0
+1.2  0     0      0     V7 + recent-contact     0.82       0.69     32.9        0        0
+1.2  0     0      0     escrow+recovery         0.96       0.81     27.2        0        0
+1.2  0     0.0003 0.25  V3 (tie-break, control) 0.64       0.92     17.5       97        1
+1.2  0     0.0003 0.25  V6 patient              0.63       0.83     29.4        0        0
+1.2  0     0.0003 0.25  V7 patient_k            0.71       0.88     23.3        0        0
+1.2  0     0.0003 0.25  V6 + recent-contact     0.56       0.88     22.3        0        0
+1.2  0     0.0003 0.25  V7 + recent-contact     0.54       0.88     20.6        0        0
+1.2  0     0.0003 0.25  escrow+recovery         0.72       0.93     14.1        0        0
+1.2  0.05  0      0     V3 (tie-break, control) 0.90       0.77     33.9      233        2
+1.2  0.05  0      0     V6 patient              0.82       0.71     37.4       24        1
+1.2  0.05  0      0     V7 patient_k            0.82       0.70     33.4        3        1
+1.2  0.05  0      0     V6 + recent-contact     0.79       0.68     35.9        0        0
+1.2  0.05  0      0     V7 + recent-contact     0.79       0.67     32.3        0        0
+1.2  0.05  0      0     escrow+recovery         0.97       0.82     25.8     2436        9
+1.2  0.05  0.0003 0.25  V3 (tie-break, control) 0.65       0.91     21.4      133        2
+1.2  0.05  0.0003 0.25  V6 patient              0.76       0.86     28.6       12        1
+1.2  0.05  0.0003 0.25  V7 patient_k            0.65       0.85     23.5        3        1
+1.2  0.05  0.0003 0.25  V6 + recent-contact     0.61       0.85     23.0        0        0
+1.2  0.05  0.0003 0.25  V7 + recent-contact     0.57       0.81     24.1        0        0
+1.2  0.05  0.0003 0.25  escrow+recovery         0.56       0.91     16.4     1742        8
