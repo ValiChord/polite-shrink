@@ -196,3 +196,42 @@ so far.
 add message loss and node crash to the sim and measure stranded capacity for escrow against
 breaches for StaleCap. If StaleCap still has no regime where it wins, stop and keep the work as
 a research note on the V6/V7 rule (its value for the shrink problem is unaffected).
+
+## 9. Fairer comparison: crashes and permanent node death (run 2026-10-28)
+
+`sim/baseline_compare2.py` (adds crashes to §8's script), output in
+`baseline_compare2_output.txt`. Skew 1, 6 seeds, 9000 ticks. A crashed node is down 40 ticks and
+its held units are freed by a lease at that point; with probability `perm` (0.25) it never returns.
+Crash rate 0.0003 per node per tick. Transport loss is modelled as delay spikes for **both**
+schemes (probability p=0.05 of a 4L lag), on the reasoning that a real escrow retransmits
+transfers rather than losing rights. `util_last` is utilisation over the final third of the run.
+**[sim]; hypothetical parameters; high variance because few nodes die per run.**
+
+| Regime | Result |
+|---|---|
+| No crashes, or transient crashes only | Same picture as §8: escrow ≥ StaleCap on every metric; StaleCap breaches once p>0 |
+| Permanent deaths, load 0.8 | Roughly a tie (`util_last` 0.40–0.45 for all three); most demand died with the node |
+| **Permanent deaths, load 1.2** | **StaleCap ahead:** `util_last` 0.63 (p=0) and 0.76 (p=0.05) against escrow 0.44 and 0.41, static 0.45; acceptance 0.83–0.86 against escrow 0.75–0.82. Escrow had 0.58–0.62 of C stranded in dead nodes' rights on average |
+| StaleCap breaches in that regime | 0 at p=0, up to 12 breach-ticks at p=0.05 (all 1 unit over) |
+
+**What this establishes.** The one advantage StaleCap has is structural and now visible:
+nothing is bound to a node, so a dead node strands nothing, whereas escrow and static quota lose
+a dead node's rights for good. It pays for that with a hard dependence on the delay bound
+(breaches at p>0) and with lower utilisation under plain overload (§8).
+
+**Caveats, none yet tested:**
+- Escrow can be given a recovery path (declare a node dead and re-mint its rights). Doing that
+  safely needs agreement on death, which is a coordinator or consensus step, and it needs a
+  failure-detection timing bound: the same kind of assumption StaleCap makes. A comparison
+  against *escrow with recovery* is the next fair test; I expect the gap to narrow.
+- Permanent loss of 25% of the capacity is a heavy hypothetical; with fewer deaths the gap shrinks.
+- The StaleCap sim still uses consistent-cut views; its breaches under delay spikes would be
+  worse with independent message delays and no linger (§3c).
+
+**Updated decision.** Gate 4 is no longer a flat fail: StaleCap has one demonstrable niche, a
+shared pool where nodes die for good and capacity must remain usable without recovery
+machinery, provided the delay bound is trustworthy. Whether that niche exists for an LEO
+constellation is **[?]**: satellites that fail permanently do happen, but whether a pool's
+capacity is bound to the failed satellite, and whether recovery is already handled by existing
+network management, are unanswered. Next fair test: escrow-with-recovery in the same sim. Still
+no crate, LEO simulator or outreach.
