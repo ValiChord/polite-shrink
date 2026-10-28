@@ -114,7 +114,7 @@ by default** (`coordinated_growth`), so none of this affects the default configu
 
 | Brief 1 claim | In source? | Direction of harm |
 |---|---|---|
-| `grow_recheck` uses `id < own_id`, not the patient rule | **Yes** (`grow_recheck`, counts only lower-ID growers; `execute_grow` has no Wait outcome) | This is the V3 rule, whose model has a counterexample (§2). Over-admission, i.e. a ceiling breach. Mapping Rust grow ↔ TLA `tb` is **[R]**, not run |
+| `grow_recheck` uses `id < own_id`, not the patient rule | **In source, but not a bug (corrected 2026-10-28).** `REPORT_v7.md` documents it: growers count lower-ID announced growers as already there, and the ceiling is deliberately *soft* because a hard one "refused hundreds of repairs and lost data in 4–8 of 24 storm and churn runs" (the floor must win). It is the V3 rule, which TLC shows can overshoot a ceiling, so growth can over-replicate by a copy; that is the accepted cost | Over-replication only, by design. Applying the patient rule here would risk refusing repairs, so it was left unchanged |
 | Storm brake cancels pending shrinks without a withdrawal | **Yes** (brake block: `pending.take()` and `intents.remove`, no `withdraw_intent`) | Peers keep counting the ghost for up to `2·wait`. They over-count, so liveness cost only **[R]** |
 | Sender-absolute expiry on the wire | **Yes** (`expires_at_us`, then `receive_intent` compares to the receiver's `Timestamp::now()`) | Sender clock *behind* receiver drops the intent early, breaking A2, which is a **safety** direction. Sender *ahead* only lingers. Tolerance is roughly the slack `wait − L` **[R]** |
 | `view_delay` skips `live_grows` | **Yes** (`view_delay.apply(now, peers, live_intents)`; `live_grows` is read just above it) | Test-coverage gap: stale-view tests exercise shrink races but not grow races |
@@ -161,8 +161,7 @@ needs no flight-specific claim.
 
 Proceed to the baseline-comparison simulation only. Do not publish a crate, claim LEO
 applicability, or contact anyone yet. Keep the framing the briefs share: admission supervision
-above independent hardware protection, never a safety interlock. Fix the three Rust items in §5
-only if coordinated growth is going to be enabled; I have not done so.
+above independent hardware protection, never a safety interlock. Rust items in §5: the grow rule is a documented design choice (corrected above); the other three were fixed on a local fork branch, see `patches/`.
 
 ## 8. Baseline comparison result (Stage 4 experiment, run 2026-10-28)
 
